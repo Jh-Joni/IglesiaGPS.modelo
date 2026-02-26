@@ -1,0 +1,65 @@
+@model IEnumerable<IglesiaGPS.modelo.SolicitudDirector>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SolicitudDirectorId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UsuarioId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CodigoIngresado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Estado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaSolicitud)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaRespuesta)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SolicitudDirectorId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UsuarioId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CodigoIngresado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Estado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaSolicitud)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaRespuesta)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id=item.SolicitudDirectorId }) |
+                @Html.ActionLink("Details", "Details", new { id=item.SolicitudDirectorId }) |
+                @Html.ActionLink("Delete", "Delete", new { id=item.SolicitudDirectorId })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

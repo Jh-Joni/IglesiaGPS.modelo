@@ -1,0 +1,52 @@
+@model IglesiaGPS.modelo.Recomendacion
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Recomendacion</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="UsuarioId" class="control-label"></label>
+                <input asp-for="UsuarioId" class="form-control" />
+                <span asp-validation-for="UsuarioId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CancionId" class="control-label"></label>
+                <input asp-for="CancionId" class="form-control" />
+                <span asp-validation-for="CancionId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Mensaje" class="control-label"></label>
+                <textarea asp-for="Mensaje" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Mensaje" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FechaRecomendacion" class="control-label"></label>
+                <input asp-for="FechaRecomendacion" class="form-control" />
+                <span asp-validation-for="FechaRecomendacion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Leida" class="control-label"></label>
+                <input asp-for="Leida" class="form-check-input" />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,53 @@
+@model IEnumerable<IglesiaGPS.modelo.ListaCancionDetalle>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ListaCancionDetalleId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ListaCancionesId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CancionId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Orden)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ListaCancionDetalleId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ListaCancionesId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CancionId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Orden)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id=item.ListaCancionDetalleId }) |
+                @Html.ActionLink("Details", "Details", new { id=item.ListaCancionDetalleId }) |
+                @Html.ActionLink("Delete", "Delete", new { id=item.ListaCancionDetalleId })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

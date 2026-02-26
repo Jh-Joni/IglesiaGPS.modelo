@@ -1,0 +1,65 @@
+@model IEnumerable<IglesiaGPS.modelo.ListaCanciones>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ListaCancionesId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Titulo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaPublicacion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaCreacion)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Publicada)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DirectorId)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ListaCancionesId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Titulo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaPublicacion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaCreacion)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Publicada)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DirectorId)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id=item.ListaCancionesId }) |
+                @Html.ActionLink("Details", "Details", new { id=item.ListaCancionesId }) |
+                @Html.ActionLink("Delete", "Delete", new { id=item.ListaCancionesId })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IglesiaGPS.Api.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<EmailService>();
 builder.Services.AddDbContext<IglesiaGPSApiContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("IglesiaGPSApiContext") ?? throw new InvalidOperationException("Connection string 'IglesiaGPSApiContext' not found.")));
 

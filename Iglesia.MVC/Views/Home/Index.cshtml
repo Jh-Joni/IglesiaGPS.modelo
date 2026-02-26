@@ -1,0 +1,683 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    Layout = null;
+    var anuncios = ViewBag.Anuncios as List<Iglesia.MVC.Controllers.HomeController.AnuncioTemporal> ?? new List<Iglesia.MVC.Controllers.HomeController.AnuncioTemporal>();
+    var usuarioLogueado = Context.Session.GetString("UsuarioNombre");
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iglesia GPS – Ministerio de Alabanza</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== HERO REDISEÑADO ===== */
+        .hero-nuevo {
+            background: linear-gradient(135deg, #0a1f44 0%, #132d5e 40%, #1a3a6c 100%);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-nuevo::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-nuevo::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            display: flex;
+            position: relative;
+            z-index: 2;
+            min-height: 320px;
+        }
+
+        /* LADO IZQUIERDO: Info */
+        .hero-info {
+            flex: 1;
+            padding: 50px 40px 50px 8%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.3);
+            color: #d4af37;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+
+        .hero-info h1 {
+            font-size: 38px;
+            font-weight: 800;
+            color: white;
+            line-height: 1.15;
+            margin: 0 0 12px;
+            text-shadow: none;
+        }
+
+        .hero-info h1 span {
+            color: #d4af37;
+        }
+
+        .hero-subtitle {
+            color: rgba(255,255,255,0.6);
+            font-size: 15px;
+            font-weight: 300;
+            margin: 0 0 25px;
+        }
+
+        .hero-fecha {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            width: fit-content;
+        }
+
+        .hero-fecha .fecha-icon {
+            font-size: 18px;
+        }
+
+        .hero-fecha .fecha-label {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            display: block;
+        }
+
+        .hero-fecha .fecha-valor {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        /* LADO DERECHO: Anuncios */
+        .hero-anuncios {
+            width: 420px;
+            padding: 35px 8% 35px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hero-anuncios-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .hero-anuncios-titulo {
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hero-anuncios-titulo::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: #d4af37;
+            border-radius: 3px;
+        }
+
+        /* Botón lápiz */
+        .btn-escribir {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid rgba(212,175,55,0.4);
+            background: rgba(212,175,55,0.1);
+            color: #d4af37;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .btn-escribir:hover {
+            background: rgba(212,175,55,0.25);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(212,175,55,0.2);
+        }
+
+        /* Lista de anuncios en hero */
+        .hero-anuncios-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .hero-anuncios-lista::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .hero-anuncios-lista::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .hero-anuncios-lista::-webkit-scrollbar-thumb {
+            background: rgba(212,175,55,0.3);
+            border-radius: 3px;
+        }
+
+        .mini-anuncio {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 14px 16px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .mini-anuncio:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(212,175,55,0.2);
+        }
+
+        .mini-anuncio-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .mini-tipo {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .mini-tipo-anuncio { background: rgba(25,118,210,0.2); color: #64b5f6; }
+        .mini-tipo-versiculo { background: rgba(230,81,0,0.2); color: #ffab91; }
+        .mini-tipo-mensaje { background: rgba(46,125,50,0.2); color: #81c784; }
+
+        .mini-autor {
+            font-size: 10px;
+            color: rgba(255,255,255,0.35);
+        }
+
+        .mini-contenido {
+            color: rgba(255,255,255,0.85);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .mini-fecha-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .mini-fecha {
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .mini-eliminar {
+            background: none;
+            border: none;
+            color: rgba(255,100,100,0.5);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .mini-eliminar:hover {
+            color: #ff6b6b;
+            background: rgba(255,100,100,0.1);
+        }
+
+        .sin-anuncios-hero {
+            text-align: center;
+            color: rgba(255,255,255,0.3);
+            padding: 30px 10px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Separador vertical */
+        .hero-separador {
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(212,175,55,0.3), transparent);
+            margin: 40px 0;
+        }
+
+        /* ===== MODAL ANUNCIO ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.activo {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-anuncio {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: #0a1f44;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-cerrar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .modal-cerrar:hover {
+            background: #eee;
+            color: #333;
+        }
+
+        .modal-textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 14px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+            outline: none;
+            transition: border-color 0.3s;
+            color: #333;
+        }
+
+        .modal-textarea:focus {
+            border-color: #d4af37;
+        }
+
+        .modal-textarea::placeholder {
+            color: #bbb;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            align-items: center;
+        }
+
+        .modal-select {
+            padding: 11px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            outline: none;
+            background: #fafafa;
+            cursor: pointer;
+            color: #555;
+            flex: 1;
+        }
+
+        .modal-select:focus {
+            border-color: #d4af37;
+        }
+
+        .modal-btn {
+            padding: 11px 28px;
+            background: linear-gradient(135deg, #0a1f44, #1a3a6c);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(10,31,68,0.3);
+        }
+
+        .modal-nota {
+            margin-top: 14px;
+            font-size: 11px;
+            color: #bbb;
+            text-align: center;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @@media (max-width: 768px) {
+            .hero-content {
+                flex-direction: column;
+            }
+
+            .hero-info {
+                padding: 40px 6%;
+            }
+
+            .hero-info h1 {
+                font-size: 26px;
+            }
+
+            .hero-separador {
+                width: 80%;
+                height: 1px;
+                margin: 0 auto;
+                background: linear-gradient(to right, transparent, rgba(212,175,55,0.3), transparent);
+            }
+
+            .hero-anuncios {
+                width: 100%;
+                padding: 20px 6% 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">🎵 Iglesia GPS</div>
+        <nav>
+            <a href="#">Inicio</a>
+            <a href="#">Listas publicadas</a>
+            <a href="#">Canciones</a>
+            @if (usuarioLogueado != null)
+            {
+                <a href="#">👤 @usuarioLogueado</a>
+                <a href="@Url.Action("CerrarSesion", "Auth")">Cerrar sesión</a>
+            }
+            else
+            {
+                <a href="@Url.Action("Login", "Auth")">Iniciar sesión</a>
+            }
+            <a href="#">Acerca</a>
+        </nav>
+    </header>
+
+    <!-- HERO REDISEÑADO -->
+    <section class="hero-nuevo">
+        <div class="hero-content">
+            <!-- IZQUIERDA: Información -->
+            <div class="hero-info">
+                <div class="hero-badge">🎵 Ministerio de Alabanza</div>
+                <h1>@ViewBag.SemanaActual Semana<br>del Mes de <span>@ViewBag.MesActual</span></h1>
+                <p class="hero-subtitle">Preparados para adorar con excelencia</p>
+                <div class="hero-fecha">
+                    <span class="fecha-icon">📅</span>
+                    <div>
+                        <span class="fecha-label">Fecha de hoy</span>
+                        <span class="fecha-valor">@ViewBag.FechaHoy</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEPARADOR -->
+            <div class="hero-separador"></div>
+
+            <!-- DERECHA: Anuncios -->
+            <div class="hero-anuncios">
+                <div class="hero-anuncios-header">
+                    <div class="hero-anuncios-titulo">Anuncios de la Semana</div>
+                    @if (usuarioLogueado != null)
+                    {
+                        <button class="btn-escribir" onclick="abrirModal()" title="Escribir anuncio">✏️</button>
+                    }
+                </div>
+
+                <div class="hero-anuncios-lista">
+                    @if (anuncios.Count == 0)
+                    {
+                        <div class="sin-anuncios-hero">
+                            ✨ No hay anuncios esta semana<br>
+                            @if (usuarioLogueado != null)
+                            {
+                                <span>Pulsa ✏️ para publicar uno</span>
+                            }
+                            else
+                            {
+                                <span><a href="@Url.Action("Login", "Auth")" style="color:#d4af37; text-decoration:none;">Inicia sesión</a> para publicar</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var anuncio in anuncios)
+                        {
+                            var tipoClass = anuncio.Tipo == "Versículo" ? "mini-tipo-versiculo" :
+                                            anuncio.Tipo == "Mensaje" ? "mini-tipo-mensaje" : "mini-tipo-anuncio";
+                            var tipoIcon = anuncio.Tipo == "Versículo" ? "📖" :
+                                           anuncio.Tipo == "Mensaje" ? "💬" : "📢";
+
+                            <div class="mini-anuncio">
+                                <div class="mini-anuncio-top">
+                                    <span class="mini-tipo @tipoClass">@tipoIcon @anuncio.Tipo</span>
+                                    <span class="mini-autor">@anuncio.Autor</span>
+                                </div>
+                                <div class="mini-contenido">@anuncio.Contenido</div>
+                                <div class="mini-fecha-meta">
+                                    <span class="mini-fecha">@anuncio.FechaCreacion.ToString("dd MMM, HH:mm")</span>
+                                    @if (usuarioLogueado == anuncio.Autor)
+                                    {
+                                        <form method="post" asp-action="EliminarAnuncio" asp-controller="Home" style="display:inline; margin:0;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@anuncio.Id" />
+                                            <button type="submit" class="mini-eliminar">✕</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL PARA ESCRIBIR ANUNCIOS -->
+    @if (usuarioLogueado != null)
+    {
+        <div class="modal-overlay" id="modalAnuncio">
+            <div class="modal-anuncio">
+                <div class="modal-header">
+                    <h3>✏️ Nuevo Anuncio</h3>
+                    <button class="modal-cerrar" onclick="cerrarModal()">✕</button>
+                </div>
+                <form method="post" asp-action="CrearAnuncio" asp-controller="Home">
+                    @Html.AntiForgeryToken()
+                    <textarea class="modal-textarea" name="contenido" placeholder="Escribe tu anuncio, versículo o mensaje para esta semana..." required></textarea>
+                    <div class="modal-actions">
+                        <select class="modal-select" name="tipo">
+                            <option value="Anuncio">📢 Anuncio</option>
+                            <option value="Versículo">📖 Versículo</option>
+                            <option value="Mensaje">💬 Mensaje</option>
+                        </select>
+                        <button type="submit" class="modal-btn">Publicar</button>
+                    </div>
+                </form>
+                <p class="modal-nota">Los anuncios se eliminan automáticamente después de 7 días</p>
+            </div>
+        </div>
+    }
+
+    <!-- BUSCADOR -->
+    <section class="buscador">
+        <input type="text" placeholder="Buscar canción por título o autor...">
+        <button>Buscar</button>
+    </section>
+
+    <!-- LISTA DESTACADA -->
+    <section class="lista-canciones">
+        <h2>Lista de esta semana</h2>
+
+        <div class="canciones-container">
+            @{
+                var canciones = ViewBag.Canciones as List<IglesiaGPS.modelo.Cancion> ?? new List<IglesiaGPS.modelo.Cancion>();
+                var cancionesAMostrar = canciones.Take(7).ToList();
+            }
+
+            @if (cancionesAMostrar.Count == 0)
+            {
+                <div style="text-align:center; color:#aaa; padding:40px; width:100%; font-size:15px;">
+                    🎵 No hay canciones registradas aún
+                </div>
+            }
+            else
+            {
+                @foreach (var cancion in cancionesAMostrar)
+                {
+                    <div class="cancion-card">
+                        <div>
+                            <h3>@cancion.Titulo</h3>
+                            <p>Autor: @cancion.Autor</p>
+                            @if (!string.IsNullOrEmpty(cancion.Tono))
+                            {
+                                <p style="font-size:11px; color:#2e7d32; font-weight:600;">🎼 Tono: @cancion.Tono</p>
+                            }
+                        </div>
+                        <div class="botones">
+                            <button>Ver notas</button>
+                            @if (!string.IsNullOrEmpty(cancion.UrlAudio))
+                            {
+                                <button class="secundario" onclick="window.open('@cancion.UrlAudio', '_blank')">Escuchar</button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+        <p>© @ViewBag.AnioActual Iglesia GPS – Ministerio de Alabanza. Desarrollado por Jonathan Díaz.</p>
+        <p>Contacto: jsdiazy@utn.edu.ec | 0992408016</p>
+    </footer>
+
+    <script>
+        function abrirModal() {
+            document.getElementById('modalAnuncio').classList.add('activo');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalAnuncio').classList.remove('activo');
+            document.body.style.overflow = '';
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            var modal = document.getElementById('modalAnuncio');
+            if (modal && e.target === modal) {
+                cerrarModal();
+            }
+        });
+
+        // Cerrar con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') cerrarModal();
+        });
+    </script>
+
+</body>
+</html>

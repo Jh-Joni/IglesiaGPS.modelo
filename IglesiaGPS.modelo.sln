@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IglesiaGPS.modelo", "Iglesi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IglesiaGPS.Api", "IglesiaGPS.Api\IglesiaGPS.Api.csproj", "{36808171-F111-445A-8419-F975DF9F33C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iglesia.Api.consumer", "Iglesia.Api.consumer\Iglesia.Api.consumer.csproj", "{D844E164-ACA1-479C-8045-4A2504A660CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iglesia.MVC", "Iglesia.MVC\Iglesia.MVC.csproj", "{7796B1C7-12CE-472B-955D-1EC415E26612}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{36808171-F111-445A-8419-F975DF9F33C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36808171-F111-445A-8419-F975DF9F33C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36808171-F111-445A-8419-F975DF9F33C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D844E164-ACA1-479C-8045-4A2504A660CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D844E164-ACA1-479C-8045-4A2504A660CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D844E164-ACA1-479C-8045-4A2504A660CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D844E164-ACA1-479C-8045-4A2504A660CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7796B1C7-12CE-472B-955D-1EC415E26612}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7796B1C7-12CE-472B-955D-1EC415E26612}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7796B1C7-12CE-472B-955D-1EC415E26612}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7796B1C7-12CE-472B-955D-1EC415E26612}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
