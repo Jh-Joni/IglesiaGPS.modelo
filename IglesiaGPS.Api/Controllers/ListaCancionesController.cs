@@ -24,7 +24,26 @@ namespace IglesiaGPS.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListaCanciones>>> GetListaCanciones()
         {
-            return await _context.ListaCanciones.ToListAsync();
+            return await _context.ListaCanciones
+                .Include(l => l.Director)
+                .Include(l => l.Detalles)!
+                    .ThenInclude(d => d.Cancion)
+                .OrderByDescending(l => l.FechaPublicacion)
+                .ToListAsync();
+        }
+
+        // GET: api/ListaCanciones/publicadas
+        [HttpGet("publicadas")]
+        public async Task<ActionResult<IEnumerable<ListaCanciones>>> GetPublicadas()
+        {
+            return await _context.ListaCanciones
+                .Where(l => l.Publicada)
+                .Include(l => l.Director)
+                .Include(l => l.Detalles)!
+                    .ThenInclude(d => d.Cancion)
+                .OrderByDescending(l => l.FechaPublicacion)
+                .Take(5)
+                .ToListAsync();
         }
 
         // GET: api/ListaCanciones/5

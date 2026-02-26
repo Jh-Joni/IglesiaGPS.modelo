@@ -13,6 +13,181 @@
     <link rel="stylesheet" href="~/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* ===== HISTORIAL DE LISTAS ===== */
+        .historial-section {
+            padding: 50px 5%;
+            background: #f4f6f9;
+        }
+
+        .historial-section h2 {
+            text-align: center;
+            font-size: 28px;
+            color: #0a1f44;
+            margin-bottom: 8px;
+        }
+
+        .historial-subtitulo {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 35px;
+        }
+
+        .historial-vacio {
+            text-align: center;
+            font-size: 15px;
+            color: #bbb;
+            padding: 50px;
+        }
+
+        .historial-lista {
+            background: white;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .historial-lista:hover {
+            box-shadow: 0 6px 25px rgba(0,0,0,0.08);
+        }
+
+        /* Lista activa - borde verde */
+        .lista-activa {
+            border-left: 5px solid #2e7d32;
+        }
+
+        /* Lista pasada - borde rojo */
+        .lista-pasada {
+            border-left: 5px solid #c62828;
+            opacity: 0.75;
+        }
+
+        .lista-pasada:hover {
+            opacity: 0.9;
+        }
+
+        .historial-lista-header {
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .historial-lista-info h3 {
+            font-size: 18px;
+            color: #0a1f44;
+            margin: 6px 0 8px;
+        }
+
+        .estado-badge {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .badge-activa {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-pasada {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .historial-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .historial-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Canciones dentro del historial */
+        .historial-lista .canciones-container {
+            padding: 0 20px 20px;
+        }
+
+        /* Tarjeta pasada - borde rojo */
+        .card-pasada {
+            border-left-color: #c62828 !important;
+        }
+
+        /* Toggle icon */
+        .toggle-icon {
+            font-size: 16px;
+            color: #999;
+            transition: transform 0.3s;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Colapsar/expandir canciones */
+        .canciones-wrapper {
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+        }
+
+        .canciones-wrapper.expandido {
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        .canciones-wrapper.colapsado {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        /* Countdown */
+        .countdown {
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tono info */
+        .tono-info {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Animación de entrada */
+        .historial-lista {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s;
+        }
+
+        .historial-lista.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Forzar visible para lista pasada (ya tiene opacity) */
+        .lista-pasada.visible {
+            opacity: 0.75;
+        }
+
+        .lista-pasada.visible:hover {
+            opacity: 0.9;
+        }
+
+        .historial-lista-header {
+            cursor: pointer;
+        }
+
+
         /* ===== HERO REDISEÑADO ===== */
         .hero-nuevo {
             background: linear-gradient(135deg, #0a1f44 0%, #132d5e 40%, #1a3a6c 100%);
@@ -598,53 +773,88 @@
         </div>
     }
 
-    <!-- BUSCADOR -->
-    <section class="buscador">
-        <input type="text" placeholder="Buscar canción por título o autor...">
-        <button>Buscar</button>
-    </section>
+    <!-- HISTORIAL DE ALABANZAS POR SEMANA -->
+    <section class="historial-section">
+        @{
+            var semanasCanciones = ViewBag.SemanasCanciones as List<Iglesia.MVC.Controllers.HomeController.SemanaCancion> 
+                ?? new List<Iglesia.MVC.Controllers.HomeController.SemanaCancion>();
+            var ahoraLocal = DateTime.Now;
+        }
 
-    <!-- LISTA DESTACADA -->
-    <section class="lista-canciones">
-        <h2>Lista de esta semana</h2>
+        <h2>📋 Alabanzas de la Semana</h2>
+        <p class="historial-subtitulo">Se actualiza automáticamente cada domingo a las 7:00 PM</p>
 
-        <div class="canciones-container">
-            @{
-                var canciones = ViewBag.Canciones as List<IglesiaGPS.modelo.Cancion> ?? new List<IglesiaGPS.modelo.Cancion>();
-                var cancionesAMostrar = canciones.Take(7).ToList();
-            }
-
-            @if (cancionesAMostrar.Count == 0)
+        @if (semanasCanciones.Count == 0)
+        {
+            <div class="historial-vacio">
+                🎵 No hay canciones registradas todavía.<br>
+                <span style="font-size:13px;">Registra canciones desde el panel y aparecerán aquí automáticamente.</span>
+            </div>
+        }
+        else
+        {
+            @for (int i = 0; i < semanasCanciones.Count; i++)
             {
-                <div style="text-align:center; color:#aaa; padding:40px; width:100%; font-size:15px;">
-                    🎵 No hay canciones registradas aún
-                </div>
-            }
-            else
-            {
-                @foreach (var cancion in cancionesAMostrar)
-                {
-                    <div class="cancion-card">
-                        <div>
-                            <h3>@cancion.Titulo</h3>
-                            <p>Autor: @cancion.Autor</p>
-                            @if (!string.IsNullOrEmpty(cancion.Tono))
+                var sem = semanasCanciones[i];
+                var esActiva = ahoraLocal < sem.DomingoCorte;
+                var colorClase = esActiva ? "lista-activa" : "lista-pasada";
+
+                // Formato de fechas
+                var cultura = new System.Globalization.CultureInfo("es-ES");
+                var mesInicio = sem.InicioSemana.ToString("MMMM", cultura);
+                mesInicio = char.ToUpper(mesInicio[0]) + mesInicio.Substring(1);
+
+                <div class="historial-lista @colorClase" data-domingo="@sem.DomingoCorte.ToString("o")" data-index="@i">
+                    <div class="historial-lista-header" onclick="toggleSemana(@i)">
+                        <div class="historial-lista-info">
+                            @if (esActiva)
                             {
-                                <p style="font-size:11px; color:#2e7d32; font-weight:600;">🎼 Tono: @cancion.Tono</p>
+                                <span class="estado-badge badge-activa">🟢 SEMANA ACTUAL</span>
                             }
-                        </div>
-                        <div class="botones">
-                            <button>Ver notas</button>
-                            @if (!string.IsNullOrEmpty(cancion.UrlAudio))
+                            else
                             {
-                                <button class="secundario" onclick="window.open('@cancion.UrlAudio', '_blank')">Escuchar</button>
+                                <span class="estado-badge badge-pasada">🔴 PASADA</span>
+                            }
+                            <h3>Semana del @sem.InicioSemana.ToString("dd") al @sem.FinSemana.ToString("dd") de @mesInicio</h3>
+                            <div class="historial-meta">
+                                <span>🎵 @sem.Canciones.Count canciones</span>
+                                <span>📅 @sem.InicioSemana.ToString("dd/MM/yyyy")</span>
+                                @if (esActiva)
+                                {
+                                    <span class="countdown" id="countdown-@i">⏳ Calculando...</span>
+                                }
+                            </div>
+                        </div>
+                        <span class="toggle-icon" id="toggle-icon-@i">@(i == 0 ? "▼" : "▶")</span>
+                    </div>
+
+                    <div class="canciones-wrapper @(i == 0 ? "expandido" : "colapsado")" id="canciones-@i">
+                        <div class="canciones-container">
+                            @foreach (var cancion in sem.Canciones)
+                            {
+                                <div class="cancion-card @(esActiva ? "" : "card-pasada")" style="animation-delay: @(sem.Canciones.IndexOf(cancion) * 0.1)s">
+                                    <div>
+                                        <h3>@cancion.Titulo</h3>
+                                        <p>Autor: @cancion.Autor</p>
+                                        @if (!string.IsNullOrEmpty(cancion.Tono))
+                                        {
+                                            <p class="tono-info" style="color:@(esActiva ? "#2e7d32" : "#c62828")">🎼 Tono: @cancion.Tono</p>
+                                        }
+                                    </div>
+                                    <div class="botones">
+                                        <button>Ver notas</button>
+                                        @if (!string.IsNullOrEmpty(cancion.UrlAudio))
+                                        {
+                                            <button class="secundario" onclick="window.open('@cancion.UrlAudio', '_blank')">Escuchar</button>
+                                        }
+                                    </div>
+                                </div>
                             }
                         </div>
                     </div>
-                }
+                </div>
             }
-        </div>
-
+        }
     </section>
 
 
@@ -655,6 +865,7 @@
     </footer>
 
     <script>
+        // ===== MODAL =====
         function abrirModal() {
             document.getElementById('modalAnuncio').classList.add('activo');
             document.body.style.overflow = 'hidden';
@@ -665,19 +876,92 @@
             document.body.style.overflow = '';
         }
 
-        // Cerrar modal al hacer clic fuera
         document.addEventListener('click', function(e) {
             var modal = document.getElementById('modalAnuncio');
-            if (modal && e.target === modal) {
-                cerrarModal();
-            }
+            if (modal && e.target === modal) cerrarModal();
         });
 
-        // Cerrar con Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') cerrarModal();
+        });
+
+        // ===== TOGGLE SEMANAS (colapsar/expandir) =====
+        function toggleSemana(index) {
+            var wrapper = document.getElementById('canciones-' + index);
+            var icon = document.getElementById('toggle-icon-' + index);
+            if (wrapper.classList.contains('expandido')) {
+                wrapper.classList.remove('expandido');
+                wrapper.classList.add('colapsado');
+                icon.textContent = '▶';
+            } else {
+                wrapper.classList.remove('colapsado');
+                wrapper.classList.add('expandido');
+                icon.textContent = '▼';
+            }
+        }
+
+        // ===== COUNTDOWN al domingo 7 PM =====
+        function actualizarCountdowns() {
+            var semanas = document.querySelectorAll('.historial-lista[data-domingo]');
+            var ahora = new Date();
+
+            semanas.forEach(function(sem) {
+                var domingoStr = sem.getAttribute('data-domingo');
+                var idx = sem.getAttribute('data-index');
+                var domingo = new Date(domingoStr);
+                var countdownEl = document.getElementById('countdown-' + idx);
+
+                if (!countdownEl) return;
+
+                var diff = domingo - ahora;
+                if (diff <= 0) {
+                    // Ya pasó el domingo 7 PM — cambiar a rojo
+                    countdownEl.textContent = '⏰ Tiempo finalizado';
+                    countdownEl.style.color = '#c62828';
+                    sem.classList.remove('lista-activa');
+                    sem.classList.add('lista-pasada');
+                    // Cambiar badges
+                    var badge = sem.querySelector('.estado-badge');
+                    if (badge) {
+                        badge.className = 'estado-badge badge-pasada';
+                        badge.textContent = '🔴 PASADA';
+                    }
+                    // Cambiar cards
+                    sem.querySelectorAll('.cancion-card').forEach(function(card) {
+                        card.classList.add('card-pasada');
+                    });
+                } else {
+                    var dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    var horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    var segundos = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    var texto = '⏳ ';
+                    if (dias > 0) texto += dias + 'd ';
+                    texto += horas + 'h ' + minutos + 'm ' + segundos + 's';
+                    countdownEl.textContent = texto;
+                }
+            });
+        }
+
+        // Actualizar cada segundo
+        actualizarCountdowns();
+        setInterval(actualizarCountdowns, 1000);
+
+        // ===== ANIMACIONES DE ENTRADA =====
+        var observer = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.historial-lista').forEach(function(el) {
+            observer.observe(el);
         });
     </script>
 
 </body>
 </html>
+
