@@ -653,8 +653,8 @@
         <div class="logo">🎵 Iglesia GPS</div>
         <nav>
             <a href="#">Inicio</a>
-            <a href="#">Listas publicadas</a>
-            <a href="#">Canciones</a>
+            <a href="@Url.Action("Index","SolicitudesDirector")">Solicitud a Director</a>
+            <a href="@Url.Action("Index","Canciones")">Canciones</a>
             @if (usuarioLogueado != null)
             {
                 <a href="#">👤 @usuarioLogueado</a>
@@ -842,7 +842,7 @@
                                         }
                                     </div>
                                     <div class="botones">
-                                        <button>Ver notas</button>
+                                       <a asp-controller="NotasMusicales" asp-action="Index" class="btn btn-notas" >Ver notas</a>
                                         @if (!string.IsNullOrEmpty(cancion.UrlAudio))
                                         {
                                             <button class="secundario" onclick="window.open('@cancion.UrlAudio', '_blank')">Escuchar</button>

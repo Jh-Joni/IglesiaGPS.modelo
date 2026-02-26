@@ -1,16 +1,16 @@
 @model IglesiaGPS.modelo.Cancion
 
 @{
-    ViewData["Title"] = "Nueva Canción";
+    ViewData["Title"] = "Editar Canción";
 }
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-success text-white text-center py-4 rounded-top-4">
-                    <h2 class="mb-0 fw-bold"><i class="bi bi-music-note-list me-2"></i>Registrar Nueva Canción</h2>
-                    <p class="mb-0 text-white-50">Ingresa los datos de la alabanza y opcionalmente sus notas musicales</p>
+                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                    <h2 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Editar Canción</h2>
+                    <p class="mb-0 text-white-50">Modifica los detalles de la alabanza y actualiza sus notas musicales</p>
                 </div>
                 
                 <div class="card-body p-5">
@@ -19,10 +19,11 @@
                         <div class="alert alert-danger shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
                     }
 
-                    <form asp-action="Create" method="post">
+                    <form asp-action="Edit" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="CancionId" />
 
-                        <h5 class="text-success border-bottom pb-2 mb-4"><i class="bi bi-info-circle me-2"></i>Información Principal</h5>
+                        <h5 class="text-primary border-bottom pb-2 mb-4"><i class="bi bi-info-circle me-2"></i>Información Principal</h5>
                         
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
@@ -85,30 +86,55 @@
                             </div>
                         </div>
 
-                        <h5 class="text-success border-bottom pb-2 mb-4 mt-5"><i class="bi bi-music-note me-2"></i>Notas Musicales (Opcional)</h5>
-                        <p class="text-muted small">Agrega directamente la tablatura o acordes para esta canción.</p>
+                        <h5 class="text-primary border-bottom pb-2 mb-4 mt-5"><i class="bi bi-music-note-list me-2"></i>Notas Musicales Existentes</h5>
+                        
+                        @if (Model.NotasMusicales != null && Model.NotasMusicales.Any())
+                        {
+                            <div class="row g-4 mb-4">
+                                @foreach (var nota in Model.NotasMusicales)
+                                {
+                                    <div class="col-12">
+                                        <div class="p-3 bg-light rounded shadow-sm border">
+                                            <input type="hidden" name="NotaIds" value="@nota.NotaMusicalId" />
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="badge bg-secondary">Instrumento: @nota.Instrumento</span>
+                                                <small class="text-muted">Última edición: @nota.UltimaEdicion.ToShortDateString()</small>
+                                            </div>
+                                            <textarea name="NotaContenidos" class="form-control font-monospace" style="height: 100px">@nota.Contenido</textarea>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info shadow-sm">
+                                <i class="bi bi-info-circle-fill me-2"></i>Esta canción aún no tiene notas registradas. Puedes agregar una a continuación.
+                            </div>
+                        }
 
-                        <div class="row g-4 mb-5 bg-light p-4 rounded-3 shadow-sm border">
+                        <h5 class="text-success border-bottom pb-2 mb-4 mt-4"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva Nota (Opcional)</h5>
+                        <div class="row g-4 mb-5 bg-light p-4 rounded-3 shadow-sm border border-success-subtle">
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" name="Instrumento" class="form-control" placeholder="Ej: Guitarra, Piano, Bajo..." />
-                                    <label for="Instrumento">Instrumento</label>
+                                    <input type="text" name="NewInstrumento" class="form-control" placeholder="Ej: Batería, Voz..." />
+                                    <label for="NewInstrumento">Instrumento</label>
                                 </div>
                             </div>
                             <div class="col-md-8">
                                 <div class="form-floating">
-                                    <textarea name="NotaContenido" class="form-control font-monospace" placeholder="Escribe aquí los acordes..." style="height: 150px"></textarea>
-                                    <label for="NotaContenido">Acordes / Tablatura</label>
+                                    <textarea name="NewNotaContenido" class="form-control font-monospace" placeholder="Escribe aquí los acordes o tablatura..." style="height: 100px"></textarea>
+                                    <label for="NewNotaContenido">Acordes / Tablatura nueva</label>
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 rounded-pill shadow-sm">
-                                <i class="bi bi-arrow-left me-2"></i>Volver
+                                <i class="bi bi-arrow-left me-2"></i>Cancelar
                             </a>
-                            <button type="submit" class="btn btn-success btn-lg px-5 rounded-pill shadow-sm fw-bold">
-                                <i class="bi bi-save me-2"></i>Guardar Canción
+                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm fw-bold">
+                                <i class="bi bi-save me-2"></i>Actualizar Cambios
                             </button>
                         </div>
                     </form>
@@ -120,15 +146,4 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set current date time if empty
-            const dateInput = document.querySelector('input[name="FechaCreacion"]');
-            if(dateInput && !dateInput.value) {
-                const now = new Date();
-                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                dateInput.value = now.toISOString().slice(0,16);
-            }
-        });
-    </script>
 }
