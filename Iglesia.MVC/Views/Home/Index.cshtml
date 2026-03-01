@@ -842,7 +842,7 @@
                                         }
                                     </div>
                                     <div class="botones">
-                                       <a asp-controller="NotasMusicales" asp-action="Index" class="btn btn-notas" >Ver notas</a>
+                                        <a asp-controller="NotasMusicales" asp-action="VerNotas" asp-route-id="@cancion.CancionId" class="btn btn-notas" >Ver notas</a>
                                         @if (!string.IsNullOrEmpty(cancion.UrlAudio))
                                         {
                                             <button class="secundario" onclick="window.open('@cancion.UrlAudio', '_blank')">Escuchar</button>

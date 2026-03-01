@@ -10,8 +10,37 @@ namespace Iglesia.MVC.Controllers
         // GET: SolicitudesDirectorController
         public ActionResult Index()
         {
-            var lista = Crud<SolicitudDirector>.GetAll();
-            return View(lista);
+            var usuarioLogueadoIdString = HttpContext.Session.GetString("UsuarioId");
+            var usuarioRol = HttpContext.Session.GetString("UsuarioRol");
+
+            if (usuarioLogueadoIdString == null) return RedirectToAction("Login", "Auth");
+
+            // Si es Desarrollador, listar todas las solicitudes pendientes y cruzar con usuario
+            if (usuarioRol == "Desarrollador")
+            {
+                var solicitudes = Crud<SolicitudDirector>.GetAll().Where(s => s.Estado == "Pendiente").ToList();
+                var usuarios = Crud<Usuario>.GetAll();
+
+                foreach (var solicitud in solicitudes)
+                {
+                    solicitud.Usuario = usuarios.FirstOrDefault(u => u.UsuarioId == solicitud.UsuarioId);
+                }
+
+                return View("IndexDesarrollador", solicitudes);
+            }
+            else
+            {
+                // Si es usuario normal/director, mostrar su propia solicitud si existe
+                if (int.TryParse(usuarioLogueadoIdString, out int uid))
+                {
+                    var miSolicitud = Crud<SolicitudDirector>.GetAll()
+                        .OrderByDescending(s => s.FechaSolicitud)
+                        .FirstOrDefault(s => s.UsuarioId == uid);
+                    
+                    return View("Index", miSolicitud); // Puede ser null
+                }
+                return RedirectToAction("Login", "Auth");
+            }
         }
 
         // GET: SolicitudesDirectorController/Details/5
@@ -26,20 +55,82 @@ namespace Iglesia.MVC.Controllers
             return View();
         }
 
-        // POST: SolicitudesDirectorController/Create
+        // POST: SolicitudesDirectorController/Solicitar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(SolicitudDirector solicitud)
+        public ActionResult Solicitar()
         {
+            var usuarioLogueadoIdString = HttpContext.Session.GetString("UsuarioId");
+            if (usuarioLogueadoIdString == null || !int.TryParse(usuarioLogueadoIdString, out int uid))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Verificar si ya tiene solicitud
+            var existe = Crud<SolicitudDirector>.GetAll().Any(s => s.UsuarioId == uid && s.Estado == "Pendiente");
+
+            if (!existe)
+            {
+                var nuevaSolicitud = new SolicitudDirector
+                {
+                    UsuarioId = uid,
+                    CodigoIngresado = "SOLICITUD-DIRECTOR", // Opcional o genérico
+                    Estado = "Pendiente",
+                    FechaSolicitud = DateTime.Now
+                };
+                Crud<SolicitudDirector>.Create(nuevaSolicitud);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: SolicitudesDirectorController/Validar/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Validar(int id)
+        {
+            var usuarioRol = HttpContext.Session.GetString("UsuarioRol");
+            var devIdString = HttpContext.Session.GetString("UsuarioId");
+
+            if (usuarioRol != "Desarrollador" || devIdString == null || !int.TryParse(devIdString, out int devId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             try
             {
-                Crud<SolicitudDirector>.Create(solicitud);
-                return RedirectToAction(nameof(Index));
+                var solicitud = Crud<SolicitudDirector>.GetById(id);
+                if (solicitud != null && solicitud.Estado == "Pendiente")
+                {
+                    // 1. Marcar como aprobado
+                    solicitud.Estado = "Aprobado";
+                    solicitud.FechaRespuesta = DateTime.Now;
+                    solicitud.RespuestaPorUsuarioId = devId;
+
+                    Crud<SolicitudDirector>.Update(id, solicitud);
+
+                    // 2. Buscar Rol Director
+                    var roles = Crud<Rol>.GetAll();
+                    var rolDirector = roles.FirstOrDefault(r => r.Nombre == "Director");
+
+                    if (rolDirector != null)
+                    {
+                        var usuarioSolicitante = Crud<Usuario>.GetById(solicitud.UsuarioId);
+                        if (usuarioSolicitante != null)
+                        {
+                            // 3. Cambiar Rol
+                            usuarioSolicitante.RolId = rolDirector.RolId;
+                            Crud<Usuario>.Update(usuarioSolicitante.UsuarioId, usuarioSolicitante);
+                        }
+                    }
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                return View("Index", Crud<SolicitudDirector>.GetAll());
+                // Manejar error si es necesario
             }
+            
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: SolicitudesDirectorController/Edit/5

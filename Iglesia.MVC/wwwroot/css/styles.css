@@ -162,7 +162,8 @@ nav a:hover {
     gap: 8px;
 }
 
-.cancion-card button {
+.cancion-card button,
+.cancion-card .btn {
     margin-top: 0;
     margin-right: 0;
     padding: 7px 14px;
@@ -174,13 +175,20 @@ nav a:hover {
     transition: 0.3s;
     font-size: 12px;
     font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .cancion-card .secundario {
     background: #d4af37;
 }
 
-.cancion-card button:hover {
+.cancion-card .btn-notas {
+    background: #2e7d32;
+}
+
+.cancion-card button:hover,
+.cancion-card .btn:hover {
     opacity: 0.8;
 }
 

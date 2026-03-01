@@ -45,6 +45,7 @@ namespace Iglesia.MVC.Controllers
         // GET: CancionesController/Create
         public ActionResult Create()
         {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
             ViewBag.Usuarios = Crud<Usuario>.GetAll();
             return View();
         }
@@ -54,6 +55,7 @@ namespace Iglesia.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(Cancion cancion, IFormFile? FotoFile, string NotaContenido = null, string Instrumento = null)
         {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
             try
             {
                 if (cancion.FechaCreacion == default)
@@ -109,6 +111,7 @@ namespace Iglesia.MVC.Controllers
         // GET: CancionesController/Edit/5
         public ActionResult Edit(int id)
         {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
             try
             {
                 var cancion = Crud<Cancion>.GetById(id);
@@ -128,6 +131,7 @@ namespace Iglesia.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, Cancion cancion, IFormCollection collection, IFormFile? FotoFile)
         {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
             try
             {
                 if (cancion.FechaCreacion != default)
@@ -215,6 +219,7 @@ namespace Iglesia.MVC.Controllers
         // GET: CancionesController/Delete/5
         public ActionResult Delete(int id)
         {
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador") return RedirectToAction("Index");
             var cancion = Crud<Cancion>.GetById(id);
             if (cancion == null) return NotFound();
             return View(cancion);
@@ -225,6 +230,7 @@ namespace Iglesia.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador") return RedirectToAction("Index");
             try
             {
                 Crud<Cancion>.Delete(id);
