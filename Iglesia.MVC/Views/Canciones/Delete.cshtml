@@ -1,0 +1,71 @@
+@model IglesiaGPS.modelo.Cancion
+
+@{
+    ViewData["Title"] = "Eliminar Canción";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-danger border-opacity-50 rounded-4">
+                <div class="card-header bg-danger text-white text-center py-4 rounded-top-4">
+                    <h2 class="mb-0 fw-bold"><i class="bi bi-trash3-fill me-2"></i>Eliminar Canción</h2>
+                    <p class="mb-0 text-white-50">¿Estás seguro de que deseas eliminar permanentemente esta alabanza?</p>
+                </div>
+                
+                <div class="card-body p-5 bg-light">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
+                    }
+
+                    <div class="text-center mb-4">
+                        <i class="bi bi-music-note-beamed text-danger opacity-75" style="font-size: 4rem;"></i>
+                        <h3 class="fw-bold mt-2 text-dark">@Html.DisplayFor(model => model.Titulo)</h3>
+                        <p class="text-muted fs-5">@Html.DisplayFor(model => model.Autor)</p>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4 text-muted">Tono</dt>
+                                <dd class="col-sm-8 fw-semibold">
+                                    @(string.IsNullOrEmpty(Model.Tono) ? "No especificado" : Model.Tono)
+                                </dd>
+
+                                <dt class="col-sm-4 text-muted">Fecha de Creación</dt>
+                                <dd class="col-sm-8">@Model.FechaCreacion.ToShortDateString()</dd>
+
+                                <dt class="col-sm-4 text-muted">Notas Registradas</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge bg-info text-dark">
+                                        @(Model.NotasMusicales != null ? Model.NotasMusicales.Count : 0) nota(s)
+                                    </span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning border-warning shadow-sm d-flex align-items-center mb-4">
+                        <i class="bi bi-exclamation-triangle fs-3 text-warning me-3"></i>
+                        <div>
+                            <strong>Advertencia:</strong> Esta acción borrará la canción y <strong>todas sus notas musicales asociadas</strong>. Esta acción no se puede deshacer.
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="CancionId" />
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 rounded-pill shadow-sm">
+                                <i class="bi bi-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg px-5 rounded-pill shadow-sm fw-bold">
+                                <i class="bi bi-trash me-2"></i>Sí, Eliminar Canción
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

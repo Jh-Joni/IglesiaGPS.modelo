@@ -24,7 +24,26 @@ namespace IglesiaGPS.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListaCanciones>>> GetListaCanciones()
         {
-            return await _context.ListaCanciones.ToListAsync();
+            return await _context.ListaCanciones
+                .Include(l => l.Director)
+                .Include(l => l.Detalles)!
+                    .ThenInclude(d => d.Cancion)
+                .OrderByDescending(l => l.FechaPublicacion)
+                .ToListAsync();
+        }
+
+        // GET: api/ListaCanciones/publicadas
+        [HttpGet("publicadas")]
+        public async Task<ActionResult<IEnumerable<ListaCanciones>>> GetPublicadas()
+        {
+            return await _context.ListaCanciones
+                .Where(l => l.Publicada)
+                .Include(l => l.Director)
+                .Include(l => l.Detalles)!
+                    .ThenInclude(d => d.Cancion)
+                .OrderByDescending(l => l.FechaPublicacion)
+                .Take(5)
+                .ToListAsync();
         }
 
         // GET: api/ListaCanciones/5
@@ -80,6 +99,13 @@ namespace IglesiaGPS.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ListaCanciones>> PostListaCanciones(ListaCanciones lista)
         {
+            // Reset ID to prevent duplicate key errors (23505) if the client sends an existing ID
+            lista.ListaCancionesId = 0;
+            
+            // Clean navigation properties to prevent EF Core from trying to re-insert existing related entities
+            lista.Director = null;
+            lista.Detalles = null;
+
             _context.ListaCanciones.Add(lista);
             await _context.SaveChangesAsync();
 

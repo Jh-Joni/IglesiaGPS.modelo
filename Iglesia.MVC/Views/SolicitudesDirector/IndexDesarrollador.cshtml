@@ -1,0 +1,60 @@
+@model IEnumerable<IglesiaGPS.modelo.SolicitudDirector>
+@{
+    ViewData["Title"] = "Solicitudes de Director";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h2 class="text-primary fw-bold mb-0"><i class="bi bi-people-fill me-2"></i>Gestión de Solicitudes</h2>
+    </div>
+
+    @if (Model.Count() == 0)
+    {
+        <div class="alert alert-info text-center p-5 shadow-sm rounded-4 border-0">
+            <i class="bi bi-emoji-smile fs-1 mb-3 text-info d-block"></i>
+            <h4 class="alert-heading fw-bold">No hay solicitudes pendientes</h4>
+            <p class="mb-0 text-muted">Todos los usuarios están al día. Cuando alguien solicite ser director, aparecerá aquí.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary">
+                        <tr>
+                            <th class="py-3 px-4 border-bottom-0">Usuario (ID)</th>
+                            <th class="py-3 px-4 border-bottom-0">Nombre</th>
+                            <th class="py-3 px-4 border-bottom-0">Correo</th>
+                            <th class="py-3 px-4 border-bottom-0">Fecha de Solicitud</th>
+                            <th class="py-3 px-4 border-bottom-0 text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-muted">#@item.UsuarioId</td>
+                                <td class="px-4 py-3 fw-semibold">
+                                    @(item.Usuario?.Nombre != null ? item.Usuario.Nombre + " " + item.Usuario.Apellido : "Usuario Desconocido")
+                                </td>
+                                <td class="px-4 py-3">@(item.Usuario?.Correo ?? "N/A")</td>
+                                <td class="px-4 py-3 text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i> @item.FechaSolicitud.ToString("dd MMM yyyy HH:mm")
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    <form asp-action="Validar" asp-route-id="@item.SolicitudDirectorId" method="post" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm" onclick="return confirm('¿Estás seguro de otorgar el rol de Director a este usuario?');">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Validar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

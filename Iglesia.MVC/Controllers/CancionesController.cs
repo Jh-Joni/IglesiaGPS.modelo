@@ -7,80 +7,239 @@ namespace Iglesia.MVC.Controllers
 {
     public class CancionesController : Controller
     {
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public CancionesController(IWebHostEnvironment webHostEnvironment)
+        {
+            _webHostEnvironment = webHostEnvironment;
+        }
+
         // GET: CancionesController
         public ActionResult Index()
         {
             var lista = Crud<Cancion>.GetAll();
             return View(lista);
         }
-
+                
         // GET: CancionesController/Details/5
         public ActionResult Details(int id)
         {
             return View();
         }
 
+        [HttpGet]
+        public IActionResult GetNotas(int id)
+        {
+            try
+            {
+                var todasLasNotas = Crud<NotaMusical>.GetAll();
+                var notasDeCancion = todasLasNotas?.Where(n => n.CancionId == id).ToList() ?? new List<NotaMusical>();
+                return Json(notasDeCancion);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error al cargar notas: " + ex.Message);
+            }
+        }
+
         // GET: CancionesController/Create
         public ActionResult Create()
         {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
+            ViewBag.Usuarios = Crud<Usuario>.GetAll();
             return View();
         }
 
         // POST: CancionesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Cancion cancion)
+        public ActionResult Create(Cancion cancion, IFormFile? FotoFile, string NotaContenido = null, string Instrumento = null)
         {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
             try
             {
-                Crud<Cancion>.Create(cancion);
+                if (cancion.FechaCreacion == default)
+                    cancion.FechaCreacion = DateTime.UtcNow;
+                else
+                    cancion.FechaCreacion = DateTime.SpecifyKind(cancion.FechaCreacion, DateTimeKind.Utc);
+
+                CancionDTO dto = new CancionDTO
+                {
+                    Titulo = cancion.Titulo,
+                    Autor = cancion.Autor,
+                    Tono = cancion.Tono,
+                    UrlAudio = cancion.UrlAudio,
+                    Letra = cancion.Letra,
+                    FechaCreacion = cancion.FechaCreacion,
+                    CreadoPorUsuarioId = cancion.CreadoPorUsuarioId
+                };
+
+                if (FotoFile != null && FotoFile.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        FotoFile.CopyTo(ms);
+                        dto.FotoBase64 = "data:" + FotoFile.ContentType + ";base64," + Convert.ToBase64String(ms.ToArray());
+                    }
+                }
+
+                var createdDto = Crud<CancionDTO>.Create(dto);
+
+                if (createdDto != null && createdDto.CancionId > 0 && !string.IsNullOrWhiteSpace(NotaContenido))
+                {
+                    var nota = new NotaMusical
+                    {
+                        CancionId = createdDto.CancionId,
+                        Contenido = NotaContenido,
+                        Instrumento = string.IsNullOrWhiteSpace(Instrumento) ? "General" : Instrumento,
+                        UltimaEdicion = DateTime.UtcNow,
+                        EditadoPorUsuarioId = cancion.CreadoPorUsuarioId
+                    };
+                    Crud<NotaMusical>.Create(nota);
+                }
+                    
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View("Index", Crud<Cancion>.GetAll());
+                ViewBag.Error = ex.Message;
+                ViewBag.Usuarios = Crud<Usuario>.GetAll();
+                return View(cancion);
             }
         }
 
         // GET: CancionesController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
+            try
+            {
+                var cancion = Crud<Cancion>.GetById(id);
+                if (cancion == null) return NotFound();
+                ViewBag.Usuarios = Crud<Usuario>.GetAll();
+                return View(cancion);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "No se pudo cargar la canción para edición. Verifica que la API esté conectada: " + ex.Message;
+                return View(new Cancion());
+            }
         }
 
         // POST: CancionesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, Cancion cancion, IFormCollection collection, IFormFile? FotoFile)
         {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
             try
             {
+                if (cancion.FechaCreacion != default)
+                {
+                    cancion.FechaCreacion = DateTime.SpecifyKind(cancion.FechaCreacion, DateTimeKind.Utc);
+                }
+
+                CancionDTO dto = new CancionDTO
+                {
+                    CancionId = id,
+                    Titulo = cancion.Titulo,
+                    Autor = cancion.Autor,
+                    Tono = cancion.Tono,
+                    UrlAudio = cancion.UrlAudio,
+                    Letra = cancion.Letra,
+                    FechaCreacion = cancion.FechaCreacion,
+                    CreadoPorUsuarioId = cancion.CreadoPorUsuarioId
+                };
+
+                if (FotoFile != null && FotoFile.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        FotoFile.CopyTo(ms);
+                        dto.FotoBase64 = "data:" + FotoFile.ContentType + ";base64," + Convert.ToBase64String(ms.ToArray());
+                    }
+                }
+
+                // Actualizar Canción usando el DTO
+                Crud<CancionDTO>.Update(id, dto);
+
+                // Actualizar Notas existentes
+                var notaIds = collection["NotaIds"].ToList();
+                var notaContenidos = collection["NotaContenidos"].ToList();
+
+                for (int i = 0; i < notaIds.Count; i++)
+                {
+                    if (int.TryParse(notaIds[i], out int nId))
+                    {
+                        var notaToUpdate = Crud<NotaMusical>.GetById(nId);
+                        if (notaToUpdate != null)
+                        {
+                            bool modified = false;
+                            if (i < notaContenidos.Count && notaToUpdate.Contenido != notaContenidos[i])
+                            {
+                                notaToUpdate.Contenido = notaContenidos[i];
+                                modified = true;
+                            }
+                            
+                            if (modified)
+                            {
+                                notaToUpdate.UltimaEdicion = DateTime.UtcNow;
+                                Crud<NotaMusical>.Update(nId, notaToUpdate);
+                            }
+                        }
+                    }
+                }
+
+                // Crear nueva nota si se ingresó en Edit
+                string newNotaContenido = collection["NewNotaContenido"];
+                string newInstrumento = collection["NewInstrumento"];
+                if (!string.IsNullOrWhiteSpace(newNotaContenido))
+                {
+                    var nota = new NotaMusical
+                    {
+                        CancionId = id,
+                        Contenido = newNotaContenido,
+                        Instrumento = string.IsNullOrWhiteSpace(newInstrumento) ? "General" : newInstrumento,
+                        UltimaEdicion = DateTime.UtcNow,
+                        EditadoPorUsuarioId = cancion.CreadoPorUsuarioId
+                    };
+                    Crud<NotaMusical>.Create(nota);
+                }
+
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ViewBag.Error = ex.Message;
+                ViewBag.Usuarios = Crud<Usuario>.GetAll();
+                return View(cancion);
             }
         }
 
         // GET: CancionesController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador") return RedirectToAction("Index");
+            var cancion = Crud<Cancion>.GetById(id);
+            if (cancion == null) return NotFound();
+            return View(cancion);
         }
 
         // POST: CancionesController/Delete/5
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult DeleteConfirmed(int id)
         {
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador") return RedirectToAction("Index");
             try
             {
+                Crud<Cancion>.Delete(id);
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ViewBag.Error = "No se pudo eliminar: " + ex.Message;
+                return View(Crud<Cancion>.GetById(id));
             }
         }
     }

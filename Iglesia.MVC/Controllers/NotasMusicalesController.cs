@@ -14,6 +14,76 @@ namespace Iglesia.MVC.Controllers
             return View(lista);
         }
 
+        // GET: NotasMusicalesController/VerNotas/5 (id is CancionId)
+        public ActionResult VerNotas(int id)
+        {
+            var cancion = Crud<Cancion>.GetById(id);
+            if (cancion == null) return NotFound();
+
+            var notas = Crud<NotaMusical>.GetAll().FirstOrDefault(n => n.CancionId == id);
+            
+            if (notas == null)
+            {
+                notas = new NotaMusical { CancionId = id, Contenido = "" };
+            }
+
+            ViewBag.CancionTitulo = cancion.Titulo;
+            return View(notas);
+        }
+
+        // GET: NotasMusicalesController/EditarNota/5 (id is CancionId)
+        public ActionResult EditarNota(int id)
+        {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
+
+            var cancion = Crud<Cancion>.GetById(id);
+            if (cancion == null) return NotFound();
+
+            var notas = Crud<NotaMusical>.GetAll().FirstOrDefault(n => n.CancionId == id);
+            
+            if (notas == null)
+            {
+                notas = new NotaMusical { CancionId = id, Contenido = "" };
+            }
+
+            ViewBag.CancionTitulo = cancion.Titulo;
+            return View(notas);
+        }
+
+        // POST: NotasMusicalesController/EditarNota/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditarNota(int id, NotaMusical nota)
+        {
+            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
+            
+            var usuarioLogueadoIdString = HttpContext.Session.GetString("UsuarioId");
+            int usuarioId = 1; 
+            if (!string.IsNullOrEmpty(usuarioLogueadoIdString) && int.TryParse(usuarioLogueadoIdString, out int uid))
+            {
+                usuarioId = uid;
+            }
+
+            var existeNota = Crud<NotaMusical>.GetAll().FirstOrDefault(n => n.CancionId == id);
+
+            if (existeNota == null)
+            {
+                nota.CancionId = id;
+                nota.UltimaEdicion = DateTime.Now;
+                nota.EditadoPorUsuarioId = usuarioId;
+                Crud<NotaMusical>.Create(nota);
+            }
+            else
+            {
+                existeNota.Contenido = nota.Contenido;
+                existeNota.UltimaEdicion = DateTime.Now;
+                existeNota.EditadoPorUsuarioId = usuarioId;
+                Crud<NotaMusical>.Update(existeNota.NotaMusicalId, existeNota);
+            }
+
+            return RedirectToAction("VerNotas", new { id = id });
+        }
+
         // GET: NotasMusicalesController/Details/5
         public ActionResult Details(int id)
         {

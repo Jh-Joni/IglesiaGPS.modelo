@@ -51,22 +51,55 @@ namespace Iglesia.MVC.Controllers
             // Pasar anuncios vigentes
             ViewBag.Anuncios = _anuncios.Values.OrderByDescending(a => a.FechaCreacion).ToList();
 
-            // Traer canciones de la base de datos via API
+            // Traer canciones de la BD y agrupar por semana
             try
             {
                 var handler = new HttpClientHandler();
                 handler.ServerCertificateCustomValidationCallback = (m, c, ch, e) => true;
                 using var client = new HttpClient(handler);
                 var json = client.GetStringAsync("https://localhost:7220/api/Canciones").Result;
-                var canciones = Newtonsoft.Json.JsonConvert.DeserializeObject<List<IglesiaGPS.modelo.Cancion>>(json);
-                ViewBag.Canciones = canciones ?? new List<IglesiaGPS.modelo.Cancion>();
+                var todasCanciones = Newtonsoft.Json.JsonConvert.DeserializeObject<List<IglesiaGPS.modelo.Cancion>>(json)
+                    ?? new List<IglesiaGPS.modelo.Cancion>();
+
+                // Agrupar por semana (lunes a domingo)
+                var semanas = todasCanciones
+                    .OrderByDescending(c => c.FechaCreacion)
+                    .GroupBy(c =>
+                    {
+                        // Obtener el lunes de la semana de esta canción
+                        var fecha = c.FechaCreacion.Date;
+                        int diff = (7 + (fecha.DayOfWeek - DayOfWeek.Monday)) % 7;
+                        return fecha.AddDays(-diff);
+                    })
+                    .OrderByDescending(g => g.Key)
+                    .Take(6) // semana actual + 5 pasadas
+                    .Select(g => new SemanaCancion
+                    {
+                        InicioSemana = g.Key,
+                        FinSemana = g.Key.AddDays(6),
+                        // Domingo 7 PM es el corte
+                        DomingoCorte = g.Key.AddDays(6).AddHours(19),
+                        Canciones = g.OrderBy(c => c.FechaCreacion).Take(7).ToList()
+                    })
+                    .ToList();
+
+                ViewBag.SemanasCanciones = semanas;
             }
             catch
             {
-                ViewBag.Canciones = new List<IglesiaGPS.modelo.Cancion>();
+                ViewBag.SemanasCanciones = new List<SemanaCancion>();
             }
 
             return View();
+        }
+
+        // Clase para agrupar canciones por semana
+        public class SemanaCancion
+        {
+            public DateTime InicioSemana { get; set; }
+            public DateTime FinSemana { get; set; }
+            public DateTime DomingoCorte { get; set; }
+            public List<IglesiaGPS.modelo.Cancion> Canciones { get; set; } = new();
         }
 
         // POST: /Home/CrearAnuncio

@@ -19,7 +19,8 @@ namespace Iglesia.Api.consumer
                 }
                 else
                 {
-                    throw new Exception($"Error: {response.StatusCode}");
+                    var errorResponse = response.Content.ReadAsStringAsync().Result;
+                    throw new Exception($"Error {response.StatusCode}: {errorResponse}");
                 }
             }
         }
@@ -36,7 +37,8 @@ namespace Iglesia.Api.consumer
                 }
                 else
                 {
-                    throw new Exception($"Error: {response.StatusCode}");
+                    var errorResponse = response.Content.ReadAsStringAsync().Result;
+                    throw new Exception($"Error {response.StatusCode}: {errorResponse}");
                 }
             }
         }
@@ -61,7 +63,8 @@ namespace Iglesia.Api.consumer
                 }
                 else
                 {
-                    throw new Exception($"Error: {response.StatusCode}");
+                    var errorResponse = response.Content.ReadAsStringAsync().Result;
+                    throw new Exception($"Error {response.StatusCode}: {errorResponse}");
                 }
             }
         }
@@ -85,7 +88,8 @@ namespace Iglesia.Api.consumer
                 }
                 else
                 {
-                    throw new Exception($"Error: {response.StatusCode}");
+                    var errorResponse = response.Content.ReadAsStringAsync().Result;
+                    throw new Exception($"Error {response.StatusCode}: {errorResponse}");
                 }
             }
         }
@@ -101,7 +105,8 @@ namespace Iglesia.Api.consumer
                 }
                 else
                 {
-                    throw new Exception($"Error: {response.StatusCode}");
+                    var errorResponse = response.Content.ReadAsStringAsync().Result;
+                    throw new Exception($"Error {response.StatusCode}: {errorResponse}");
                 }
             }
         }
@@ -133,7 +138,8 @@ namespace Iglesia.Api.consumer
                 }
                 else
                 {
-                    throw new Exception($"Error: {response.StatusCode}");
+                    var errorResponse = response.Content.ReadAsStringAsync().Result;
+                    throw new Exception($"Error {response.StatusCode}: {errorResponse}");
                 }
             }
         }
