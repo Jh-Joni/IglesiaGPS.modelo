@@ -19,7 +19,7 @@
                         <div class="alert alert-danger shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
                     }
 
-                    <form asp-action="Edit" method="post">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                         <input type="hidden" asp-for="CancionId" />
 
@@ -80,8 +80,21 @@
                             <div class="col-12">
                                 <div class="form-floating">
                                     <textarea asp-for="Letra" class="form-control" placeholder="Letra de la canción" style="height: 120px"></textarea>
-                                    <label asp-for="Letra">Letra</label>
+                                    <label asp-for="Letra">Letra (Exclusivo texto. ¡NO poner acordes aquí!)</label>
                                     <span asp-validation-for="Letra" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group mb-2">
+                                    <label for="FotoFile" class="form-label fw-bold"><i class="bi bi-image me-2"></i>Actualizar Foto del Artista (Opcional)</label>
+                                    @if (!string.IsNullOrEmpty(Model.FotoUrl))
+                                    {
+                                        <div class="mb-3">
+                                            <img src="@Model.FotoUrl" alt="Foto actual" class="img-thumbnail rounded shadow-sm" style="max-height: 120px;" />
+                                        </div>
+                                    }
+                                    <input type="file" name="FotoFile" class="form-control form-control-lg bg-light" accept="image/*" />
+                                    <small class="text-muted">Si subes una nueva imagen, reemplazará a la mostrada actualmente.</small>
                                 </div>
                             </div>
                         </div>
@@ -100,7 +113,7 @@
                                                 <span class="badge bg-secondary">Instrumento: @nota.Instrumento</span>
                                                 <small class="text-muted">Última edición: @nota.UltimaEdicion.ToShortDateString()</small>
                                             </div>
-                                            <textarea name="NotaContenidos" class="form-control font-monospace" style="height: 100px">@nota.Contenido</textarea>
+                                            <textarea name="NotaContenidos" class="form-control font-monospace" style="height: 350px">@nota.Contenido</textarea>
                                         </div>
                                     </div>
                                 }
@@ -124,7 +137,7 @@
                             <div class="col-md-8">
                                 <div class="form-floating">
                                     <textarea name="NewNotaContenido" class="form-control font-monospace" placeholder="Escribe aquí los acordes o tablatura..." style="height: 100px"></textarea>
-                                    <label for="NewNotaContenido">Acordes / Tablatura nueva</label>
+                                    <label for="NewNotaContenido">Acordes / Tablatura nueva (¡Copia LAS NOTAS AQUÍ!)</label>
                                 </div>
                             </div>
                         </div>

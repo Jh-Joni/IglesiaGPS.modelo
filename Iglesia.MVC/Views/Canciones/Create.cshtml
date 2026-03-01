@@ -19,7 +19,7 @@
                         <div class="alert alert-danger shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
                     }
 
-                    <form asp-action="Create" method="post">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <h5 class="text-success border-bottom pb-2 mb-4"><i class="bi bi-info-circle me-2"></i>Información Principal</h5>
@@ -79,8 +79,15 @@
                             <div class="col-12">
                                 <div class="form-floating">
                                     <textarea asp-for="Letra" class="form-control" placeholder="Letra de la canción" style="height: 120px"></textarea>
-                                    <label asp-for="Letra">Letra</label>
+                                    <label asp-for="Letra">Letra (Exclusivo texto. ¡NO poner acordes aquí!)</label>
                                     <span asp-validation-for="Letra" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group mb-2">
+                                    <label for="FotoFile" class="form-label fw-bold"><i class="bi bi-image me-2"></i>Foto del Artista / Banda (Opcional)</label>
+                                    <input type="file" name="FotoFile" class="form-control form-control-lg bg-light" accept="image/*" />
+                                    <small class="text-muted">Sube una imagen para identificar visualmente al autor de la alabanza.</small>
                                 </div>
                             </div>
                         </div>
@@ -98,7 +105,7 @@
                             <div class="col-md-8">
                                 <div class="form-floating">
                                     <textarea name="NotaContenido" class="form-control font-monospace" placeholder="Escribe aquí los acordes..." style="height: 150px"></textarea>
-                                    <label for="NotaContenido">Acordes / Tablatura</label>
+                                    <label for="NotaContenido">Acordes / Tablatura (¡Copia LAS NOTAS AQUÍ!)</label>
                                 </div>
                             </div>
                         </div>

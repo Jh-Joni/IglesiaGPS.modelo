@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 Crud<Rol>.EndPoint = "https://localhost:7220/api/Roles";
 Crud<Usuario>.EndPoint = "https://localhost:7220/api/Usuarios";
 Crud<Cancion>.EndPoint = "https://localhost:7220/api/Canciones";
+Crud<CancionDTO>.EndPoint = "https://localhost:7220/api/Canciones";
 Crud<NotaMusical>.EndPoint = "https://localhost:7220/api/NotasMusicales";
 Crud<ListaCanciones>.EndPoint = "https://localhost:7220/api/ListaCanciones";
 Crud<ListaCancionDetalle>.EndPoint = "https://localhost:7220/api/ListaCancionDetalles";

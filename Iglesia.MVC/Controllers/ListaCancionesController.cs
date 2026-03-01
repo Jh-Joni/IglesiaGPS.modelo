@@ -36,51 +36,60 @@ namespace Iglesia.MVC.Controllers
                 Crud<ListaCanciones>.Create(listaCanciones);
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View("Index", Crud<ListaCanciones>.GetAll());
+                ViewBag.Error = ex.Message;
+                return View(listaCanciones);
             }
         }
 
         // GET: ListaCancionesController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            var modelo = Crud<ListaCanciones>.GetById(id);
+            if (modelo == null) return NotFound();
+            return View(modelo);
         }
 
         // POST: ListaCancionesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, ListaCanciones listaCanciones)
         {
             try
             {
+                Crud<ListaCanciones>.Update(id, listaCanciones);
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ViewBag.Error = ex.Message;
+                return View(listaCanciones);
             }
         }
 
         // GET: ListaCancionesController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var modelo = Crud<ListaCanciones>.GetById(id);
+            if (modelo == null) return NotFound();
+            return View(modelo);
         }
 
         // POST: ListaCancionesController/Delete/5
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult DeleteConfirmed(int id)
         {
             try
             {
+                Crud<ListaCanciones>.Delete(id);
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ViewBag.Error = "No se pudo eliminar: " + ex.Message;
+                return View(Crud<ListaCanciones>.GetById(id));
             }
         }
     }

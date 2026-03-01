@@ -7,13 +7,20 @@ namespace Iglesia.MVC.Controllers
 {
     public class CancionesController : Controller
     {
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        public CancionesController(IWebHostEnvironment webHostEnvironment)
+        {
+            _webHostEnvironment = webHostEnvironment;
+        }
+
         // GET: CancionesController
         public ActionResult Index()
         {
             var lista = Crud<Cancion>.GetAll();
             return View(lista);
         }
-
+                
         // GET: CancionesController/Details/5
         public ActionResult Details(int id)
         {
@@ -45,28 +52,50 @@ namespace Iglesia.MVC.Controllers
         // POST: CancionesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Cancion cancion, string NotaContenido = null, string Instrumento = null)
+        public ActionResult Create(Cancion cancion, IFormFile? FotoFile, string NotaContenido = null, string Instrumento = null)
         {
             try
             {
                 if (cancion.FechaCreacion == default)
-                    cancion.FechaCreacion = DateTime.Now;
+                    cancion.FechaCreacion = DateTime.UtcNow;
+                else
+                    cancion.FechaCreacion = DateTime.SpecifyKind(cancion.FechaCreacion, DateTimeKind.Utc);
 
-                var createdCancion = Crud<Cancion>.Create(cancion);
+                CancionDTO dto = new CancionDTO
+                {
+                    Titulo = cancion.Titulo,
+                    Autor = cancion.Autor,
+                    Tono = cancion.Tono,
+                    UrlAudio = cancion.UrlAudio,
+                    Letra = cancion.Letra,
+                    FechaCreacion = cancion.FechaCreacion,
+                    CreadoPorUsuarioId = cancion.CreadoPorUsuarioId
+                };
 
-                if (createdCancion != null && createdCancion.CancionId > 0 && !string.IsNullOrWhiteSpace(NotaContenido))
+                if (FotoFile != null && FotoFile.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        FotoFile.CopyTo(ms);
+                        dto.FotoBase64 = "data:" + FotoFile.ContentType + ";base64," + Convert.ToBase64String(ms.ToArray());
+                    }
+                }
+
+                var createdDto = Crud<CancionDTO>.Create(dto);
+
+                if (createdDto != null && createdDto.CancionId > 0 && !string.IsNullOrWhiteSpace(NotaContenido))
                 {
                     var nota = new NotaMusical
                     {
-                        CancionId = createdCancion.CancionId,
+                        CancionId = createdDto.CancionId,
                         Contenido = NotaContenido,
                         Instrumento = string.IsNullOrWhiteSpace(Instrumento) ? "General" : Instrumento,
-                        UltimaEdicion = DateTime.Now,
+                        UltimaEdicion = DateTime.UtcNow,
                         EditadoPorUsuarioId = cancion.CreadoPorUsuarioId
                     };
                     Crud<NotaMusical>.Create(nota);
                 }
-
+                    
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -80,21 +109,55 @@ namespace Iglesia.MVC.Controllers
         // GET: CancionesController/Edit/5
         public ActionResult Edit(int id)
         {
-            var cancion = Crud<Cancion>.GetById(id);
-            if (cancion == null) return NotFound();
-            ViewBag.Usuarios = Crud<Usuario>.GetAll();
-            return View(cancion);
+            try
+            {
+                var cancion = Crud<Cancion>.GetById(id);
+                if (cancion == null) return NotFound();
+                ViewBag.Usuarios = Crud<Usuario>.GetAll();
+                return View(cancion);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "No se pudo cargar la canción para edición. Verifica que la API esté conectada: " + ex.Message;
+                return View(new Cancion());
+            }
         }
 
         // POST: CancionesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Cancion cancion, IFormCollection collection)
+        public ActionResult Edit(int id, Cancion cancion, IFormCollection collection, IFormFile? FotoFile)
         {
             try
             {
-                // Actualizar Canción
-                Crud<Cancion>.Update(id, cancion);
+                if (cancion.FechaCreacion != default)
+                {
+                    cancion.FechaCreacion = DateTime.SpecifyKind(cancion.FechaCreacion, DateTimeKind.Utc);
+                }
+
+                CancionDTO dto = new CancionDTO
+                {
+                    CancionId = id,
+                    Titulo = cancion.Titulo,
+                    Autor = cancion.Autor,
+                    Tono = cancion.Tono,
+                    UrlAudio = cancion.UrlAudio,
+                    Letra = cancion.Letra,
+                    FechaCreacion = cancion.FechaCreacion,
+                    CreadoPorUsuarioId = cancion.CreadoPorUsuarioId
+                };
+
+                if (FotoFile != null && FotoFile.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        FotoFile.CopyTo(ms);
+                        dto.FotoBase64 = "data:" + FotoFile.ContentType + ";base64," + Convert.ToBase64String(ms.ToArray());
+                    }
+                }
+
+                // Actualizar Canción usando el DTO
+                Crud<CancionDTO>.Update(id, dto);
 
                 // Actualizar Notas existentes
                 var notaIds = collection["NotaIds"].ToList();
@@ -116,7 +179,7 @@ namespace Iglesia.MVC.Controllers
                             
                             if (modified)
                             {
-                                notaToUpdate.UltimaEdicion = DateTime.Now;
+                                notaToUpdate.UltimaEdicion = DateTime.UtcNow;
                                 Crud<NotaMusical>.Update(nId, notaToUpdate);
                             }
                         }
@@ -133,7 +196,7 @@ namespace Iglesia.MVC.Controllers
                         CancionId = id,
                         Contenido = newNotaContenido,
                         Instrumento = string.IsNullOrWhiteSpace(newInstrumento) ? "General" : newInstrumento,
-                        UltimaEdicion = DateTime.Now,
+                        UltimaEdicion = DateTime.UtcNow,
                         EditadoPorUsuarioId = cancion.CreadoPorUsuarioId
                     };
                     Crud<NotaMusical>.Create(nota);

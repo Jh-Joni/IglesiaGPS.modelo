@@ -47,11 +47,27 @@ namespace IglesiaGPS.Api.Controllers
 
         // PUT: api/Canciones/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCancion(int id, Cancion cancion)
+        public async Task<IActionResult> PutCancion(int id, CancionDTO cancionDto)
         {
-            if (id != cancion.CancionId)
+            if (id != cancionDto.CancionId)
             {
                 return BadRequest();
+            }
+
+            var cancion = await _context.Canciones.FindAsync(id);
+            if (cancion == null) return NotFound();
+
+            cancion.Titulo = cancionDto.Titulo;
+            cancion.Autor = cancionDto.Autor;
+            cancion.Tono = cancionDto.Tono;
+            cancion.UrlAudio = cancionDto.UrlAudio;
+            cancion.Letra = cancionDto.Letra;
+            cancion.FechaCreacion = cancionDto.FechaCreacion;
+            cancion.CreadoPorUsuarioId = cancionDto.CreadoPorUsuarioId;
+
+            if (!string.IsNullOrEmpty(cancionDto.FotoBase64))
+            {
+                cancion.FotoUrl = cancionDto.FotoBase64;
             }
 
             _context.Entry(cancion).State = EntityState.Modified;
@@ -77,8 +93,21 @@ namespace IglesiaGPS.Api.Controllers
 
         // POST: api/Canciones
         [HttpPost]
-        public async Task<ActionResult<Cancion>> PostCancion(Cancion cancion)
+        public async Task<ActionResult<Cancion>> PostCancion(CancionDTO cancionDto)
         {
+            var cancion = new Cancion
+            {
+                CancionId = 0, // Reset ID to prevent duplicate key errors
+                Titulo = cancionDto.Titulo,
+                Autor = cancionDto.Autor,
+                Tono = cancionDto.Tono,
+                UrlAudio = cancionDto.UrlAudio,
+                Letra = cancionDto.Letra,
+                FechaCreacion = cancionDto.FechaCreacion,
+                CreadoPorUsuarioId = cancionDto.CreadoPorUsuarioId,
+                FotoUrl = cancionDto.FotoBase64
+            };
+
             _context.Canciones.Add(cancion);
             await _context.SaveChangesAsync();
 

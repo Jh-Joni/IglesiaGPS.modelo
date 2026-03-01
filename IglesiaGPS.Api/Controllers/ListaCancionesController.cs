@@ -99,6 +99,13 @@ namespace IglesiaGPS.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ListaCanciones>> PostListaCanciones(ListaCanciones lista)
         {
+            // Reset ID to prevent duplicate key errors (23505) if the client sends an existing ID
+            lista.ListaCancionesId = 0;
+            
+            // Clean navigation properties to prevent EF Core from trying to re-insert existing related entities
+            lista.Director = null;
+            lista.Detalles = null;
+
             _context.ListaCanciones.Add(lista);
             await _context.SaveChangesAsync();
 
