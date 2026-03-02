@@ -1,0 +1,125 @@
+@model IglesiaGPS.modelo.ListaCanciones
+
+@{
+    ViewData["Title"] = "Editar Repertorio Semanal";
+    var cancionesDisponibles = ViewBag.CancionesDisponibles as List<IglesiaGPS.modelo.Cancion> ?? new List<IglesiaGPS.modelo.Cancion>();
+    var preSeleccionadas = ViewBag.Seleccionadas as List<int> ?? new List<int>();
+}
+
+<div class="container mt-5">
+    <!-- Encabezado de Edición -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded shadow-sm" style="background-color: #f8f9fa; border-left: 5px solid #0D6845;">
+        <div>
+            <h1 class="display-6 fw-bold text-dark mb-1">Editando Repertorio</h1>
+            <h5 class="text-muted"><i class="bi bi-music-note-list"></i> @Model.Titulo</h5>
+        </div>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary rounded-pill fw-bold">Volver al Inicio</a>
+    </div>
+
+    <!-- Barra de búsqueda -->
+    <div class="row mb-5 justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="search-box position-relative shadow-sm rounded-pill bg-white border p-1 transition-hover">
+                <div class="input-group input-group-lg border-0">
+                    <span class="input-group-text bg-transparent border-0 text-primary ps-4 pe-2">
+                        <i class="bi bi-search fs-4"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control bg-transparent border-0 shadow-none px-2" placeholder="Busca por título o artista..." aria-label="Buscar canciones">
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold" type="button" onclick="document.getElementById('searchInput').focus()">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datos Ocultos para JavaScript -->
+    <input type="hidden" id="listaCancionesId" value="@Model.ListaCancionesId" />
+    <script>
+        // Inyectar el array de preseleccionadas al script de javascript globalmente
+        var preSeleccionadasGlobal = [@string.Join(",", preSeleccionadas)];
+    </script>
+    @Html.AntiForgeryToken()
+
+    <!-- Cuadrícula de Canciones Disponibles -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="cancionesContainer">
+        @foreach (var item in cancionesDisponibles)
+        {
+            <div class="col cancion-card" data-autor="@item.Autor?.ToLower()" data-titulo="@item.Titulo?.ToLower()">
+                <div class="card h-100 border-0 shadow-sm song-panel transition-hover">
+                    <div class="card-body d-flex flex-column text-center p-3">
+                        
+                        <!-- Contenedor del ícono/foto central interactivo -->
+                        <div class="cancion-selector mx-auto mb-3 cancion-img-container" style="cursor: pointer;" >
+                            @if (!string.IsNullOrEmpty(item.FotoUrl))
+                            {
+                                <img src="@item.FotoUrl" class="rounded-circle object-fit-cover shadow-sm cancion-foto" style="width: 70px; height: 70px; border: 2px solid #f8f9fa;" alt="Foto de @item.Autor">
+                            }
+                            else
+                            {
+                                <div class="song-icon bg-light text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto" style="width: 70px; height: 70px;">
+                                    <i class="bi bi-music-note-beamed fs-3 icon-music"></i>
+                                </div>
+                            }
+                            <!-- Etiqueta de orden de selección -->
+                            <div class="seleccion-badge d-none position-absolute top-50 start-50 translate-middle text-white rounded-circle fw-bold fs-4 d-flex align-items-center justify-content-center shadow" style="width: 70px; height: 70px; z-index: 10; background-color: #0D6845;">
+                                <span class="seleccion-numero text-white">X</span>
+                            </div>
+                        </div>
+
+                        <h5 class="card-title fw-bold text-dark text-truncate mb-1" title="@item.Titulo" style="font-size: 1.1rem;">@item.Titulo</h5>
+                        <p class="card-text text-muted mb-3" style="font-size: 0.9rem;">
+                            <i class="bi bi-person-fill"></i> @(string.IsNullOrEmpty(item.Autor) ? "Desconocido" : item.Autor)
+                        </p>
+                        
+                        <div class="mt-auto">
+                            <div class="mb-2 text-start">
+                                <span class="badge bg-primary rounded-pill px-3 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem;">
+                                    Tono: @(string.IsNullOrEmpty(item.Tono) ? "-" : item.Tono)
+                                </span>
+                            </div>
+                            <!-- Meta Boton (Su valor 'data-id' se usa en el javascript para la lógica del arreglo) -->
+                            <div class="d-none">
+                                <button class="btn-ver-notas" data-id="@item.CancionId" data-titulo="@item.Titulo"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Panel Flotante de Actualización (Siempre visible para Administradores) -->
+<div id="panelActualizacion" class="position-fixed bottom-0 start-50 translate-middle-x bg-white p-3 mb-4 rounded-pill shadow-lg d-flex align-items-center" style="z-index: 1050; min-width: 380px; border: 2px solid #0D6845;">
+    <div class="me-auto d-flex align-items-center">
+        <div class="text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background-color: #0D6845;">
+            <span id="contadorActualizadas" class="fw-bold fs-5">0</span>
+        </div>
+        <span class="fw-bold text-dark">Nuevas Seleccionadas<br><small class="text-muted fw-normal" style="font-size:0.75rem;">(Mín 5, Máx 7)</small></span>
+    </div>
+    <button id="btnActualizarLista" class="btn text-white rounded-pill fw-bold px-4 hover-success" style="background-color: #08402A;">
+        <i class="bi bi-arrow-clockwise me-1"></i> Actualizar Repertorio
+    </button>
+</div>
+
+@section Styles {
+    <style>
+        .song-panel {
+            border-radius: 15px;
+            overflow: hidden;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        }
+        .transition-hover {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+        .transition-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+            border-color: #08402A !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/editar-semana.js" asp-append-version="true"></script>
+}

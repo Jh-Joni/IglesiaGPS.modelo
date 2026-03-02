@@ -1,19 +1,20 @@
 @model IglesiaGPS.modelo.ListaCanciones
 
 @{
-    ViewData["Title"] = "Crear Repertorio";
+    ViewData["Title"] = "Editar Repertorio";
     var cancionesDisponibles = ViewBag.CancionesDisponibles as List<IglesiaGPS.modelo.Cancion> ?? new List<IglesiaGPS.modelo.Cancion>();
+    var seleccionadas = ViewBag.Seleccionadas as List<int> ?? new List<int>();
 }
 
 <div class="row justify-content-center mt-4">
     <div class="col-lg-10">
         <div class="card shadow-lg border-0 rounded-4 bg-white" style="background: rgba(255,255,255,0.8) !important; backdrop-filter: blur(10px);">
             <div class="card-header bg-transparent border-0 pt-4 pb-0 text-center">
-                <h2 class="fw-bold mb-0">🎵 Armar Nuevo Repertorio</h2>
-                <p class="text-muted mt-2">Selecciona exactamente entre <strong>5 y 7 canciones</strong> para la semana.</p>
+                <h2 class="fw-bold mb-0">✏️ Editar Repertorio</h2>
+                <p class="text-muted mt-2">Modifica la selección (debe haber entre <strong>5 y 7 canciones</strong>).</p>
             </div>
             <div class="card-body p-4 p-md-5">
-                
+
                 @if (ViewBag.Error != null)
                 {
                     <div class="alert alert-danger shadow-sm rounded-3">
@@ -21,12 +22,13 @@
                     </div>
                 }
 
-                <form asp-action="Create" method="post" id="formRepertorio">
+                <form asp-action="Edit" method="post" id="formRepertorio">
                     @Html.AntiForgeryToken()
-                    
+                    <input type="hidden" asp-for="ListaCancionesId" />
+
                     <div class="mb-4">
                         <label asp-for="Titulo" class="form-label fw-bold">Título del Repertorio</label>
-                        <input asp-for="Titulo" class="form-control form-control-lg rounded-3 shadow-sm bg-light border-0" placeholder="Ej: Servicio Dominical 26-Oct" required />
+                        <input asp-for="Titulo" class="form-control form-control-lg rounded-3 shadow-sm bg-light border-0" required />
                         <span asp-validation-for="Titulo" class="text-danger"></span>
                     </div>
 
@@ -38,9 +40,10 @@
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-4" id="gridCanciones">
                         @foreach (var cancion in cancionesDisponibles)
                         {
+                            bool isChecked = seleccionadas.Contains(cancion.CancionId);
                             <div class="col">
                                 <label class="w-100 h-100">
-                                    <input type="checkbox" name="cancionesSeleccionadas" value="@cancion.CancionId" class="d-none cancion-checkbox" />
+                                    <input type="checkbox" name="cancionesSeleccionadas" value="@cancion.CancionId" class="d-none cancion-checkbox" @(isChecked ? "checked" : "") />
                                     <div class="card h-100 border-2 rounded-3 cursor-pointer cancion-selector transition-hover shadow-sm" style="transition: all 0.3s; cursor: pointer;">
                                         <div class="card-body text-center p-3">
                                             @if (!string.IsNullOrEmpty(cancion.FotoUrl))
@@ -64,7 +67,7 @@
 
                     <div class="d-flex justify-content-between pt-3 border-top mt-5">
                         <a asp-action="Index" class="btn btn-light rounded-pill px-4 fw-bold">Cancelar</a>
-                        <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm" id="btnGuardar">Guardar Repertorio</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm" id="btnGuardar">Guardar Cambios</button>
                     </div>
                 </form>
             </div>
@@ -81,10 +84,10 @@
             const form = document.getElementById('formRepertorio');
 
             function actualizarEstado() {
-                let seleccionadas = document.querySelectorAll('.cancion-checkbox:checked').length;
-                contador.textContent = seleccionadas + " / 7 Seleccionadas";
+                let s = document.querySelectorAll('.cancion-checkbox:checked').length;
+                contador.textContent = s + " / 7 Seleccionadas";
                 
-                if (seleccionadas >= 5 && seleccionadas <= 7) {
+                if (s >= 5 && s <= 7) {
                     contador.className = "badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm";
                 } else {
                     contador.className = "badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm";
@@ -108,8 +111,8 @@
 
             checkboxes.forEach(cb => {
                 cb.addEventListener('change', function() {
-                    let seleccionadas = document.querySelectorAll('.cancion-checkbox:checked').length;
-                    if (seleccionadas > 7) {
+                    let s = document.querySelectorAll('.cancion-checkbox:checked').length;
+                    if (s > 7) {
                         this.checked = false; // Prevent more than 7
                         return;
                     }
@@ -118,14 +121,14 @@
             });
 
             form.addEventListener('submit', function(e) {
-                let seleccionadas = document.querySelectorAll('.cancion-checkbox:checked').length;
-                if (seleccionadas < 5 || seleccionadas > 7) {
+                let s = document.querySelectorAll('.cancion-checkbox:checked').length;
+                if (s < 5 || s > 7) {
                     e.preventDefault();
                     alert("Por favor, selecciona entre 5 y 7 canciones.");
                 }
             });
 
-            // Init
+            // Init call to paint the already checked ones
             actualizarEstado();
         });
     </script>

@@ -3,6 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
+using IglesiaGPS.modelo;
+using Iglesia.Api.consumer;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace Iglesia.MVC.Controllers
 {
@@ -51,55 +56,29 @@ namespace Iglesia.MVC.Controllers
             // Pasar anuncios vigentes
             ViewBag.Anuncios = _anuncios.Values.OrderByDescending(a => a.FechaCreacion).ToList();
 
-            // Traer canciones de la BD y agrupar por semana
+            // Traer el Historial de Repertorios (Máximo 5)
             try
             {
-                var handler = new HttpClientHandler();
-                handler.ServerCertificateCustomValidationCallback = (m, c, ch, e) => true;
-                using var client = new HttpClient(handler);
-                var json = client.GetStringAsync("https://localhost:7220/api/Canciones").Result;
-                var todasCanciones = Newtonsoft.Json.JsonConvert.DeserializeObject<List<IglesiaGPS.modelo.Cancion>>(json)
-                    ?? new List<IglesiaGPS.modelo.Cancion>();
+                var endpoint = $"{Crud<ListaCanciones>.EndPoint}/publicadas";
+                var listas = Crud<ListaCanciones>.GetCustom(endpoint);
 
-                // Agrupar por semana (lunes a domingo)
-                var semanas = todasCanciones
-                    .OrderByDescending(c => c.FechaCreacion)
-                    .GroupBy(c =>
-                    {
-                        // Obtener el lunes de la semana de esta canción
-                        var fecha = c.FechaCreacion.Date;
-                        int diff = (7 + (fecha.DayOfWeek - DayOfWeek.Monday)) % 7;
-                        return fecha.AddDays(-diff);
-                    })
-                    .OrderByDescending(g => g.Key)
-                    .Take(6) // semana actual + 5 pasadas
-                    .Select(g => new SemanaCancion
-                    {
-                        InicioSemana = g.Key,
-                        FinSemana = g.Key.AddDays(6),
-                        // Domingo 7 PM es el corte
-                        DomingoCorte = g.Key.AddDays(6).AddHours(19),
-                        Canciones = g.OrderBy(c => c.FechaCreacion).Take(7).ToList()
-                    })
-                    .ToList();
+                if (listas == null || listas.Count == 0)
+                {
+                    listas = Crud<ListaCanciones>.GetAll()
+                        .OrderByDescending(l => l.FechaCreacion)
+                        .Take(5)
+                        .ToList();
+                }
 
-                ViewBag.SemanasCanciones = semanas;
+                ViewBag.ListasMusicales = listas;
             }
-            catch
+            catch (Exception ex)
             {
-                ViewBag.SemanasCanciones = new List<SemanaCancion>();
+                ViewBag.ListasMusicales = new List<ListaCanciones>();
+                _logger.LogError(ex, "Error al cargar las listas de canciones.");
             }
 
             return View();
-        }
-
-        // Clase para agrupar canciones por semana
-        public class SemanaCancion
-        {
-            public DateTime InicioSemana { get; set; }
-            public DateTime FinSemana { get; set; }
-            public DateTime DomingoCorte { get; set; }
-            public List<IglesiaGPS.modelo.Cancion> Canciones { get; set; } = new();
         }
 
         // POST: /Home/CrearAnuncio
@@ -136,6 +115,97 @@ namespace Iglesia.MVC.Controllers
         {
             _anuncios.TryRemove(id, out _);
             return RedirectToAction("Index");
+        }
+
+        // GET: /Home/DescargarPdfListaActiva/5
+        [HttpGet]
+        public IActionResult DescargarPdfListaActiva(int id)
+        {
+            var lista = Crud<ListaCanciones>.GetById(id);
+            if (lista == null) return NotFound();
+
+            var detalles = lista.Detalles?.OrderBy(d => d.Orden).ToList() ?? new List<ListaCancionDetalle>();
+            var todasLasNotas = Crud<NotaMusical>.GetAll() ?? new List<NotaMusical>();
+
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12));
+
+                    page.Header().Element(ComposeHeader);
+                    page.Content().Element(ComposeContent);
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.CurrentPageNumber();
+                        x.Span(" / ");
+                        x.TotalPages();
+                    });
+
+                    void ComposeHeader(IContainer container)
+                    {
+                        container.Row(row =>
+                        {
+                            row.RelativeItem().Column(column =>
+                            {
+                                column.Item().Text($"Repertorio: {lista.Titulo}").FontSize(20).SemiBold().FontColor(Colors.Blue.Darken2);
+                                column.Item().Text($"Fecha: {lista.FechaCreacion:dd/MM/yyyy}").FontSize(14);
+                            });
+                        });
+                    }
+
+                    void ComposeContent(IContainer container)
+                    {
+                        container.PaddingVertical(1, Unit.Centimetre).Column(column =>
+                        {
+                            foreach (var det in detalles)
+                            {
+                                var cancion = det.Cancion;
+                                if (cancion == null) continue;
+
+                                var notas = todasLasNotas.FirstOrDefault(n => n.CancionId == cancion.CancionId);
+                                
+                                column.Item().PaddingBottom(10).Text(text =>
+                                {
+                                    text.Span($"{cancion.Titulo}").FontSize(16).Bold();
+                                    if (!string.IsNullOrEmpty(cancion.Tono))
+                                    {
+                                        text.Span($" (Tono: {cancion.Tono})").FontSize(14).Italic().FontColor(Colors.Grey.Darken2);
+                                    }
+                                });
+
+                                if (notas != null && !string.IsNullOrWhiteSpace(notas.Contenido))
+                                {
+                                    column.Item().PaddingBottom(20).Text(notas.Contenido).FontSize(12);
+                                }
+                                else
+                                {
+                                    column.Item().PaddingBottom(20).Text("Sin notas registradas.").FontSize(12).Italic().FontColor(Colors.Grey.Medium);
+                                }
+                                
+                                column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                                column.Item().PaddingBottom(15);
+                            }
+                        });
+                    }
+                });
+            });
+
+            try 
+            {
+                var pdfBytes = document.GeneratePdf();
+                return File(pdfBytes, "application/pdf", $"Repertorio_{lista.Titulo.Replace(" ", "_")}.pdf");
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex, "Error al generar el PDF del repertorio.");
+                return RedirectToAction("Index");
+            }
         }
 
         public IActionResult Privacy()

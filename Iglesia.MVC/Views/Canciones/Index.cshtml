@@ -6,7 +6,12 @@
     var usuarioRol = Context.Session.GetString("UsuarioRol");
 }
 
-<div class="container mt-4">
+<div class="container mt-5">
+    @* Un solo token antiforgery para JavaScript *@
+    <form id="antiForgeryForm" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="display-5 fw-bold text-primary mb-0">Repertorio Musical</h1>
         @if (usuarioLogueado != null)
@@ -38,45 +43,55 @@
         {
             <div class="col cancion-card" data-autor="@item.Autor?.ToLower()" data-titulo="@item.Titulo?.ToLower()">
                 <div class="card h-100 border-0 shadow-sm song-panel transition-hover">
-                    <div class="card-body d-flex flex-column text-center p-4">
+                    <div class="card-body d-flex flex-column text-center p-3">
                         
-                        @if (!string.IsNullOrEmpty(item.FotoUrl))
-                        {
-                            <img src="@item.FotoUrl" class="rounded-circle mx-auto mb-3 object-fit-cover shadow-sm" style="width: 80px; height: 80px; border: 3px solid #f8f9fa;" alt="Foto de @item.Autor">
-                        }
-                        else
-                        {
-                            <div class="song-icon bg-light text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px; border: 3px solid #f8f9fa;">
-                                <i class="bi bi-music-note-beamed fs-2"></i>
+                        <!-- Contenedor del ícono/foto central (sirve de botón de selección en JS) -->
+                        <div class="cancion-selector mx-auto mb-3 cancion-img-container" style="cursor: pointer;" >
+                            @if (!string.IsNullOrEmpty(item.FotoUrl))
+                            {
+                                <img src="@item.FotoUrl" class="rounded-circle object-fit-cover shadow-sm cancion-foto" style="width: 70px; height: 70px; border: 2px solid #f8f9fa;" alt="Foto de @item.Autor">
+                            }
+                            else
+                            {
+                                <div class="song-icon bg-light text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto" style="width: 70px; height: 70px;">
+                                    <i class="bi bi-music-note-beamed fs-3 icon-music"></i>
+                                </div>
+                            }
+                            <!-- Etiqueta de orden de selección (Oculta por defecto) -->
+                            <div class="seleccion-badge d-none position-absolute top-50 start-50 translate-middle text-white rounded-circle fw-bold fs-4 d-flex align-items-center justify-content-center shadow" style="width: 70px; height: 70px; z-index: 10; background-color: #0D6845;">
+                                <span class="seleccion-numero">1</span>
                             </div>
-                        }
+                        </div>
 
-                        <h5 class="card-title fw-bold text-dark text-truncate" title="@item.Titulo">@item.Titulo</h5>
-                        <p class="card-text text-muted mb-2">
-                            <i class="bi bi-person-fill me-1"></i> @(string.IsNullOrEmpty(item.Autor) ? "Desconocido" : item.Autor)
+                        <h5 class="card-title fw-bold text-dark text-truncate mb-1" title="@item.Titulo" style="font-size: 1.1rem;">@item.Titulo</h5>
+                        <p class="card-text text-muted mb-3" style="font-size: 0.9rem;">
+                            <i class="bi bi-person-fill"></i> @(string.IsNullOrEmpty(item.Autor) ? "Desconocido" : item.Autor)
                         </p>
                         
-                        <div class="mt-auto pt-3 border-top">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-primary rounded-pill px-3 py-2">
+                        <div class="mt-auto">
+                            <!-- Botón Tono -->
+                            <div class="mb-2 text-start">
+                                <span class="badge bg-primary rounded-pill px-3 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem;">
                                     Tono: @(string.IsNullOrEmpty(item.Tono) ? "-" : item.Tono)
                                 </span>
                             </div>
                             
+                            <!-- Botones Principales -->
                             <div class="d-grid gap-2">
-                                <button class="btn btn-outline-info btn-sm btn-ver-notas fw-semibold" data-id="@item.CancionId" data-titulo="@item.Titulo">
+                                <button class="btn btn-dark btn-sm btn-ver-notas rounded-pill fw-semibold shadow-sm py-2" data-id="@item.CancionId" data-titulo="@item.Titulo" style="background-color: #0d1b2a; border-color: #0d1b2a;">
                                     <i class="bi bi-journal-text me-1"></i> Ver Notas
                                 </button>
-                                <div class="btn-group w-100 mt-1">
+                                
+                                <div class="btn-group w-100 mt-1 shadow-sm rounded-pill overflow-hidden" role="group">
                                     @if (usuarioLogueado != null)
                                     {
-                                        <a asp-action="Edit" asp-route-id="@item.CancionId" class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-pencil"></i> Editar
+                                        <a asp-action="Edit" asp-route-id="@item.CancionId" class="btn btn-dark btn-sm py-2" style="background-color: #0b192c; border-color: #1a2a40; border-right: 1px solid #1a2a40;">
+                                            <i class="bi bi-pencil" style="font-size: 0.8rem;"></i> <span style="font-size: 0.85rem;">Editar</span>
                                         </a>
                                         @if (usuarioRol == "Desarrollador")
                                         {
-                                            <a asp-action="Delete" asp-route-id="@item.CancionId" class="btn btn-outline-danger btn-sm">
-                                                <i class="bi bi-trash"></i> Eliminar
+                                            <a asp-action="Delete" asp-route-id="@item.CancionId" class="btn btn-dark btn-sm py-2" style="background-color: #0b192c; border-color: #1a2a40;">
+                                                <i class="bi bi-trash text-white" style="font-size: 0.8rem;"></i> <span style="font-size: 0.85rem;">Eliminar</span>
                                             </a>
                                         }
                                     }
@@ -113,6 +128,22 @@
     </div>
 </div>
 
+<!-- Panel Flotante de Selección (Solo para Director/Desarrollador) -->
+@if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
+{
+    <div id="panelSeleccion" class="position-fixed bottom-0 start-50 translate-middle-x bg-white p-3 mb-4 rounded-pill shadow-lg d-none align-items-center" style="z-index: 1050; min-width: 350px; border: 2px solid #0D6845;">
+        <div class="me-auto d-flex align-items-center">
+            <div class="text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background-color: #0D6845;">
+                <span id="contadorSeleccionadas" class="fw-bold fs-5">0</span>
+            </div>
+            <span class="fw-bold text-dark">Canciones<br><small class="text-muted fw-normal" style="font-size:0.75rem;">(Mín 5, Máx 7)</small></span>
+        </div>
+        <button id="btnGuardarLista" class="btn text-white rounded-pill fw-bold px-4 hover-success" disabled style="background-color: #08402A;">
+            <i class="bi bi-save me-1"></i> Guardar Lista
+        </button>
+    </div>
+}
+
 @section Styles {
     <style>
         .song-panel {
@@ -140,104 +171,5 @@
 }
 
 @section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Lógica de búsqueda
-            const searchInput = document.getElementById('searchInput');
-            const canciones = document.querySelectorAll('.cancion-card');
-
-            searchInput.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase().trim();
-
-                canciones.forEach(card => {
-                    const autor = card.getAttribute('data-autor') || '';
-                    const titulo = card.getAttribute('data-titulo') || '';
-                    if (autor.includes(searchTerm) || titulo.includes(searchTerm)) {
-                        card.style.display = 'block';
-                        // Pequeña animación
-                        card.style.opacity = '0';
-                        setTimeout(() => card.style.opacity = '1', 50);
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
-
-            // Lógica para el Modal de Notas
-            const btnVerNotas = document.querySelectorAll('.btn-ver-notas');
-            const notasModal = new bootstrap.Modal(document.getElementById('notasModal'));
-            const modalTitle = document.getElementById('notasModalLabel');
-            const modalBody = document.getElementById('notasModalBody');
-
-            btnVerNotas.forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const cancionId = this.getAttribute('data-id');
-                    const titulo = this.getAttribute('data-titulo');
-                    
-                    modalTitle.textContent = 'Notas Musicales: ' + titulo;
-                    modalBody.innerHTML = `
-                        <div class="text-center py-5">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
-                            </div>
-                            <p class="mt-2 text-muted">Obteniendo notas...</p>
-                        </div>
-                    `;
-                    
-                    notasModal.show();
-
-                    try {
-                        // Usamos la URL del MVC local que devuelve las notas para evitar error CORS
-                        const response = await fetch(`/Canciones/GetNotas?id=${cancionId}`);
-                        
-                        if (!response.ok) {
-                            throw new Error('No se pudieron obtener los datos.');
-                        }
-                        
-                        const notas = await response.json();
-
-                        if (!notas || notas.length === 0) {
-                            modalBody.innerHTML = `
-                                <div class="alert alert-info d-flex align-items-center" role="alert">
-                                    <i class="bi bi-info-circle-fill me-2 fs-4"></i>
-                                    <div>No hay notas musicales disponibles para esta canción.</div>
-                                </div>`;
-                            return;
-                        }
-
-                        let notasHtml = '<div class="row g-3">';
-                        notas.forEach((nota, index) => {
-                            const instrumento = nota.instrumento || 'General';
-                            notasHtml += `
-                                <div class="col-12">
-                                    <div class="card border-0 shadow-sm">
-                                        <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                                            <h6 class="text-primary fw-bold mb-0">
-                                                <i class="bi bi-music-note-list me-2"></i>${instrumento}
-                                            </h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <pre class="bg-dark text-light p-3 rounded mb-0" style="white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;">${nota.contenido}</pre>
-                                            <small class="text-muted mt-2 d-block text-end">
-                                                Actualizado: ${new Date(nota.ultimaEdicion).toLocaleDateString()}
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        notasHtml += '</div>';
-                        modalBody.innerHTML = notasHtml;
-
-                    } catch (error) {
-                        modalBody.innerHTML = `
-                            <div class="alert alert-danger d-flex align-items-center" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
-                                <div>Error al cargar las notas: ${error.message}</div>
-                            </div>`;
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="~/js/canciones-index.js" asp-append-version="true"></script>
 }
