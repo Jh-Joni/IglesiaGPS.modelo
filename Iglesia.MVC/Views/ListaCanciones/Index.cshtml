@@ -1,65 +1,102 @@
 @model IEnumerable<IglesiaGPS.modelo.ListaCanciones>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Repertorios Musicales";
+    var usuarioRol = Context.Session.GetString("UsuarioRol");
+    var userId = Context.Session.GetInt32("UsuarioId");
 }
 
-<h1>Index</h1>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold text-primary mb-0">Repertorios Musicales</h1>
+        @if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
+        {
+            <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
+                <i class="bi bi-plus-circle me-2"></i>Armar Nuevo Repertorio
+            </a>
+        }
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ListaCancionesId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Titulo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaPublicacion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaCreacion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Publicada)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DirectorId)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ListaCancionesId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Titulo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaPublicacion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaCreacion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Publicada)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DirectorId)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.ListaCancionesId }) |
-                @Html.ActionLink("Details", "Details", new { id=item.ListaCancionesId }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.ListaCancionesId })
-            </td>
-        </tr>
+    <!-- Barra de búsqueda Elegante -->
+    <div class="row mb-5 justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="search-box position-relative shadow-sm rounded-pill bg-white border p-1 transition-hover">
+                <div class="input-group input-group-lg border-0">
+                    <span class="input-group-text bg-transparent border-0 text-primary ps-4 pe-2">
+                        <i class="bi bi-search fs-4"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control bg-transparent border-0 shadow-none px-2" placeholder="Busca por título o fecha..." aria-label="Buscar">
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold" type="button" onclick="document.getElementById('searchInput').focus()">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Repertorios -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="listasContainer">
+        @foreach (var item in Model)
+        {
+            <div class="col lista-card" data-titulo="@item.Titulo?.ToLower()">
+                <div class="card h-100 border-0 shadow-sm transition-hover" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border-radius: 16px;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="fw-bold mb-0 text-dark">@item.Titulo</h5>
+                            @if (item.Publicada)
+                            {
+                                <span class="badge bg-success rounded-pill px-3 py-1 bg-opacity-10 text-success border border-success">Pública</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary rounded-pill px-3 py-1 bg-opacity-10 text-secondary border border-secondary">Privada</span>
+                            }
+                        </div>
+
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-calendar-event me-1"></i> Creado: @item.FechaCreacion.ToString("dd MMM yyyy")
+                        </p>
+
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            @if (item.Director != null)
+                            {
+                                <span class="text-secondary small fw-bold">Por: @item.Director.Nombre</span>
+                            }
+                            else
+                            {
+                                <span class="text-secondary small fw-bold">Por: Director</span>
+                            }
+
+                            @* Permisos de Editar / Eliminar *@
+                            @if (usuarioRol == "Desarrollador" || (usuarioRol == "Director" && item.DirectorId == userId))
+                            {
+                                <div class="btn-group shadow-sm rounded-pill">
+                                    <a asp-action="Edit" asp-route-id="@item.ListaCancionesId" class="btn btn-sm btn-light border-0 text-primary px-3 rounded-start-pill" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ListaCancionesId" class="btn btn-sm btn-light border-0 text-danger px-3 rounded-end-pill" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="display-1 text-muted mb-3 opacity-25">
+                <i class="bi bi-music-note-list"></i>
+            </div>
+            <h3 class="fw-bold text-muted">Aún no hay repertorios</h3>
+            <p class="text-secondary">Sé el primero en armar la lista de canciones de esta semana.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/listacanciones-index.js" asp-append-version="true"></script>
 }
-    </tbody>
-</table>

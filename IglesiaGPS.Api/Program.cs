@@ -47,6 +47,7 @@ using (var scope = app.Services.CreateScope())
         db.Database.ExecuteSqlRaw("SELECT setval(pg_get_serial_sequence('\"Usuarios\"', 'UsuarioId'), coalesce(max(\"UsuarioId\"), 1), max(\"UsuarioId\") IS NOT null) FROM \"Usuarios\";");
         db.Database.ExecuteSqlRaw("SELECT setval(pg_get_serial_sequence('\"Roles\"', 'RolId'), coalesce(max(\"RolId\"), 1), max(\"RolId\") IS NOT null) FROM \"Roles\";");
         db.Database.ExecuteSqlRaw("SELECT setval(pg_get_serial_sequence('\"NotaMusicales\"', 'NotaMusicalId'), coalesce(max(\"NotaMusicalId\"), 1), max(\"NotaMusicalId\") IS NOT null) FROM \"NotaMusicales\";");
+        db.Database.ExecuteSqlRaw("SELECT setval(pg_get_serial_sequence('\"ListaCancionDetalles\"', 'ListaCancionDetalleId'), coalesce(max(\"ListaCancionDetalleId\"), 1), max(\"ListaCancionDetalleId\") IS NOT null) FROM \"ListaCancionDetalles\";");
     }
     catch (Exception ex)
     {

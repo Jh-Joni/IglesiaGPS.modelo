@@ -24,26 +24,56 @@ namespace IglesiaGPS.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListaCanciones>>> GetListaCanciones()
         {
-            return await _context.ListaCanciones
+            var listas = await _context.ListaCanciones
+                .AsNoTracking()
                 .Include(l => l.Director)
                 .Include(l => l.Detalles)!
                     .ThenInclude(d => d.Cancion)
-                .OrderByDescending(l => l.FechaPublicacion)
+                .OrderByDescending(l => l.FechaCreacion)
                 .ToListAsync();
+
+            foreach(var l in listas)
+            {
+                if(l.Director != null) l.Director.ListasCanciones = null;
+                if(l.Detalles != null)
+                {
+                    foreach(var d in l.Detalles)
+                    {
+                        d.ListaCanciones = null;
+                        if(d.Cancion != null) d.Cancion.ListaCancionDetalles = null;
+                    }
+                }
+            }
+            return listas;
         }
 
         // GET: api/ListaCanciones/publicadas
         [HttpGet("publicadas")]
         public async Task<ActionResult<IEnumerable<ListaCanciones>>> GetPublicadas()
         {
-            return await _context.ListaCanciones
+            var listas = await _context.ListaCanciones
+                .AsNoTracking()
                 .Where(l => l.Publicada)
                 .Include(l => l.Director)
                 .Include(l => l.Detalles)!
                     .ThenInclude(d => d.Cancion)
-                .OrderByDescending(l => l.FechaPublicacion)
+                .OrderByDescending(l => l.FechaCreacion)
                 .Take(5)
                 .ToListAsync();
+
+            foreach(var l in listas)
+            {
+                if(l.Director != null) l.Director.ListasCanciones = null;
+                if(l.Detalles != null)
+                {
+                    foreach(var d in l.Detalles)
+                    {
+                        d.ListaCanciones = null;
+                        if(d.Cancion != null) d.Cancion.ListaCancionDetalles = null;
+                    }
+                }
+            }
+            return listas;
         }
 
         // GET: api/ListaCanciones/5
@@ -52,6 +82,7 @@ namespace IglesiaGPS.Api.Controllers
         {
             var lista = await _context
                 .ListaCanciones
+                .AsNoTracking()
                 .Include(l => l.Director)
                 .Include(l => l.Detalles)
                     .ThenInclude(d => d.Cancion)
@@ -60,6 +91,16 @@ namespace IglesiaGPS.Api.Controllers
             if (lista == null)
             {
                 return NotFound();
+            }
+
+            if(lista.Director != null) lista.Director.ListasCanciones = null;
+            if(lista.Detalles != null)
+            {
+                foreach(var d in lista.Detalles)
+                {
+                    d.ListaCanciones = null;
+                    if(d.Cancion != null) d.Cancion.ListaCancionDetalles = null;
+                }
             }
 
             return lista;
@@ -99,15 +140,27 @@ namespace IglesiaGPS.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ListaCanciones>> PostListaCanciones(ListaCanciones lista)
         {
-            // Reset ID to prevent duplicate key errors (23505) if the client sends an existing ID
+            await using var tx = await _context.Database.BeginTransactionAsync();
+
             lista.ListaCancionesId = 0;
-            
-            // Clean navigation properties to prevent EF Core from trying to re-insert existing related entities
             lista.Director = null;
             lista.Detalles = null;
+            lista.Publicada = true;
+            lista.FechaPublicacion = DateTime.UtcNow;
+
+            var publicadas = await _context.ListaCanciones
+                .Where(l => l.Publicada)
+                .ToListAsync();
+
+            foreach (var publicada in publicadas)
+            {
+                publicada.Publicada = false;
+                publicada.FechaPublicacion = null;
+            }
 
             _context.ListaCanciones.Add(lista);
             await _context.SaveChangesAsync();
+            await tx.CommitAsync();
 
             return CreatedAtAction("GetListaCanciones", new { id = lista.ListaCancionesId }, lista);
         }

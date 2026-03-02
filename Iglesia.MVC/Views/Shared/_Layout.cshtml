@@ -5,37 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Iglesia.MVC</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Iglesia.MVC.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark app-header shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Iglesia.MVC</a>
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-music-note-beamed me-2" style="color: #9d8df1;"></i>Iglesia GPS
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
+                    <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="SolicitudesDirector" asp-action="Index">Solicitud a Director</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Canciones" asp-action="Index">Canciones</a>
+                        </li>
+                        
+                        @{ 
+                            var usuario = Context.Session.GetString("UsuarioNombre"); 
+                            var rol = Context.Session.GetString("UsuarioRol");
+                            
+                            var badgeClass = "bg-secondary"; // Por defecto (Usuario)
+                            var badgeStyle = "";
+                            
+                            if (rol == "Director") 
+                            {
+                                badgeClass = "";
+                                badgeStyle = "background: linear-gradient(135deg, #3C6852, #2B4A3B, #1A2D24); color: white;";
+                            }
+                            else if (rol == "Desarrollador") 
+                            {
+                                badgeClass = "";
+                                badgeStyle = "background: linear-gradient(135deg, #08402A, #0D6845, #53947C, #099A65); color: white;";
+                            }
+                        }
+                        @if (!string.IsNullOrEmpty(usuario))
+                        {
+                            <li class="nav-item d-flex align-items-center me-2">
+                                <span class="badge @badgeClass px-3 py-2 rounded-pill shadow-sm d-flex align-items-center border border-white border-opacity-25" style="font-size: 0.95rem; @badgeStyle">
+                                    <i class="bi bi-person-circle me-2 fs-6"></i> @usuario
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Auth" asp-action="CerrarSesion">Cerrar sesión</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Auth" asp-action="Login">Iniciar sesión</a>
+                            </li>
+                        }
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Acerca</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main">
             @RenderBody()
         </main>
-    </div>
 
     <footer class="border-top footer text-muted">
         <div class="container">
