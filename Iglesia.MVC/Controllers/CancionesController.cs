@@ -18,6 +18,14 @@ namespace Iglesia.MVC.Controllers
         public ActionResult Index()
         {
             var lista = Crud<Cancion>.GetAll();
+            
+            // Lógica de Recomendaciones
+            string? userIdStr = HttpContext.Session.GetString("UsuarioId");
+            int usuarioId = string.IsNullOrEmpty(userIdStr) ? 0 : int.Parse(userIdStr);
+            
+            var todasRecomendaciones = Crud<Recomendacion>.GetAll() ?? new List<Recomendacion>();
+            ViewBag.Recomendadas = todasRecomendaciones.Where(r => r.UsuarioId == usuarioId).Select(r => r.CancionId).ToList();
+            
             return View(lista);
         }
                 

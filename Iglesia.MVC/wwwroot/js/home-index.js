@@ -69,3 +69,21 @@ document.addEventListener('DOMContentLoaded', function () {
         observer.observe(el);
     });
 });
+
+// ===== ALTERNAR DOMINGO VS MIÉRCOLES =====
+window.switchTab = function (index, tabId) {
+    // Referencias a Paneles de Canciones
+    var gridDom = document.getElementById('grid-domingo-' + index);
+    var gridMie = document.getElementById('grid-miercoles-' + index);
+
+    if (tabId === 'domingo') {
+        // MOSTRAR DOMINGO
+        if (gridDom) gridDom.classList.remove('d-none');
+        if (gridMie) gridMie.classList.add('d-none');
+    }
+    else if (tabId === 'miercoles') {
+        // MOSTRAR MIÉRCOLES
+        if (gridMie) gridMie.classList.remove('d-none');
+        if (gridDom) gridDom.classList.add('d-none');
+    }
+};

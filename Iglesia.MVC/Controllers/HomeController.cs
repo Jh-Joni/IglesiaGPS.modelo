@@ -78,6 +78,17 @@ namespace Iglesia.MVC.Controllers
                 _logger.LogError(ex, "Error al cargar las listas de canciones.");
             }
 
+            // Notificación de Recomendaciones para Directores/Desarrolladores
+            try
+            {
+                var recomendaciones = Crud<Recomendacion>.GetAll();
+                ViewBag.TotalRecomendacionesPendientes = recomendaciones != null ? recomendaciones.Count : 0;
+            }
+            catch (Exception)
+            {
+                ViewBag.TotalRecomendacionesPendientes = 0;
+            }
+
             return View();
         }
 

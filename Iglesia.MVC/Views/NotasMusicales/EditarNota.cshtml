@@ -3,31 +3,244 @@
     ViewData["Title"] = "Editar Notas: " + ViewBag.CancionTitulo;
 }
 
-<div class="container mt-5 mb-5">
-    <h2 class="text-primary">Editando notas de: <span class="text-dark">@ViewBag.CancionTitulo</span></h2>
-    <hr />
-
-    <div class="card shadow p-4" style="border-radius: 12px; border-left: 5px solid #d4af37;">
-        <form asp-action="EditarNota" asp-route-id="@Model.CancionId" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="CancionId" />
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-lg-10">
+        <!-- Contendor entrada principal -->
+        <div class="neo-main-panel shadow-lg border-0 rounded-4 overflow-hidden position-relative sys-boot-glitch" style="border: 1px solid rgba(255, 61, 0, 0.4) !important;">
             
-            <div class="form-group mb-4">
-                <label asp-for="Contenido" class="control-label fw-bold mb-2 text-secondary">Escribe o pega las notas (acordes y letras) de la canción:</label>
-                <textarea asp-for="Contenido" class="form-control" rows="18" style="font-family: 'Courier New', Courier, monospace; font-size: 16px; border: 2px solid #e8e8e8; border-radius: 8px; padding: 15px;" placeholder="Ejemplo:
+            <!-- Barra superior del monitor -->
+            <div class="neo-header-bar p-3 d-flex justify-content-between align-items-center" style="background: rgba(10, 11, 16, 0.9); border-bottom: 2px solid var(--cyber-orange);">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-terminal-fill fs-4" style="color: var(--cyber-orange);"></i>
+                    <span class="fw-bold" style="color: var(--cyber-orange); font-family: monospace; letter-spacing: 2px; font-size: 1.1rem;">
+                        TERM_EDIT: <span style="color: #ffffff;">[@ViewBag.CancionTitulo]</span>
+                    </span>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span id="typing-status" class="badge" style="background: transparent; color: #64748b; font-family: monospace; transition: color 0.2s;">
+                        ESPERANDO_INPUT...
+                    </span>
+                    <div class="status-dot" style="width: 10px; height: 10px; border-radius: 50%; background-color: #64748b; box-shadow: 0 0 5px #64748b;"></div>
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-md-5 position-relative" style="background: var(--cyber-panel);">
+                
+                <form asp-action="EditarNota" asp-route-id="@Model.CancionId" method="post" id="hacker-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="CancionId" />
+                    
+                    <div class="form-group mb-5 position-relative">
+                        <label asp-for="Contenido" class="control-label fw-bold mb-3 d-flex align-items-center" style="color: var(--cyber-teal); font-family: monospace; font-size: 1.1rem;">
+                            <i class="bi bi-braces me-2 fs-4"></i> Inserte secuencias de acordes y letras:
+                        </label>
+                        
+                        <!-- Wrapper interactivo del textarea -->
+                        <div id="terminal-wrapper" class="position-relative focus-ring-container rounded-3 overflow-hidden p-1" style="background: var(--cyber-bg); border: 2px solid rgba(29, 233, 182, 0.2); transition: all 0.1s ease;">
+                            
+                            <!-- Borde de animacion (Ping) -->
+                            <div id="ping-border" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid transparent; border-radius: inherit; pointer-events: none; opacity: 0;"></div>
+                            
+                            <textarea asp-for="Contenido" id="cyber-textarea" class="form-control" rows="20" 
+                                style="background: transparent !important; color: #1de9b6; font-family: 'Space Mono', 'Courier New', monospace; font-size: 16px; border: none; padding: 20px; box-shadow: none; outline: none !important; resize: vertical;" 
+                                spellcheck="false"
+                                placeholder="> INSERTE CÓDIGO AQUÍ...
+Ejemplo:
 G          D
 Way maker, miracle worker..."></textarea>
-                <span asp-validation-for="Contenido" class="text-danger mt-1"></span>
+                        </div>
+                        <span asp-validation-for="Contenido" class="text-danger mt-2 font-monospace d-block" style="text-shadow: 0 0 5px rgba(255,0,0,0.5);"></span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center pt-4 border-top" style="border-color: rgba(255, 61, 0, 0.2) !important;">
+                        <a asp-action="VerNotas" asp-route-id="@Model.CancionId" class="btn neo-btn-outline-danger rounded-pill px-4 fw-bold">
+                            <i class="bi bi-x-octagon me-2"></i>ABORTAR
+                        </a>
+
+                        <button type="submit" class="btn neo-btn-orange-solid rounded-pill px-5 py-3 fw-bold shadow-lg" style="letter-spacing: 2px; font-size: 1.1rem;">
+                            <i class="bi bi-database-down me-2"></i>SOBRESCRIBIR SISTEMA
+                        </button>
+                    </div>
+                </form>
             </div>
-            
-            <div class="form-group mt-2">
-                <button type="submit" class="btn btn-primary px-4 py-2" style="background-color: #0a1f44; border:none; font-weight: 600;">💾 Guardar Cambios</button>
-                <a asp-action="VerNotas" asp-route-id="@Model.CancionId" class="btn btn-outline-secondary px-4 py-2 ms-2">Cancelar</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
+@section Styles {
+    <style>
+        :root {
+            --cyber-bg: #050608;
+            --cyber-panel: #0d1117;
+            --cyber-orange: #ff3d00;
+            --cyber-teal: #1de9b6;
+        }
+        
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        /* Glitch en arranque */
+        .sys-boot-glitch {
+            animation: sysBoot 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+
+        @@keyframes sysBoot {
+            0% { opacity: 0; transform: scale(0.98) translateY(20px); filter: blur(10px); }
+            40% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+            42% { opacity: 0.8; transform: translateX(5px); }
+            44% { opacity: 1; transform: translateX(-5px); }
+            46% { opacity: 0.9; transform: translateX(0); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        /* Área de Texto Hacker */
+        #cyber-textarea:focus {
+            box-shadow: none !important;
+            border: none !important;
+            background: rgba(29, 233, 182, 0.02) !important; /* Leve fondo verde al escribir */
+        }
+
+        #cyber-textarea::placeholder {
+            color: rgba(29, 233, 182, 0.3);
+            text-shadow: none;
+        }
+        
+        /* Custom scrollbar para texarea */
+        #cyber-textarea::-webkit-scrollbar {
+            width: 10px;
+        }
+        #cyber-textarea::-webkit-scrollbar-track {
+            background: var(--cyber-bg);
+            border-left: 1px solid rgba(29, 233, 182, 0.2);
+        }
+        #cyber-textarea::-webkit-scrollbar-thumb {
+            background: rgba(29, 233, 182, 0.4);
+            border-radius: 5px;
+        }
+        #cyber-textarea::-webkit-scrollbar-thumb:hover {
+            background: var(--cyber-teal);
+        }
+
+        /* Pulsación de interacción JavaScript */
+        .ping-active {
+            box-shadow: 0 0 20px rgba(29, 233, 182, 0.4) !important;
+            border-color: var(--cyber-teal) !important;
+        }
+        
+        .ping-flash {
+            animation: borderFlash 0.3s ease-out;
+        }
+
+        @@keyframes borderFlash {
+            0% { opacity: 1; border-color: #ffffff; box-shadow: 0 0 30px #ffffff, inset 0 0 20px #ffffff; }
+            100% { opacity: 0; border-color: transparent; box-shadow: none; }
+        }
+
+        /* Botones */
+        .neo-btn-outline-danger {
+            color: #94a3b8 !important;
+            border: 1px solid rgba(255, 61, 0, 0.3) !important;
+            background: transparent;
+            transition: all 0.3s;
+        }
+        .neo-btn-outline-danger:hover {
+            color: #ffffff !important;
+            background: rgba(255, 61, 0, 0.2);
+            border-color: var(--cyber-orange) !important;
+            box-shadow: 0 0 15px rgba(255, 61, 0, 0.4);
+        }
+
+        .neo-btn-orange-solid {
+            background-color: rgba(255, 61, 0, 0.1) !important;
+            color: var(--cyber-orange) !important;
+            border: 1px solid var(--cyber-orange) !important;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Efecto scanline en botón guardar */
+        .neo-btn-orange-solid::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 61, 0, 0.4), transparent);
+            transition: all 0.5s;
+        }
+        .neo-btn-orange-solid:hover {
+            background-color: var(--cyber-orange) !important;
+            color: #000 !important;
+            box-shadow: 0 0 30px rgba(255, 61, 0, 0.6);
+            transform: scale(1.02);
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        .neo-btn-orange-solid:hover::before {
+            left: 100%;
+        }
+    </style>
+}
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('cyber-textarea');
+            const wrapper = document.getElementById('terminal-wrapper');
+            const pingBorder = document.getElementById('ping-border');
+            const statusText = document.getElementById('typing-status');
+            const statusDot = document.querySelector('.status-dot');
+            
+            let typingTimer;
+            const doneTypingInterval = 1000; // 1 segundo sin tocar nada = inactivo
+
+            // Efecto Visual al escribir (Keypress Ping)
+            textarea.addEventListener('input', function() {
+                // Reiniciar Timer flash
+                clearTimeout(typingTimer);
+                
+                // Efecto borde Matrix Flash (Ping visual)
+                // Removemos la clase de animacion anterior por si teclea rápido, forzando recomenzar
+                pingBorder.classList.remove('ping-flash');
+                void pingBorder.offsetWidth; // trigea un reflow
+                pingBorder.classList.add('ping-flash');
+                
+                // Actualizar estatus arriba
+                statusText.innerText = "RECIBIENDO_DATOS...";
+                statusText.style.color = "var(--cyber-teal)";
+                statusText.style.textShadow = "0 0 8px var(--cyber-teal)";
+                
+                statusDot.style.backgroundColor = "var(--cyber-teal)";
+                statusDot.style.boxShadow = "0 0 10px var(--cyber-teal)";
+                
+                wrapper.classList.add('ping-active');
+
+                // Si deja de escribir...
+                typingTimer = setTimeout(function() {
+                    statusText.innerText = "ESPERANDO_INPUT...";
+                    statusText.style.color = "#64748b";
+                    statusText.style.textShadow = "none";
+                    
+                    statusDot.style.backgroundColor = "#64748b";
+                    statusDot.style.boxShadow = "0 0 5px #64748b";
+                    
+                    wrapper.classList.remove('ping-active');
+                }, doneTypingInterval);
+            });
+            
+            // Foco inicial
+            textarea.addEventListener('focus', function() {
+                wrapper.style.borderColor = "var(--cyber-teal)";
+                wrapper.style.boxShadow = "0 0 15px rgba(29, 233, 182, 0.2)";
+            });
+            
+            textarea.addEventListener('blur', function() {
+                wrapper.style.borderColor = "rgba(29, 233, 182, 0.2)";
+                wrapper.style.boxShadow = "none";
+            });
+        });
+    </script>
 }

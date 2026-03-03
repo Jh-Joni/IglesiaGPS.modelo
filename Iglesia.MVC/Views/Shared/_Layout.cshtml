@@ -35,11 +35,10 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Canciones" asp-action="Index">Canciones</a>
                         </li>
-                        
                         @{ 
                             var usuario = Context.Session.GetString("UsuarioNombre"); 
                             var rol = Context.Session.GetString("UsuarioRol");
-                            
+                        
                             var badgeClass = "bg-secondary"; // Por defecto (Usuario)
                             var badgeStyle = "";
                             
@@ -53,6 +52,15 @@
                                 badgeClass = "";
                                 badgeStyle = "background: linear-gradient(135deg, #08402A, #0D6845, #53947C, #099A65); color: white;";
                             }
+                        }
+                        
+                        @if (rol == "Director" || rol == "Desarrollador")
+                        {
+                            <li class="nav-item text-warning">
+                                <a class="nav-link fw-bold" asp-area="" asp-controller="Recomendaciones" asp-action="Index" style="color: #ffaa00;">
+                                    <i class="bi bi-star-fill"></i> Recomendadas
+                                </a>
+                            </li>
                         }
                         @if (!string.IsNullOrEmpty(usuario))
                         {

@@ -215,5 +215,95 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.disabled = false;
             }
         });
+
+        // ----------------------------------------------------
+        // Lector de Parámetro 'seleccionar' (Recomendaciones)
+        // ----------------------------------------------------
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoSelectId = urlParams.get('seleccionar');
+        if (autoSelectId) {
+            // Retirar de la URL limpiamente
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            // Localizar y dar Click a la Tarjeta correspondiente
+            setTimeout(() => {
+                const btnRef = document.querySelector(`.btn-ver-notas[data-id="${autoSelectId}"]`);
+                if (btnRef) {
+                    const selectorPanel = btnRef.closest('.card-body').querySelector('.cancion-selector');
+                    if (selectorPanel) {
+                        // Scroll visual
+                        selectorPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Simular Selección
+                        selectorPanel.click();
+
+                        // Efecto Destello Cyberpunk (Verde Confirmación)
+                        const panelTarjeta = btnRef.closest('.song-panel');
+                        const vTransition = panelTarjeta.style.transition;
+                        panelTarjeta.style.transition = 'all 0.4s';
+                        panelTarjeta.style.boxShadow = '0 0 35px rgba(29, 233, 182, 0.9)';
+                        panelTarjeta.style.borderColor = 'rgba(29, 233, 182, 1)';
+
+                        setTimeout(() => {
+                            panelTarjeta.style.boxShadow = '';
+                            panelTarjeta.style.transition = vTransition; // restaurar
+                        }, 1800);
+                    }
+                }
+            }, 600);
+        }
+    }
+
+    // ---- 4. Lógica de Sistema de Recomendaciones (Cyberpunk) ----
+    const botonesRecomendar = document.querySelectorAll('.btn-recomendar');
+    if (botonesRecomendar.length > 0) {
+        botonesRecomendar.forEach(btn => {
+            btn.addEventListener('click', async function (e) {
+                e.preventDefault();
+                const cancionId = this.getAttribute('data-cancion-id');
+                const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]')?.value || '';
+
+                // Animación de Carga
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ENVIANDO...';
+                this.disabled = true;
+                this.style.background = 'rgba(255, 61, 0, 0.3)';
+                this.style.color = '#ffffff';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('cancionId', cancionId);
+
+                    const response = await fetch('/Recomendaciones/AjaxRecomendar', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'RequestVerificationToken': token
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Animación Éxito Cyberpunk
+                        this.innerHTML = '<i class="bi bi-star-fill"></i> Recomendada';
+                        this.style.background = 'rgba(29, 233, 182, 0.1)';
+                        this.style.borderColor = 'var(--cyber-teal)';
+                        this.style.color = 'var(--cyber-teal)';
+                        this.style.boxShadow = '0 0 10px rgba(29,233,182,0.3)';
+                        this.classList.remove('btn-recomendar');
+                    } else {
+                        // Restaurar en caso de error
+                        this.innerHTML = '<i class="bi bi-star"></i> Recomendar';
+                        this.disabled = false;
+                        this.style.background = 'rgba(255, 61, 0, 0.1)';
+                        this.style.color = '#ff3d00';
+                        alert('Respuesta Denegada del Servidor Central.');
+                    }
+                } catch (error) {
+                    this.innerHTML = '<i class="bi bi-star"></i> Recomendar';
+                    this.disabled = false;
+                    this.style.background = 'rgba(255, 61, 0, 0.1)';
+                    this.style.color = '#ff3d00';
+                    alert('Fallo de conexión en la Red.');
+                }
+            });
+        });
     }
 });

@@ -1,67 +1,266 @@
 @model IEnumerable<IglesiaGPS.modelo.Recomendacion>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Panel de Recomendaciones";
 }
 
-<div class="container mt-5">
-<h1>Index</h1>
+<div class="container mt-5 mb-5">
+    
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold mb-0" style="color: #ffffff; text-shadow: 0 0 15px rgba(255, 170, 0, 0.4); letter-spacing: -1px;">
+                <i class="bi bi-broadcast me-2" style="color: #ffaa00; text-shadow: 0 0 10px #ffaa00;"></i>Señales de Adoración
+            </h1>
+            <p class="mt-2 mb-0" style="color: #94a3b8; font-size: 1.1rem;">
+                Transmisiones de peticiones musicales de los usuarios del sistema.
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <span class="badge rounded-pill px-4 py-3 shadow-sm" style="background: rgba(255, 170, 0, 0.1); border: 1px solid rgba(255, 170, 0, 0.5); color: #ffaa00; font-family: monospace; font-size: 1rem;">
+                <i class="bi bi-activity me-2"></i>TOTAL: @Model.Count()
+            </span>
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.RecomendacionId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UsuarioId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CancionId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Mensaje)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaRecomendacion)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Leida)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.RecomendacionId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UsuarioId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CancionId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Mensaje)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaRecomendacion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Leida)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { id=item.RecomendacionId }) |
-                @Html.ActionLink("Details", "Details", new { id=item.RecomendacionId }) |
-                @Html.ActionLink("Delete", "Delete", new { id=item.RecomendacionId })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    @if (!Model.Any())
+    {
+        <!-- Empty State -->
+        <div class="neo-main-panel text-center py-5 shadow-lg border-0" style="border-radius: 15px; border-top: 4px solid var(--cyber-teal) !important;">
+            <i class="bi bi-radar text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
+            <h3 class="mt-4 fw-bold" style="color: #ffffff;">SIN SEÑAL</h3>
+            <p class="text-muted fs-5">No se detectan recomendaciones en los servidores de la congregación actualmente.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-lg position-relative neo-recom-card" style="background: rgba(10, 11, 16, 0.85); border: 1px solid rgba(255, 170, 0, 0.2); border-radius: 12px; overflow: hidden; backdrop-filter: blur(10px);">
+                        
+                        <!-- LÍNEA DE COLOR SUPERIOR -->
+                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #ffaa00, transparent);"></div>
+
+                        <div class="card-header bg-transparent border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 40px; height: 40px; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.4); color: #00e5ff;">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h6 class="mb-0 fw-bold" style="color: #e2e8f0; font-family: monospace;">Usuario_@(item.UsuarioId)</h6>
+                                    <span style="color: #00e5ff; font-size: 0.85rem; text-shadow: 0 0 5px rgba(0, 229, 255, 0.4);">
+                                        @(item.Usuario != null ? item.Usuario.Nombre : "Desconocido")
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Fecha Cyberpunk -->
+                            <div class="text-end">
+                                <small class="d-block" style="color: #64748b; font-family: 'Space Mono', monospace; font-size: 0.75rem;">CAPTURA:</small>
+                                <span class="badge" style="background: #1e293b; color: #94a3b8; border: 1px solid #334155;">
+                                    @item.FechaRecomendacion.ToString("dd/MM/yy HH:mm")
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="p-3 rounded mb-3" style="background: rgba(255, 255, 255, 0.03); border-left: 3px solid #ffaa00;">
+                                <h5 class="fw-bold mb-1" style="color: #ffffff;">@(item.Cancion != null ? item.Cancion.Titulo : "Canción no encontrada")</h5>
+                                <p class="mb-0" style="color: #94a3b8; font-size: 0.9rem;">
+                                    <i class="bi bi-music-note"></i> Autor: @(item.Cancion != null ? item.Cancion.Autor : "-")
+                                </p>
+                            </div>
+                            
+                            <!-- Eliminar mensaje, poner Ver Notas -->
+                            <div class="mt-3 text-center">
+                                <button class="btn btn-sm w-100 rounded-pill fw-bold btn-ver-notas" data-id="@item.CancionId" data-titulo="@item.Cancion?.Titulo" style="background: rgba(29, 233, 182, 0.1); border: 1px dashed var(--cyber-teal); color: var(--cyber-teal); transition: all 0.3s;">
+                                    <i class="bi bi-music-note-list me-2"></i>VER NOTAS
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent border-top-0 pb-4 pt-0 text-center">
+                            @if (item.Cancion != null)
+                            {
+                                <div class="d-grid gap-2">
+                                    <a href="/Recomendaciones/AceptarRecomendacion/@item.RecomendacionId" class="btn btn-sm neo-btn-accept rounded-pill fw-bold pt-2 pb-2">
+                                        <i class="bi bi-check-circle-fill me-1"></i> ACEPTAR RECOMENDACIÓN
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
+
+@section Styles {
+    <style>
+        :root {
+            --cyber-bg: #050608;
+            --cyber-panel: #0d1117;
+            --cyber-teal: #1de9b6;
+        }
+        
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        .neo-recom-card {
+            transition: all 0.3s ease;
+        }
+        
+        .neo-recom-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 170, 0, 0.1) !important;
+            border-color: rgba(255, 170, 0, 0.5) !important;
+        }
+
+        .neo-btn-outline-info {
+            color: #00e5ff !important;
+            border: 1px solid rgba(0, 229, 255, 0.3) !important;
+            background: rgba(0, 229, 255, 0.05);
+            transition: all 0.3s;
+        }
+        .neo-btn-outline-info:hover {
+            background: rgba(0, 229, 255, 0.2);
+            border-color: #00e5ff !important;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+            color: #ffffff !important;
+        }
+
+        .neo-btn-accept {
+            color: #000 !important;
+            background: var(--cyber-teal);
+            border: 1px solid var(--cyber-teal) !important;
+            transition: all 0.3s;
+        }
+        .neo-btn-accept:hover {
+            box-shadow: 0 0 15px rgba(29, 233, 182, 0.6);
+            transform: scale(1.02);
+            background: #20ffc9;
+        }
+        
+        .footer {
+            background-color: var(--cyber-bg) !important;
+            border-top: 1px solid rgba(255, 170, 0, 0.2) !important;
+            color: #475569 !important;
+        }
+        .footer a {
+            color: #ffaa00 !important;
+            text-decoration: none;
+        }
+        
+        /* Efecto hover extra para el btn ver notas */
+        .btn-ver-notas:hover {
+            background: rgba(29, 233, 182, 0.2) !important;
+            box-shadow: 0 0 10px rgba(29, 233, 182, 0.4);
+            color: #ffffff !important;
+        }
+    </style>
+}
+
+<!-- Modal para Notas Musicales -->
+<div class="modal fade" id="notasModal" tabindex="-1" aria-labelledby="notasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="background: #1e293b;">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold text-white shadow-sm" id="notasModalLabel" style="text-shadow: 0 0 10px rgba(0,242,254,0.3);">Notas Musicales</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="notasModalBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnVerNotas = document.querySelectorAll('.btn-ver-notas');
+            const modalElement = document.getElementById('notasModal');
+
+            if (btnVerNotas.length > 0 && modalElement) {
+                const notasModal = new bootstrap.Modal(modalElement);
+                const modalTitle = document.getElementById('notasModalLabel');
+                const modalBody = document.getElementById('notasModalBody');
+
+                btnVerNotas.forEach(btn => {
+                    btn.addEventListener('click', async function (e) {
+                        e.stopPropagation();
+                        const cancionId = this.getAttribute('data-id');
+                        const titulo = this.getAttribute('data-titulo');
+
+                        modalTitle.textContent = 'Notas Musicales: ' + titulo;
+                        modalBody.innerHTML = `
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-info" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Acesando base de datos...</p>
+                            </div>
+                        `;
+
+                        notasModal.show();
+
+                        try {
+                            const response = await fetch('/Canciones/GetNotas?id=' + cancionId);
+                            if (!response.ok) throw new Error('No se pudieron obtener los datos.');
+                            const notas = await response.json();
+
+                            if (!notas || notas.length === 0) {
+                                modalBody.innerHTML = `
+                                    <div class="alert alert-info d-flex align-items-center bg-transparent border-info text-info" role="alert">
+                                        <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                                        <div>No hay datos de partitura o notas grabados.</div>
+                                    </div>`;
+                                return;
+                            }
+
+                            let notasHtml = '<div class="row g-3">';
+                            notas.forEach((nota) => {
+                                const instrumento = nota.instrumento || 'General';
+                                notasHtml += `
+                                    <div class="col-12">
+                                        <div class="card border-0 bg-dark shadow-sm">
+                                            <div class="card-header border-bottom-0 pt-3 pb-0" style="background:#000;">
+                                                <h6 class="fw-bold mb-0" style="color:#00e5ff;">
+                                                    <i class="bi bi-music-note-list me-2"></i>${instrumento}
+                                                </h6>
+                                            </div>
+                                            <div class="card-body" style="background:#111;">
+                                                <pre class="text-light p-3 rounded mb-0" style="white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; background:rgba(255,255,255,0.02);">${nota.contenido}</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            notasHtml += '</div>';
+                            modalBody.innerHTML = notasHtml;
+
+                        } catch (error) {
+                            modalBody.innerHTML = `
+                                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
+                                    <div>Error al cargar las notas: ${error.message}</div>
+                                </div>`;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}
