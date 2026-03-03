@@ -24,7 +24,7 @@ namespace IglesiaGPS.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuario()
         {
-            return await _context.Usuarios.ToListAsync();
+            return await _context.Usuarios.Include(u => u.Rol).ToListAsync();
         }
 
         // GET: api/Usuarios/5

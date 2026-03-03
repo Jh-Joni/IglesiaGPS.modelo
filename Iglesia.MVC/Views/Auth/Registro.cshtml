@@ -8,258 +8,281 @@
     <meta charset="UTF-8">
     <title>Crear Cuenta – Iglesia GPS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="~/imagen/logosinfondo.png" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Raleway', sans-serif;
+            background-color: #2d3250;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #0a1f44 0%, #1a3a6c 50%, #0a1f44 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 60% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 20% 70%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
-            animation: float 15s ease-in-out infinite;
-        }
-
-        @@keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(1deg); }
-            66% { transform: translate(-20px, 20px) rotate(-1deg); }
+            color: #ffffff;
+            padding: 20px;
         }
 
         .auth-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 45px 40px;
+            display: flex;
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 1;
-            animation: slideUp 0.6s ease-out;
+            max-width: 900px;
+            height: 570px; /* Un poco más alto por los campos extra */
+            background: #424769;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.8s ease-out;
         }
 
-        @@keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .auth-logo {
-            text-align: center;
-            margin-bottom: 25px;
+        /* ----- PANEL IZQUIERDO (Formulario) ----- */
+        .auth-panel-form {
+            flex: 1;
+            padding: 40px 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow-y: auto;
         }
 
-        .auth-logo .icon {
-            font-size: 42px;
-            display: block;
-            margin-bottom: 8px;
+        /* Ocultar barra de scroll interna en webkit para más elegancia */
+        .auth-panel-form::-webkit-scrollbar { display: none; }
+        .auth-panel-form { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .auth-tabs {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
         }
 
-        .auth-logo h1 {
-            color: #0a1f44;
-            font-size: 24px;
+        .auth-tabs a {
+            text-decoration: none;
+            color: #676f9d;
+            font-size: 14px;
+            font-weight: 600;
+            padding-bottom: 5px;
+            transition: 0.3s;
+        }
+
+        .auth-tabs a.active {
+            color: #ffffff;
+            border-bottom: 2px solid #f9b17a;
+        }
+
+        .auth-tabs a:hover:not(.active) {
+            color: #ffffff;
+        }
+
+        .auth-titles h1 {
+            font-size: 30px; /* Ligeramente más pequeño para caber */
             font-weight: 700;
+            margin-bottom: 5px;
         }
 
-        .auth-logo p {
-            color: #888;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #0a1f44;
-            font-weight: 500;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 13px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            outline: none;
-            background: #fafafa;
-        }
-
-        .form-group input:focus {
-            border-color: #d4af37;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+        .auth-titles p {
+            font-size: 13px;
+            color: #ffffff;
+            opacity: 0.8;
+            margin-bottom: 25px;
         }
 
         .form-row {
             display: flex;
             gap: 15px;
+            margin-bottom: 15px;
         }
 
         .form-row .form-group {
             flex: 1;
+            margin-bottom: 0;
         }
 
-        .btn-primary-auth {
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-group label {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 10px;
+            color: #676f9d;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+        }
+
+        .form-group input {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #0a1f44, #1a3a6c);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-        }
-
-        .btn-primary-auth:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(10, 31, 68, 0.3);
-        }
-
-        .btn-primary-auth:active {
-            transform: translateY(0);
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 22px;
-            color: #888;
+            background: #53587d;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 24px 15px 10px 15px;
+            color: #ffffff;
+            font-family: 'Raleway', sans-serif;
             font-size: 14px;
-        }
-
-        .auth-footer a {
-            color: #d4af37;
-            text-decoration: none;
             font-weight: 600;
+            outline: none;
             transition: 0.3s;
         }
 
-        .auth-footer a:hover {
-            color: #b8942e;
-            text-decoration: underline;
+        .form-group input::placeholder {
+            color: #8c93bc;
         }
 
+        .form-group input:focus {
+            border-color: #676f9d;
+            background: #5b6088;
+        }
+
+        .btn-submit {
+            background: #f9b17a;
+            color: #2d3250;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            margin-top: 15px;
+            width: fit-content;
+        }
+
+        .btn-submit:hover {
+            background: #ffc99e;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(249, 177, 122, 0.2);
+        }
+
+        /* Ocultar el scroll del navegador si la pantalla es muy pequeña */
+        @@media (max-width: 768px) {
+            .auth-panel-image { display: none; }
+            .auth-container { max-width: 450px; }
+            .auth-panel-form { padding: 40px; }
+            .form-row { flex-direction: column; gap: 15px; }
+        }
+
+        /* ----- PANEL DERECHO (Imagen) ----- */
+        .auth-panel-image {
+            flex: 1;
+            /* Reemplazar la URL por una imagen propia de montañas, o un gradiente estético si no hay imagen externa. Usado de Unsplash de referencia. */
+            background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1470&auto=format&fit=crop') center center / cover no-repeat;
+            position: relative;
+        }
+
+        .auth-panel-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(66, 71, 105, 0.1), rgba(66, 71, 105, 0.8));
+        }
+
+        /* Alertas */
         .alert-error {
-            background: #fff0f0;
-            border: 1px solid #ffcdd2;
-            color: #c62828;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            margin-bottom: 18px;
-            animation: shake 0.4s ease-out;
-        }
-
-        @@keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+            background: rgba(200, 50, 50, 0.2);
+            border-left: 3px solid #ff6b6b;
+            color: #ffcccc;
+            padding: 10px 15px;
+            font-size: 12px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
         }
 
         .info-note {
-            text-align: center;
-            background: #f0f4ff;
-            border: 1px solid #d0d8f0;
-            color: #0a1f44;
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 12px;
-            margin-bottom: 18px;
-        }
-
-        .back-home {
-            text-align: center;
-            margin-top: 12px;
-        }
-
-        .back-home a {
-            color: #888;
-            font-size: 13px;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .back-home a:hover {
-            color: #0a1f44;
+            background: rgba(103, 111, 157, 0.2);
+            border-left: 3px solid #676f9d;
+            color: #d8deff;
+            padding: 10px 15px;
+            font-size: 11px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-logo">
-            <span class="icon">🎵</span>
-            <h1>Iglesia GPS</h1>
-            <p>Crear una Cuenta</p>
-        </div>
 
-        @if (ViewBag.Error != null)
-        {
-            <div class="alert-error">⚠️ @ViewBag.Error</div>
-        }
-
-        <div class="info-note">
-            🔒 Se enviará un código de verificación a tu correo electrónico
-        </div>
-
-        <form method="post" asp-action="Registro" asp-controller="Auth">
-            @Html.AntiForgeryToken()
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="nombre">Nombre</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required />
-                </div>
-                <div class="form-group">
-                    <label for="apellido">Apellido</label>
-                    <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" required />
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="correo">Correo Electrónico</label>
-                <input type="email" id="correo" name="correo" placeholder="tucorreo@gmail.com" required />
-            </div>
-
-            <div class="form-group">
-                <label for="contrasena">Contraseña</label>
-                <input type="password" id="contrasena" name="contrasena" placeholder="••••••••" minlength="6" required />
-            </div>
-
-            <button type="submit" class="btn-primary-auth">Crear Cuenta</button>
-        </form>
-
-        <div class="auth-footer">
-            ¿Ya tienes cuenta? <a href="@Url.Action("Login", "Auth")">Iniciar Sesión</a>
-        </div>
-
-        <div class="back-home">
-            <a href="@Url.Action("Index", "Home")">← Volver al inicio</a>
-        </div>
+    <!-- Logo superior minimalista -->
+    <div style="position: absolute; top: 30px; right: 40px; color: #676f9d; font-size: 12px; font-weight: 700; letter-spacing: 1px; z-index: 10;">
+        <img src="~/imagen/logosinfondo.png" alt="Logo" style="height: 20px; vertical-align: middle; margin-right: 8px; filter: grayscale(1) brightness(1.5);"> MINISTERIO DE ALABANZA
     </div>
+    <div style="position: absolute; top: 30px; left: 40px; color: #676f9d; font-size: 12px; font-weight: 700; letter-spacing: 1px; z-index: 10;">
+        UX | UI DESIGN ♦ IGLESIA GPS
+    </div>
+
+    <div class="auth-container">
+        
+        <!-- Panel de la Imagen de Fondo (Ahora a la izquierda para el Registro, alternancia visual) -->
+        <div class="auth-panel-image"></div>
+
+        <!-- Panel del Formulario -->
+        <div class="auth-panel-form">
+            <div class="auth-tabs">
+                <a href="@Url.Action("Login", "Auth")">Ingresar</a>
+                <a href="@Url.Action("Registro", "Auth")" class="active">Registro</a>
+            </div>
+
+            <div class="auth-titles">
+                <h1>¡Únete a nosotros!</h1>
+                <p>Crea tu cuenta en minutos</p>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert-error">@ViewBag.Error</div>
+            }
+
+            <div class="info-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Te enviaremos un código para verificar tu correo.
+            </div>
+
+            <form method="post" asp-action="Registro" asp-controller="Auth">
+                @Html.AntiForgeryToken()
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" placeholder="Ej. Juan" required autocomplete="off" />
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido</label>
+                        <input type="text" name="apellido" placeholder="Ej. Pérez" required autocomplete="off" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Correo</label>
+                    <input type="email" name="correo" placeholder="alguien@ejemplo.com" required autocomplete="off" />
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Contraseña</label>
+                    <input type="password" name="contrasena" placeholder="••••••••" minlength="6" required />
+                </div>
+
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <button type="submit" class="btn-submit">Registrarse</button>
+                    <!-- Puedes poner accesos a redes aquí si lo deseas en un futuro -->
+                </div>
+            </form>
+        </div>
+
+    </div>
+
 </body>
 </html>

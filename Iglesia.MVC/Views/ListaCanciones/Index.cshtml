@@ -7,26 +7,29 @@
 }
 
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-5 fw-bold text-primary mb-0">Repertorios Musicales</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4 rounded neo-header-box" style="position: relative; overflow: hidden; background: rgba(20, 24, 36, 0.7); border: 1px solid rgba(255, 61, 0, 0.3);">
+        <div style="position: absolute; left: 0; top: 0; height: 100%; border-left: 5px solid #ff3d00; box-shadow: 0 0 20px #ff3d00;"></div>
+        <div class="ms-md-3">
+            <h1 class="display-5 fw-bold mb-0" style="color: #ffffff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); letter-spacing: -1px;">Repertorios Musicales</h1>
+        </div>
         @if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
         {
-            <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
+            <a asp-action="Create" class="btn neo-btn-cyan-solid rounded-pill fw-bold btn-lg shadow-sm">
                 <i class="bi bi-plus-circle me-2"></i>Armar Nuevo Repertorio
             </a>
         }
     </div>
 
-    <!-- Barra de búsqueda Elegante -->
+    <!-- Barra de búsqueda Cyberpunk -->
     <div class="row mb-5 justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="search-box position-relative shadow-sm rounded-pill bg-white border p-1 transition-hover">
+            <div class="neo-search-box position-relative shadow-sm rounded-pill p-1 transition-hover">
                 <div class="input-group input-group-lg border-0">
-                    <span class="input-group-text bg-transparent border-0 text-primary ps-4 pe-2">
-                        <i class="bi bi-search fs-4"></i>
+                    <span class="input-group-text bg-transparent border-0 ps-4 pe-2" style="color: #ff3d00;">
+                        <i class="bi bi-search fs-4" style="text-shadow: 0 0 8px rgba(255, 61, 0, 0.6);"></i>
                     </span>
-                    <input type="text" id="searchInput" class="form-control bg-transparent border-0 shadow-none px-2" placeholder="Busca por título o fecha..." aria-label="Buscar">
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold" type="button" onclick="document.getElementById('searchInput').focus()">Buscar</button>
+                    <input type="text" id="searchInput" class="form-control bg-transparent border-0 shadow-none px-2 text-white" placeholder="Busca por título o fecha..." aria-label="Buscar">
+                    <button class="btn neo-btn-cyan rounded-pill px-4 fw-bold" type="button" onclick="document.getElementById('searchInput').focus()">Buscar</button>
                 </div>
             </div>
         </div>
@@ -37,43 +40,43 @@
         @foreach (var item in Model)
         {
             <div class="col lista-card" data-titulo="@item.Titulo?.ToLower()">
-                <div class="card h-100 border-0 shadow-sm transition-hover" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); border-radius: 16px;">
+                <div class="card h-100 border-0 shadow-sm transition-hover neo-song-panel">
                     <div class="card-body p-4 d-flex flex-column">
                         
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h5 class="fw-bold mb-0 text-dark">@item.Titulo</h5>
+                            <h5 class="fw-bold mb-0 text-white" style="letter-spacing: 0.5px;">@item.Titulo</h5>
                             @if (item.Publicada)
                             {
-                                <span class="badge bg-success rounded-pill px-3 py-1 bg-opacity-10 text-success border border-success">Pública</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background: rgba(29, 233, 182, 0.15); color: #1de9b6; border: 1px solid rgba(29, 233, 182, 0.4); text-shadow: 0 0 5px rgba(29, 233, 182, 0.5);">Pública</span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary rounded-pill px-3 py-1 bg-opacity-10 text-secondary border border-secondary">Privada</span>
+                                <span class="badge rounded-pill px-3 py-1" style="background: rgba(255, 255, 255, 0.1); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.2);">Privada</span>
                             }
                         </div>
 
-                        <p class="text-muted small mb-3">
-                            <i class="bi bi-calendar-event me-1"></i> Creado: @item.FechaCreacion.ToString("dd MMM yyyy")
+                        <p class="small mb-3" style="color: #94a3b8;">
+                            <i class="bi bi-calendar-event me-1" style="color: #ff3d00;"></i> Creado: @item.FechaCreacion.ToString("dd MMM yyyy")
                         </p>
 
-                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div class="mt-auto pt-3 d-flex justify-content-between align-items-center" style="border-top: 1px solid rgba(255,255,255,0.05);">
                             @if (item.Director != null)
                             {
-                                <span class="text-secondary small fw-bold">Por: @item.Director.Nombre</span>
+                                <span class="small fw-bold" style="color: #00e5ff;">Por: @item.Director.Nombre</span>
                             }
                             else
                             {
-                                <span class="text-secondary small fw-bold">Por: Director</span>
+                                <span class="small fw-bold" style="color: #00e5ff;">Por: Director</span>
                             }
 
                             @* Permisos de Editar / Eliminar *@
                             @if (usuarioRol == "Desarrollador" || (usuarioRol == "Director" && item.DirectorId == userId))
                             {
                                 <div class="btn-group shadow-sm rounded-pill">
-                                    <a asp-action="Edit" asp-route-id="@item.ListaCancionesId" class="btn btn-sm btn-light border-0 text-primary px-3 rounded-start-pill" title="Editar">
+                                    <a asp-action="Edit" asp-route-id="@item.ListaCancionesId" class="btn btn-sm btn-dark neo-btn-action text-info px-3 rounded-start-pill" title="Editar">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <a asp-action="Delete" asp-route-id="@item.ListaCancionesId" class="btn btn-sm btn-light border-0 text-danger px-3 rounded-end-pill" title="Eliminar">
+                                    <a asp-action="Delete" asp-route-id="@item.ListaCancionesId" class="btn btn-sm btn-dark neo-btn-action text-danger px-3 rounded-end-pill" title="Eliminar">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
@@ -88,14 +91,118 @@
     @if (!Model.Any())
     {
         <div class="text-center py-5">
-            <div class="display-1 text-muted mb-3 opacity-25">
+            <div class="display-1 mb-3" style="color: rgba(0, 229, 255, 0.2);">
                 <i class="bi bi-music-note-list"></i>
             </div>
-            <h3 class="fw-bold text-muted">Aún no hay repertorios</h3>
-            <p class="text-secondary">Sé el primero en armar la lista de canciones de esta semana.</p>
+            <h3 class="fw-bold" style="color: #1de9b6; text-shadow: 0 0 10px rgba(29, 233, 182, 0.4);">Aún no hay repertorios</h3>
+            <p style="color: #94a3b8;">Sé el primero en armar la lista de canciones de esta semana.</p>
         </div>
     }
 </div>
+
+@section Styles {
+    <style>
+        /* Cyberpunk Variables */
+        :root {
+            --cyber-bg: #0a0b10;
+            --cyber-panel: #12141d;
+            --cyber-box: #1a1e2b;
+            --cyber-cyan: #00e5ff;
+            --cyber-cyan-dim: rgba(0, 229, 255, 0.2);
+            --cyber-orange: #ff3d00;
+            --cyber-orange-dim: rgba(255, 61, 0, 0.2);
+            --cyber-teal: #1de9b6;
+        }
+
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            color: #ffffff !important;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        main { background-color: transparent !important; }
+
+        .neo-header-box {
+            transition: all 0.4s ease;
+        }
+        .neo-header-box:hover {
+            box-shadow: 0 5px 30px rgba(255, 61, 0, 0.1);
+            background: rgba(20, 24, 36, 0.9);
+        }
+
+        .neo-search-box {
+            background-color: var(--cyber-panel) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .neo-search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .neo-btn-cyan {
+            background: linear-gradient(135deg, #00b4d8, #0077b6);
+            color: #ffffff;
+            border: 1px solid #00b4d8;
+        }
+        .neo-btn-cyan:hover {
+            box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);
+            color: #ffffff;
+        }
+
+        .neo-song-panel {
+            background-color: var(--cyber-panel) !important;
+            border: 1px solid rgba(255,255,255,0.03) !important;
+            border-bottom: 2px solid transparent !important;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .transition-hover:hover {
+            transform: translateY(-8px);
+            background-color: var(--cyber-box) !important;
+            border-bottom: 2px solid var(--cyber-cyan) !important;
+            box-shadow: 0 10px 25px var(--cyber-cyan-dim), 0 0 10px var(--cyber-orange-dim) !important;
+        }
+
+        .neo-btn-action {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.3s ease;
+        }
+        .neo-btn-action:hover.text-info {
+            background: rgba(0, 229, 255, 0.1) !important;
+            border-color: var(--cyber-cyan) !important;
+            box-shadow: 0 0 10px var(--cyber-cyan-dim);
+            color: var(--cyber-cyan) !important;
+        }
+        .neo-btn-action:hover.text-danger {
+            background: rgba(255, 61, 0, 0.1) !important;
+            border-color: var(--cyber-orange) !important;
+            box-shadow: 0 0 10px var(--cyber-orange-dim);
+            color: var(--cyber-orange) !important;
+        }
+
+        .neo-btn-cyan-solid {
+            background-color: var(--cyber-cyan) !important;
+            color: #000 !important;
+            border: none !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--cyber-cyan-dim);
+        }
+        .neo-btn-cyan-solid:hover {
+            background-color: #18ffff !important;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+            transform: scale(1.03);
+        }
+
+        .footer {
+            background-color: var(--cyber-bg) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+            color: var(--text-muted) !important;
+        }
+        .footer a {
+            color: var(--cyber-cyan) !important;
+            text-decoration: none;
+        }
+    </style>
+}
 
 @section Scripts {
     <script src="~/js/listacanciones-index.js" asp-append-version="true"></script>

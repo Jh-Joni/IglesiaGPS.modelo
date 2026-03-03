@@ -5,51 +5,57 @@
 }
 
 <div class="container mt-5 mb-5 d-flex justify-content-center">
-    <div class="card shadow border-0" style="border-radius: 15px; max-width: 600px; width: 100%;">
-        <div class="card-header bg-primary text-white text-center py-4" style="border-radius: 15px 15px 0 0;">
-            <h2 class="mb-0 fw-bold"><i class="bi bi-star-fill me-2 text-warning"></i>Únete como Director</h2>
+    <!-- Panel Cyberpunk En lugar de Card -->
+    <div class="neo-main-panel shadow-lg position-relative" style="border-radius: 15px; max-width: 600px; width: 100%; overflow: hidden; border: 1px solid rgba(0, 229, 255, 0.3);">
+        <!-- Deco line -->
+        <div style="position: absolute; left: 0; top: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff3d00, #00e5ff); box-shadow: 0 0 15px #00e5ff;"></div>
+        
+        <div class="p-4 text-center" style="background: rgba(10, 11, 16, 0.8);">
+            <h2 class="mb-0 fw-bold" style="color: #ffffff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); letter-spacing: -0.5px;">
+                <i class="bi bi-star-fill me-2" style="color: #ff3d00; text-shadow: 0 0 15px #ff3d00;"></i>Únete como Director
+            </h2>
         </div>
         
-        <div class="card-body p-5 text-center bg-light">
+        <div class="p-5 text-center" style="background-color: var(--cyber-panel);">
             
             @if (usuarioRol == "Director")
             {
-                <div class="alert alert-success d-flex align-items-center mb-0" role="alert">
-                    <i class="bi bi-check-circle-fill fs-3 me-3"></i>
+                <div class="alert neo-alert-success d-flex align-items-center mb-0 text-start" role="alert">
+                    <i class="bi bi-check-circle-fill fs-3 me-3" style="color: #1de9b6; text-shadow: 0 0 8px #1de9b6;"></i>
                     <div>
-                        <h5 class="alert-heading mb-1 fw-bold">¡Felicidades! Ya eres Director</h5>
-                        <p class="mb-0">Ahora tienes acceso para crear listas de canciones de la semana y editar el repertorio con herramientas exclusivas.</p>
+                        <h5 class="alert-heading mb-1 fw-bold" style="color: #ffffff;">¡Felicidades! Ya eres Director</h5>
+                        <p class="mb-0" style="color: #94a3b8;">Ahora tienes acceso para crear listas de canciones de la semana y editar el repertorio con herramientas exclusivas.</p>
                     </div>
                 </div>
             }
             else
             {
-                <h4 class="text-dark mb-4 fw-bold">¿Deseas guiar la adoración?</h4>
-                <p class="text-secondary mb-4" style="font-size: 1.1rem;">
-                    Como <strong>Director de Alabanza</strong> tendrás opciones extras en nuestra plataforma. Podrás dar la bienvenida a las listas, armar el repertorio semanal (canciones a tocar) y actualizar los tonos y notas para tu equipo.
+                <h4 class="mb-4 fw-bold" style="color: #00e5ff; text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);">¿Deseas guiar la adoración?</h4>
+                <p class="mb-4" style="font-size: 1.1rem; color: #94a3b8;">
+                    Como <strong style="color: #ffffff;">Director de Alabanza</strong> tendrás opciones extras en nuestra plataforma. Podrás dar la bienvenida a las listas, armar el repertorio semanal (canciones a tocar) y actualizar los tonos y notas para tu equipo.
                 </p>
 
-                <div class="p-3 bg-white rounded shadow-sm border mb-4 text-start">
-                    <h6 class="fw-bold text-primary mb-3"><i class="bi bi-gift-fill me-2"></i>Beneficios del Rol:</h6>
-                    <ul class="text-muted mb-0">
-                        <li><i class="bi bi-check2 text-success me-2"></i>Crear listas de canciones para los domingos.</li>
-                        <li><i class="bi bi-check2 text-success me-2"></i>Publicar Mensajes o Versículos en el Inicio.</li>
-                        <li><i class="bi bi-check2 text-success me-2"></i>Añadir completamente nuevas canciones al repertorio.</li>
+                <div class="p-4 rounded mb-4 text-start neo-benefits-box">
+                    <h6 class="fw-bold mb-3" style="color: #1de9b6;"><i class="bi bi-gift-fill me-2"></i>Beneficios del Rol:</h6>
+                    <ul class="mb-0" style="color: #94a3b8; list-style: none; padding-left: 0;">
+                        <li class="mb-2"><i class="bi bi-check2 me-2" style="color: #ff3d00;"></i>Crear listas de canciones para los domingos.</li>
+                        <li class="mb-2"><i class="bi bi-check2 me-2" style="color: #ff3d00;"></i>Publicar Mensajes o Versículos en el Inicio.</li>
+                        <li><i class="bi bi-check2 me-2" style="color: #ff3d00;"></i>Añadir completamente nuevas canciones al repertorio.</li>
                     </ul>
                 </div>
 
                 @if (Model != null && Model.Estado == "Pendiente")
                 {
-                    <div class="alert alert-warning d-flex align-items-center justify-content-center fw-bold" role="alert" style="font-size: 1.1rem; border-left: 5px solid #ffc107;">
-                        <i class="bi bi-hourglass-split fs-4 me-3"></i>
-                        <span>Espera a que el desarrollador te acepte.</span>
+                    <div class="alert neo-alert-warning d-flex align-items-center justify-content-center fw-bold" role="alert">
+                        <i class="bi bi-hourglass-split fs-4 me-3" style="color: #ffc107; text-shadow: 0 0 10px #ffc107;"></i>
+                        <span style="color: #ffffff; letter-spacing: 0.5px;">Espera a que el desarrollador te acepte.</span>
                     </div>
                 }
                 else
                 {
                     <form asp-action="Solicitar" method="post">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow-sm" style="background-color: #2e7d32; border:none; padding:15px;">
+                        <button type="submit" class="btn neo-btn-cyan-solid btn-lg w-100 rounded-pill fw-bold shadow-lg" style="padding:15px; letter-spacing: 1px;">
                             <i class="bi bi-send-fill me-2"></i> Solicitar Ser Director
                         </button>
                     </form>
@@ -59,3 +65,80 @@
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        :root {
+            --cyber-bg: #0a0b10;
+            --cyber-panel: #12141d;
+            --cyber-box: #1a1e2b;
+            --cyber-cyan: #00e5ff;
+            --cyber-cyan-dim: rgba(0, 229, 255, 0.2);
+            --cyber-orange: #ff3d00;
+            --cyber-orange-dim: rgba(255, 61, 0, 0.2);
+            --cyber-teal: #1de9b6;
+        }
+
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            color: #ffffff !important;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        main { background-color: transparent !important; }
+
+        .neo-main-panel {
+            background-color: var(--cyber-panel);
+            transition: all 0.4s ease;
+        }
+        .neo-main-panel:hover {
+            box-shadow: 0 10px 40px rgba(0, 229, 255, 0.15) !important;
+        }
+
+        .neo-benefits-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        .neo-benefits-box:hover {
+            background: rgba(29, 233, 182, 0.05);
+            border-color: rgba(29, 233, 182, 0.3);
+            box-shadow: 0 0 15px rgba(29, 233, 182, 0.1);
+        }
+
+        .neo-alert-success {
+            background: rgba(29, 233, 182, 0.1);
+            border: 1px solid var(--cyber-teal);
+            box-shadow: 0 0 15px rgba(29, 233, 182, 0.2);
+        }
+
+        .neo-alert-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            border-left: 5px solid #ffc107;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.2);
+        }
+
+        .neo-btn-cyan-solid {
+            background-color: var(--cyber-cyan) !important;
+            color: #000 !important;
+            border: none !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--cyber-cyan-dim);
+        }
+        .neo-btn-cyan-solid:hover {
+            background-color: #18ffff !important;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            background-color: var(--cyber-bg) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+            color: var(--text-muted) !important;
+        }
+        .footer a {
+            color: var(--cyber-cyan) !important;
+            text-decoration: none;
+        }
+    </style>
+}

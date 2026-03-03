@@ -4,34 +4,236 @@
     var usuarioLogueado = Context.Session.GetString("UsuarioNombre");
 }
 
-<div class="container mt-5 mb-5">
-    <h2 class="text-primary">Notas de la canción: <span class="text-dark">@ViewBag.CancionTitulo</span></h2>
-    <hr />
-
-    <div class="card shadow p-4" style="border-radius: 12px; border-left: 5px solid #2e7d32;">
-        @if (string.IsNullOrEmpty(Model.Contenido))
-        {
-            <div class="alert alert-warning">
-                <i class="bi bi-info-circle"></i> Aún no hay notas registradas para esta canción. Has clic en el botón inferior para empezar a editar.
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-lg-10">
+        
+        <div class="neo-main-panel shadow-lg border-0 rounded-4 overflow-hidden position-relative" style="border: 1px solid rgba(29, 233, 182, 0.4) !important;">
+            
+            <!-- Deco headers -->
+            <div class="neo-header-bar p-3 d-flex justify-content-between align-items-center" style="background: rgba(10, 11, 16, 0.9); border-bottom: 2px solid var(--cyber-teal);">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="spinner-grow spinner-grow-sm text-info" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="fw-bold" style="color: var(--cyber-teal); font-family: monospace; letter-spacing: 2px; font-size: 1.1rem;">
+                        LEYENDO_ARCHIVO: <span style="color: #ffffff;">[@ViewBag.CancionTitulo]</span>
+                    </span>
+                </div>
+                <div class="mac-btns">
+                    <span class="badge" style="background: rgba(0, 229, 255, 0.1); color: var(--cyber-cyan); border: 1px solid var(--cyber-cyan);">
+                        HUD_ACTIVE
+                    </span>
+                </div>
             </div>
-        }
-        else
-        {
-            <div style="background: #fdfdfd; padding: 20px; border-radius: 8px; border: 1px solid #eee;">
-                <pre style="white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; font-size: 16px; margin: 0; color: #333;">@Model.Contenido</pre>
-            </div>
-        }
 
-        <div class="mt-4 pt-3 border-top">
-            @if (usuarioLogueado != null)
-            {
-                <a asp-action="EditarNota" asp-route-id="@Model.CancionId" class="btn btn-warning px-4 py-2" style="font-weight: 600;">
-                    ✏️ Editar Notas
-                </a>
-            }
-            <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2 ms-2">
-                Volver
-            </a>
+            <div class="card-body p-4 p-md-5 neo-hud-body position-relative" style="background: var(--cyber-panel);">
+                
+                @if (string.IsNullOrEmpty(Model?.Contenido))
+                {
+                    <div class="alert neo-alert-warning d-flex align-items-center rounded-3 p-4">
+                        <i class="bi bi-exclamation-triangle-fill fs-2 me-4" style="color: var(--cyber-orange);"></i>
+                        <div>
+                            <h5 class="fw-bold text-white mb-1">ARCHIVO VACÍO / CORRUPTO</h5>
+                            <p class="mb-0 text-muted">Aún no hay notas registradas para este archivo de canción. <br/>Requiere inserción manual de datos.</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="neo-display-screen p-4 rounded-3 position-relative overflow-hidden shadow-lg">
+                        <!-- Hologram overlay effect -->
+                        <div class="hologram-overlay"></div>
+                        <!-- Scanline animado -->
+                        <div class="hud-scanline"></div>
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2" style="border-color: rgba(29, 233, 182, 0.2) !important;">
+                            <span class="badge" style="background: rgba(29, 233, 182, 0.15); color: var(--cyber-teal); border: 1px solid var(--cyber-teal); font-family: monospace;">
+                                <i class="bi bi-music-note-beamed me-1"></i> Secuencia: @Model.Instrumento
+                            </span>
+                            <span style="color: #64748b; font-family: monospace; font-size: 0.85rem;">
+                                SYS_TIME: @DateTime.Now.ToString("HH:mm:ss")
+                            </span>
+                        </div>
+
+                        <!-- El contenido a decodificar -->
+                        <div class="neo-lyrics-container position-relative z-1" style="min-height: 200px;">
+                            <pre id="hud-content-target" class="text-transparent" style="font-family: 'Space Mono', 'Courier New', monospace; font-size: 1.1rem; color: #1de9b6; text-shadow: 0 0 5px rgba(29, 233, 182, 0.5); white-space: pre-wrap; line-height: 1.6; display: none;">@Model.Contenido</pre>
+                            
+                            <!-- El visor visible durante la animacion -->
+                            <pre id="hud-decrypt-view" class="fw-bold" style="font-family: 'Space Mono', 'Courier New', monospace; font-size: 1.1rem; color: #1de9b6; text-shadow: 0 0 8px rgba(29, 233, 182, 0.6); white-space: pre-wrap; line-height: 1.6;">
+[ INICIANDO DECODIFICACIÓN... ]
+                            </pre>
+                        </div>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <a href="javascript:history.back()" class="btn neo-btn-outline rounded-pill px-4 fw-bold">
+                        <i class="bi bi-arrow-return-left me-2"></i>Desconectar
+                    </a>
+
+                    @if (usuarioLogueado != null)
+                    {
+                        <a asp-action="EditarNota" asp-route-id="@Model?.CancionId" class="btn neo-btn-orange-solid rounded-pill px-5 py-2 fw-bold shadow-lg" style="letter-spacing: 1px;">
+                            <i class="bi bi-pencil-square me-2"></i>Sobrescribir Datos
+                        </a>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        :root {
+            --cyber-bg: #0a0b10;
+            --cyber-panel: #12141d;
+            --cyber-box: #1a1e2b;
+            --cyber-cyan: #00e5ff;
+            --cyber-orange: #ff3d00;
+            --cyber-teal: #1de9b6;
+        }
+        
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        /* Screen & HUD Elements */
+        .neo-display-screen {
+            background-color: #051614; /* Oscuro verdoso */
+            border: 1px solid rgba(29, 233, 182, 0.3);
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(29, 233, 182, 0.1);
+        }
+
+        .hologram-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(29, 233, 182, 0.05) 1px, transparent 1px);
+            background-size: 100% 4px; /* Rayas horizontales TV */
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        .hud-scanline {
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: var(--cyber-teal);
+            box-shadow: 0 0 15px var(--cyber-teal), 0 0 30px var(--cyber-cyan);
+            opacity: 0.8;
+            z-index: 2;
+            animation: laserScan 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            border-radius: 50%;
+        }
+
+        @@keyframes laserScan {
+            0% { top: -10px; opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* Alerts and Buttons */
+        .neo-alert-warning {
+            background: rgba(255, 61, 0, 0.05);
+            border: 1px solid rgba(255, 61, 0, 0.4);
+            border-left: 4px solid var(--cyber-orange);
+            box-shadow: 0 0 15px rgba(255, 61, 0, 0.1);
+        }
+
+        .neo-btn-outline {
+            color: #94a3b8 !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            background: transparent;
+            transition: all 0.3s;
+        }
+        .neo-btn-outline:hover {
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.1);
+            border-color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        .neo-btn-orange-solid {
+            background-color: transparent !important;
+            color: var(--cyber-orange) !important;
+            border: 2px solid var(--cyber-orange) !important;
+            transition: all 0.3s ease;
+        }
+        .neo-btn-orange-solid:hover {
+            background-color: var(--cyber-orange) !important;
+            color: #000 !important;
+            box-shadow: 0 0 25px rgba(255, 61, 0, 0.6);
+            transform: translateY(-2px);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hiddenTarget = document.getElementById('hud-content-target');
+            const viewTarget = document.getElementById('hud-decrypt-view');
+            
+            if (!hiddenTarget || !viewTarget) return;
+
+            const finalString = hiddenTarget.innerText;
+            const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@@#$%-+<>[]{}';
+            
+            // Si el texto es muy largo, ajustamos la velocidad
+            const isLong = finalString.length > 500;
+            const steps = isLong ? 15 : 25; // Número de pasadas de desencriptado
+            let currentStep = 0;
+
+            function scramble() {
+                let displayString = '';
+                
+                // Si hemos terminado
+                if (currentStep >= steps) {
+                    viewTarget.innerText = finalString;
+                    viewTarget.style.textShadow = '0 0 15px rgba(29, 233, 182, 0.8)';
+                    viewTarget.animate([
+                        { opacity: 0.5 }, { opacity: 1 }
+                    ], { duration: 300 });
+                    return;
+                }
+
+                // Generamos texto mitad real, mitad basura
+                for (let i = 0; i < finalString.length; i++) {
+                    const char = finalString[i];
+                    
+                    // Respetamos los saltos de linea y espacios para mantener el formato
+                    if (char === '\n' || char === ' ') {
+                        displayString += char;
+                        continue;
+                    }
+
+                    // A medida que currentStep se acerca a steps, más letras reales se muestran
+                    const threshold = (currentStep / steps);
+                    if (Math.random() < threshold) {
+                        displayString += char; // Letra real
+                    } else {
+                        // Letra aleatoria
+                        const randomChar = validChars.charAt(Math.floor(Math.random() * validChars.length));
+                        displayString += randomChar;
+                    }
+                }
+
+                viewTarget.innerText = displayString;
+                currentStep++;
+                
+                // Efecto de sonido (opcional silenciado por default para web)
+                setTimeout(scramble, 60); // 60ms por iteración
+            }
+
+            // Iniciar animación después un ligero delay para impacto
+            setTimeout(scramble, 500);
+        });
+    </script>
+}
