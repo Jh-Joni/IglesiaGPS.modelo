@@ -191,6 +191,52 @@ namespace Iglesia.MVC.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
+
+        // GET: /Auth/RecuperarContrasena
+        public IActionResult RecuperarContrasena()
+        {
+            return View();
+        }
+
+        // POST: /Auth/RecuperarContrasena
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RecuperarContrasena(string correo)
+        {
+            try
+            {
+                using var client = CrearHttpClient();
+                var payload = JsonConvert.SerializeObject(new { correo });
+                var content = new StringContent(payload, Encoding.UTF8, "application/json");
+                var response = client.PostAsync($"{_apiBaseUrl}/recuperar-contrasena", content).Result;
+
+                var json = response.Content.ReadAsStringAsync().Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Exito"] = "Si el correo existe, se enviará la contraseña correspondiente.";
+                    return RedirectToAction("Login");
+                }
+                else
+                {
+                    try
+                    {
+                        var result = JsonConvert.DeserializeObject<dynamic>(json);
+                        ViewBag.Error = (string)(result?.mensaje ?? "Error al recuperar cuenta.");
+                    }
+                    catch
+                    {
+                        ViewBag.Error = "No se pudo recuperar la cuenta. Intenta nuevamente.";
+                    }
+                    return View();
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Error de conexión con el servidor.";
+                return View();
+            }
+        }
     }
 }
 

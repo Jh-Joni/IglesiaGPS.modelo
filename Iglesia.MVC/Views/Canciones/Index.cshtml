@@ -13,25 +13,25 @@
     </form>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="display-5 fw-bold text-primary mb-0">Repertorio Musical</h1>
+        <h1 class="display-5 fw-bold mb-0" style="color: #ffffff; text-shadow: 0 0 15px rgba(0, 242, 254, 0.4);">Repertorio Musical</h1>
         @if (usuarioLogueado != null)
         {
-            <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
+            <a asp-action="Create" class="btn btn-lg shadow-sm" style="background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.4); color: #00f2fe; box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);">
                 <i class="bi bi-plus-circle me-2"></i>Nueva Canción
             </a>
         }
     </div>
 
-    <!-- Barra de búsqueda Elegante -->
+    <!-- Barra de búsqueda Elegante Neón -->
     <div class="row mb-5 justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="search-box position-relative shadow-sm rounded-pill bg-white border p-1 transition-hover">
+            <div class="search-box position-relative shadow-sm rounded-pill p-1 transition-hover" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(0, 242, 254, 0.3);">
                 <div class="input-group input-group-lg border-0">
-                    <span class="input-group-text bg-transparent border-0 text-primary ps-4 pe-2">
+                    <span class="input-group-text bg-transparent border-0 ps-4 pe-2" style="color: #00f2fe;">
                         <i class="bi bi-search fs-4"></i>
                     </span>
-                    <input type="text" id="searchInput" class="form-control bg-transparent border-0 shadow-none px-2" placeholder="Busca por título o artista..." aria-label="Buscar canciones">
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold" type="button" onclick="document.getElementById('searchInput').focus()">Buscar</button>
+                    <input type="text" id="searchInput" class="form-control bg-transparent border-0 shadow-none px-2 text-white" placeholder="Busca por título o artista..." aria-label="Buscar canciones">
+                    <button class="btn rounded-pill px-4 fw-bold" type="button" onclick="document.getElementById('searchInput').focus()" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: 1px solid rgba(0, 242, 254, 0.5);">Buscar</button>
                 </div>
             </div>
         </div>
@@ -42,56 +42,56 @@
         @foreach (var item in Model)
         {
             <div class="col cancion-card" data-autor="@item.Autor?.ToLower()" data-titulo="@item.Titulo?.ToLower()">
-                <div class="card h-100 border-0 shadow-sm song-panel transition-hover">
+                <div class="card h-100 border-0 shadow-sm song-panel transition-hover" style="background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05) !important;">
                     <div class="card-body d-flex flex-column text-center p-3">
                         
                         <!-- Contenedor del ícono/foto central (sirve de botón de selección en JS) -->
-                        <div class="cancion-selector mx-auto mb-3 cancion-img-container" style="cursor: pointer;" >
+                        <div class="cancion-selector mx-auto mb-3 cancion-img-container position-relative" style="cursor: pointer;" >
                             @if (!string.IsNullOrEmpty(item.FotoUrl))
                             {
-                                <img src="@item.FotoUrl" class="rounded-circle object-fit-cover shadow-sm cancion-foto" style="width: 70px; height: 70px; border: 2px solid #f8f9fa;" alt="Foto de @item.Autor">
+                                <img src="@item.FotoUrl" class="rounded-circle object-fit-cover shadow-sm cancion-foto" style="width: 70px; height: 70px; border: 2px solid rgba(0, 242, 254, 0.5);" alt="Foto de @item.Autor">
                             }
                             else
                             {
-                                <div class="song-icon bg-light text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto" style="width: 70px; height: 70px;">
+                                <div class="song-icon rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto" style="width: 70px; height: 70px; background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.3); color: #00f2fe;">
                                     <i class="bi bi-music-note-beamed fs-3 icon-music"></i>
                                 </div>
                             }
                             <!-- Etiqueta de orden de selección (Oculta por defecto) -->
-                            <div class="seleccion-badge d-none position-absolute top-50 start-50 translate-middle text-white rounded-circle fw-bold fs-4 d-flex align-items-center justify-content-center shadow" style="width: 70px; height: 70px; z-index: 10; background-color: #0D6845;">
-                                <span class="seleccion-numero">1</span>
+                            <div class="seleccion-badge d-none position-absolute top-50 start-50 translate-middle text-white rounded-circle fw-bold fs-4 d-flex align-items-center justify-content-center shadow" style="width: 70px; height: 70px; z-index: 10; background-color: rgba(0, 242, 254, 0.85); border: 2px solid #fff;">
+                                <span class="seleccion-numero text-dark">1</span>
                             </div>
                         </div>
 
-                        <h5 class="card-title fw-bold text-dark text-truncate mb-1" title="@item.Titulo" style="font-size: 1.1rem;">@item.Titulo</h5>
-                        <p class="card-text text-muted mb-3" style="font-size: 0.9rem;">
+                        <h5 class="card-title fw-bold text-truncate mb-1" title="@item.Titulo" style="font-size: 1.1rem; color: #ffffff;">@item.Titulo</h5>
+                        <p class="card-text mb-3" style="font-size: 0.9rem; color: #94a3b8;">
                             <i class="bi bi-person-fill"></i> @(string.IsNullOrEmpty(item.Autor) ? "Desconocido" : item.Autor)
                         </p>
                         
                         <div class="mt-auto">
                             <!-- Botón Tono -->
                             <div class="mb-2 text-start">
-                                <span class="badge bg-primary rounded-pill px-3 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem;">
+                                <span class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem; background: rgba(0, 242, 254, 0.1); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.3);">
                                     Tono: @(string.IsNullOrEmpty(item.Tono) ? "-" : item.Tono)
                                 </span>
                             </div>
                             
                             <!-- Botones Principales -->
                             <div class="d-grid gap-2">
-                                <button class="btn btn-dark btn-sm btn-ver-notas rounded-pill fw-semibold shadow-sm py-2" data-id="@item.CancionId" data-titulo="@item.Titulo" style="background-color: #0d1b2a; border-color: #0d1b2a;">
+                                <button class="btn btn-sm btn-ver-notas rounded-pill fw-semibold shadow-sm py-2 text-white" data-id="@item.CancionId" data-titulo="@item.Titulo" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: 1px solid rgba(255,255,255,0.1);">
                                     <i class="bi bi-journal-text me-1"></i> Ver Notas
                                 </button>
                                 
                                 <div class="btn-group w-100 mt-1 shadow-sm rounded-pill overflow-hidden" role="group">
                                     @if (usuarioLogueado != null)
                                     {
-                                        <a asp-action="Edit" asp-route-id="@item.CancionId" class="btn btn-dark btn-sm py-2" style="background-color: #0b192c; border-color: #1a2a40; border-right: 1px solid #1a2a40;">
+                                        <a asp-action="Edit" asp-route-id="@item.CancionId" class="btn btn-sm py-2 text-white" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.05);">
                                             <i class="bi bi-pencil" style="font-size: 0.8rem;"></i> <span style="font-size: 0.85rem;">Editar</span>
                                         </a>
                                         @if (usuarioRol == "Desarrollador")
                                         {
-                                            <a asp-action="Delete" asp-route-id="@item.CancionId" class="btn btn-dark btn-sm py-2" style="background-color: #0b192c; border-color: #1a2a40;">
-                                                <i class="bi bi-trash text-white" style="font-size: 0.8rem;"></i> <span style="font-size: 0.85rem;">Eliminar</span>
+                                            <a asp-action="Delete" asp-route-id="@item.CancionId" class="btn btn-sm py-2 text-danger" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
+                                                <i class="bi bi-trash" style="font-size: 0.8rem;"></i> <span style="font-size: 0.85rem;">Eliminar</span>
                                             </a>
                                         }
                                     }
@@ -131,14 +131,14 @@
 <!-- Panel Flotante de Selección (Solo para Director/Desarrollador) -->
 @if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
 {
-    <div id="panelSeleccion" class="position-fixed bottom-0 start-50 translate-middle-x bg-white p-3 mb-4 rounded-pill shadow-lg d-none align-items-center" style="z-index: 1050; min-width: 350px; border: 2px solid #0D6845;">
+    <div id="panelSeleccion" class="position-fixed bottom-0 start-50 translate-middle-x p-3 mb-4 rounded-pill shadow-lg d-none align-items-center" style="z-index: 1050; min-width: 350px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border: 2px solid rgba(0, 242, 254, 0.4); box-shadow: 0 0 20px rgba(0, 242, 254, 0.15) !important;">
         <div class="me-auto d-flex align-items-center">
-            <div class="text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background-color: #0D6845;">
-                <span id="contadorSeleccionadas" class="fw-bold fs-5">0</span>
+            <div class="text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 44px; height: 44px; background: rgba(0, 242, 254, 0.2); border: 2px solid #00f2fe; color: #00f2fe;">
+                <span id="contadorSeleccionadas" class="fw-bold fs-5" style="text-shadow: 0 0 5px rgba(0, 242, 254, 0.5);">0</span>
             </div>
-            <span class="fw-bold text-dark">Canciones<br><small class="text-muted fw-normal" style="font-size:0.75rem;">(Mín 5, Máx 7)</small></span>
+            <span class="fw-bold text-white fs-5">Canciones<br><small class="fw-normal" style="font-size:0.75rem; color: #94a3b8;">(Mín 5, Máx 7)</small></span>
         </div>
-        <button id="btnGuardarLista" class="btn text-white rounded-pill fw-bold px-4 hover-success" disabled style="background-color: #08402A;">
+        <button id="btnGuardarLista" class="btn text-dark rounded-pill fw-bold px-4 ms-3" disabled style="background: #00f2fe; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); border: none;">
             <i class="bi bi-save me-1"></i> Guardar Lista
         </button>
     </div>
@@ -146,26 +146,56 @@
 
 @section Styles {
     <style>
+        /* Fondo oscuro exclusivo para Index Canciones */
+        body { 
+            background-color: #0b1120 !important; 
+            color: #e2e8f0 !important;
+        }
+        main { 
+            background-color: transparent !important; 
+        }
+        /* Ajuste de Placeholder búsqueda oscura */
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        #searchInput:focus {
+            color: #ffffff;
+        }
+        /* Estilar panel y transiciones Hover con destello */
         .song-panel {
             border-radius: 15px;
             overflow: hidden;
-            background: linear-gradient(145deg, #ffffff, #f8f9fa);
-        }
-        .transition-hover {
+            border-left: 5px solid #00f2fe !important;
             transition: all 0.3s ease;
-            transform: translateY(0);
         }
         .transition-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-            border-color: #0d6efd !important;
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 242, 254, 0.15) !important;
+            border-color: rgba(0, 242, 254, 0.4) !important;
+            background: rgba(30, 41, 59, 0.9) !important;
         }
         .song-icon {
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
         .btn-ver-notas:hover {
-            background-color: #0dcaf0;
-            color: white;
+            background: linear-gradient(135deg, #14b8a6, #0f766e) !important;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+        }
+        /* Ajustar Footer a modo oscuro para que encaje */
+        .footer {
+            background-color: #0b1120 !important;
+            border-top: 1px solid rgba(0, 242, 254, 0.2) !important;
+            color: #475569 !important;
+            box-shadow: 0 -10px 30px rgba(0, 242, 254, 0.05);
+        }
+        .footer a {
+            color: #00f2fe !important;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .footer a:hover {
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+            color: #ffffff !important;
         }
     </style>
 }

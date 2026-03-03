@@ -3,58 +3,204 @@
     ViewData["Title"] = "Solicitudes de Director";
 }
 
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <h2 class="text-primary fw-bold mb-0"><i class="bi bi-people-fill me-2"></i>Gestión de Solicitudes</h2>
-    </div>
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-lg-10">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 neo-header-box pb-3" style="border-bottom: 1px solid rgba(0, 229, 255, 0.3);">
+            <h2 class="fw-bold mb-0" style="color: #ffffff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); letter-spacing: -0.5px;">
+                <i class="bi bi-shield-lock-fill me-2" style="color: #00e5ff; text-shadow: 0 0 15px #00e5ff;"></i>Panel de Aprobaciones
+            </h2>
+            <span class="badge" style="background: rgba(0, 229, 255, 0.1); color: #00e5ff; border: 1px solid rgba(0, 229, 255, 0.3); font-size: 0.9rem;">
+                Dev_Access_Grants
+            </span>
+        </div>
 
-    @if (Model.Count() == 0)
-    {
-        <div class="alert alert-info text-center p-5 shadow-sm rounded-4 border-0">
-            <i class="bi bi-emoji-smile fs-1 mb-3 text-info d-block"></i>
-            <h4 class="alert-heading fw-bold">No hay solicitudes pendientes</h4>
-            <p class="mb-0 text-muted">Todos los usuarios están al día. Cuando alguien solicite ser director, aparecerá aquí.</p>
-        </div>
-    }
-    else
-    {
-        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light text-secondary">
-                        <tr>
-                            <th class="py-3 px-4 border-bottom-0">Usuario (ID)</th>
-                            <th class="py-3 px-4 border-bottom-0">Nombre</th>
-                            <th class="py-3 px-4 border-bottom-0">Correo</th>
-                            <th class="py-3 px-4 border-bottom-0">Fecha de Solicitud</th>
-                            <th class="py-3 px-4 border-bottom-0 text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="px-4 py-3 fw-bold text-muted">#@item.UsuarioId</td>
-                                <td class="px-4 py-3 fw-semibold">
-                                    @(item.Usuario?.Nombre != null ? item.Usuario.Nombre + " " + item.Usuario.Apellido : "Usuario Desconocido")
-                                </td>
-                                <td class="px-4 py-3">@(item.Usuario?.Correo ?? "N/A")</td>
-                                <td class="px-4 py-3 text-muted">
-                                    <i class="bi bi-calendar3 me-1"></i> @item.FechaSolicitud.ToString("dd MMM yyyy HH:mm")
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <form asp-action="Validar" asp-route-id="@item.SolicitudDirectorId" method="post" style="display:inline;">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm" onclick="return confirm('¿Estás seguro de otorgar el rol de Director a este usuario?');">
-                                            <i class="bi bi-check-circle-fill me-1"></i> Validar
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+        @if (!Model.Any())
+        {
+            <div class="neo-empty-state text-center p-5 rounded-4 shadow-lg position-relative overflow-hidden" style="background: var(--cyber-panel); border: 1px solid rgba(255, 61, 0, 0.3);">
+                <!-- Animated grid background -->
+                <div class="neo-grid-bg"></div>
+                
+                <div class="position-relative z-1">
+                    <div class="d-inline-block p-4 rounded-circle mb-4" style="background: rgba(255, 61, 0, 0.1); border: 1px solid rgba(255, 61, 0, 0.3); box-shadow: 0 0 20px rgba(255, 61, 0, 0.2);">
+                        <i class="bi bi-robot fs-1 d-block" style="color: var(--cyber-orange); text-shadow: 0 0 15px var(--cyber-orange);"></i>
+                    </div>
+                    <h3 class="fw-bold" style="color: #ffffff; letter-spacing: 1px;">SISTEMA_LIMPIO</h3>
+                    <p class="mb-0 text-muted" style="font-family: monospace; font-size: 1.1rem;">
+                        No hay solicitudes pendientes en la cola.<br/>
+                        <span style="color: var(--cyber-teal);">Todos los usuarios regulares están al día con sus roles.</span>
+                    </p>
+                </div>
             </div>
-        </div>
-    }
+        }
+        else
+        {
+            <div class="neo-main-panel shadow-lg border-0 rounded-4 overflow-hidden position-relative" style="border: 1px solid rgba(0, 229, 255, 0.2) !important;">
+                <!-- Deco line top -->
+                <div style="position: absolute; left: 0; top: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #00e5ff, transparent); box-shadow: 0 0 10px #00e5ff;"></div>
+                
+                <div class="table-responsive">
+                    <table class="table neo-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="py-3 px-4 neo-th">USR_ID</th>
+                                <th class="py-3 px-4 neo-th">IDENTIDAD_REGISTRADA</th>
+                                <th class="py-3 px-4 neo-th">RED_CONTACTO</th>
+                                <th class="py-3 px-4 neo-th">TIMESTAMP_SOLICITUD</th>
+                                <th class="py-3 px-4 neo-th text-center">OVERRIDE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="neo-tr">
+                                    <td class="px-4 py-3 fw-bold" style="color: var(--cyber-teal); font-family: monospace;">#@item.UsuarioId</td>
+                                    <td class="px-4 py-3 fw-semibold text-white">
+                                        <div class="d-flex align-items-center">
+                                            <div class="neo-avatar me-3">
+                                                <i class="bi bi-person-fill"></i>
+                                            </div>
+                                            @(item.Usuario?.Nombre != null ? item.Usuario.Nombre + " " + item.Usuario.Apellido : "Usuario Desconocido")
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3" style="color: #a9b7c6;">@(item.Usuario?.Correo ?? "N/A")</td>
+                                    <td class="px-4 py-3" style="color: #64748b; font-family: monospace;">
+                                        <i class="bi bi-clock-history me-1" style="color: var(--cyber-cyan);"></i> @item.FechaSolicitud.ToString("dd MMM yyyy HH:mm")
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <form asp-action="Validar" asp-route-id="@item.SolicitudDirectorId" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn neo-btn-approve fw-bold px-4 rounded-pill shadow-sm btn-sm" onclick="return confirm('¿Estás seguro de otorgar el rol de Director a este usuario? Esta acción es irreversible aquí.');">
+                                                <i class="bi bi-shield-check me-1"></i> APROBAR
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
 </div>
+
+@section Styles {
+    <style>
+        :root {
+            --cyber-bg: #0a0b10;
+            --cyber-panel: #12141d;
+            --cyber-box: #1a1e2b;
+            --cyber-cyan: #00e5ff;
+            --cyber-orange: #ff3d00;
+            --cyber-teal: #1de9b6;
+        }
+        
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        .neo-main-panel { background-color: var(--cyber-panel) !important; }
+        
+        /* Empty state grid */
+        .neo-grid-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.5;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Table Styling */
+        .neo-table {
+            color: #ffffff;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .neo-table > :not(caption) > * > * {
+            background-color: transparent;
+            border-bottom-color: rgba(255,255,255,0.05);
+        }
+
+        .neo-th {
+            background-color: #0d1117 !important;
+            color: #64748b !important;
+            font-family: monospace;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+            border-bottom: 2px solid rgba(0, 229, 255, 0.2) !important;
+        }
+
+        .neo-tr {
+            transition: all 0.3s ease;
+        }
+        
+        .neo-tr:hover {
+            background-color: rgba(0, 229, 255, 0.03) !important;
+        }
+        
+        .neo-tr:hover > td {
+            color: #ffffff !important;
+            border-bottom-color: rgba(0, 229, 255, 0.2);
+        }
+
+        .neo-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(29, 233, 182, 0.1);
+            border: 1px solid var(--cyber-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--cyber-teal);
+        }
+
+        /* Approve Button */
+        .neo-btn-approve {
+            background-color: transparent !important;
+            color: var(--cyber-teal) !important;
+            border: 1px solid var(--cyber-teal) !important;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        
+        .neo-btn-approve:hover {
+            background-color: var(--cyber-teal) !important;
+            color: #000 !important;
+            box-shadow: 0 0 15px rgba(29, 233, 182, 0.5);
+            transform: scale(1.05);
+        }
+        
+        /* Reveal animation for table rows applied via JS */
+        .row-reveal {
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInRight 0.5s forwards ease-out;
+        }
+        
+        @@keyframes slideInRight {
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animación de aparición en cascada para las filas de la tabla
+            const rows = document.querySelectorAll('.neo-tr');
+            rows.forEach((row, index) => {
+                row.classList.add('row-reveal');
+                row.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+}

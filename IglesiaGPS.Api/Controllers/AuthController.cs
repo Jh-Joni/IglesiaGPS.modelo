@@ -174,6 +174,27 @@ namespace IglesiaGPS.Api.Controllers
 
             return Ok(new { mensaje = "Se reenvió el código de verificación a tu correo." });
         }
+
+        // POST: api/Auth/recuperar-contrasena
+        [HttpPost("recuperar-contrasena")]
+        public async Task<ActionResult> RecuperarContrasena(RecuperarContrasenaDto dto)
+        {
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == dto.Correo);
+            if (usuario == null)
+            {
+                return BadRequest(new { mensaje = "No se encontró ninguna cuenta con este correo electrónico." });
+            }
+
+            try
+            {
+                await _emailService.EnviarContrasenaOlvidada(usuario.Correo, usuario.Contrasena);
+                return Ok(new { mensaje = "Se ha enviado la contraseña a tu correo electrónico." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Ocurrió un error al enviar el correo.", error = ex.Message });
+            }
+        }
     }
 }
 

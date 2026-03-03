@@ -230,6 +230,36 @@
 
 
     <!-- FOOTER -->
+    @section Styles {
+        <style>
+            /* Forzar fondo oscuro profundo exclusivo para la pantalla de inicio */
+            body { 
+                background-color: #0b1120 !important; 
+                color: #e2e8f0 !important;
+            }
+            /* Eliminar fondos blancos del layout maestro si los hay */
+            main { 
+                background-color: transparent !important; 
+            }
+            /* Estilizar el footer para integrarlo con el neón */
+            .footer {
+                background-color: #0b1120 !important;
+                border-top: 1px solid rgba(0, 242, 254, 0.2) !important;
+                color: #475569 !important;
+                box-shadow: 0 -10px 30px rgba(0, 242, 254, 0.05);
+            }
+            .footer a {
+                color: #00f2fe !important;
+                text-decoration: none;
+                transition: 0.3s;
+            }
+            .footer a:hover {
+                text-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+                color: #ffffff !important;
+            }
+        </style>
+    }
+
     @section Scripts {
         <script src="~/js/home-index.js" asp-append-version="true"></script>
     }

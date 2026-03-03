@@ -92,5 +92,93 @@ namespace Iglesia.MVC.Controllers
                 return View(Crud<Usuario>.GetById(id));
             }
         }
+
+        // GET: /Usuarios/Gestion
+        public ActionResult Gestion()
+        {
+            // Solo Desarrolladores
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador")
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var usuarios = Crud<Usuario>.GetAll() ?? new List<Usuario>();
+            return View(usuarios);
+        }
+
+        // POST: /Usuarios/CambiarRol
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CambiarRol(int usuarioId, string nuevoRol)
+        {
+            // Solo Desarrolladores
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador")
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            try
+            {
+                var usuario = Crud<Usuario>.GetById(usuarioId);
+                if (usuario == null) return NotFound();
+
+                var roles = Crud<Rol>.GetAll();
+                var rolAsignar = roles?.FirstOrDefault(r => r.Nombre.Equals(nuevoRol, StringComparison.OrdinalIgnoreCase));
+
+                if (rolAsignar != null)
+                {
+                    usuario.RolId = rolAsignar.RolId;
+                    Crud<Usuario>.Update(usuario.UsuarioId, usuario);
+                    TempData["MensajeGestion"] = $"Rol actualizado a {nuevoRol} para {usuario.Nombre} {usuario.Apellido}.";
+                }
+                else
+                {
+                    TempData["ErrorGestion"] = $"No se encontró el rol '{nuevoRol}' en el sistema.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorGestion"] = $"Error al cambiar rol: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Gestion));
+        }
+
+        // POST: /Usuarios/CambiarRolAjax
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CambiarRolAjax(int usuarioId, string nuevoRol)
+        {
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador")
+            {
+                return Json(new { success = false, message = "No autorizado." });
+            }
+
+            try
+            {
+                var usuario = Crud<Usuario>.GetById(usuarioId);
+                if (usuario == null) return Json(new { success = false, message = "Usuario no encontrado." });
+
+                var roles = Crud<Rol>.GetAll();
+                var rolAsignar = roles?.FirstOrDefault(r => r.Nombre.Equals(nuevoRol, StringComparison.OrdinalIgnoreCase));
+
+                if (rolAsignar != null)
+                {
+                    usuario.RolId = rolAsignar.RolId;
+                    Crud<Usuario>.Update(usuario.UsuarioId, usuario);
+                    return Json(new { 
+                        success = true, 
+                        message = $"Rol actualizado a {nuevoRol} para {usuario.Nombre} {usuario.Apellido}.",
+                        usuario = new { id = usuario.UsuarioId, nombre = usuario.Nombre, apellido = usuario.Apellido, correo = usuario.Correo }
+                    });
+                }
+                
+                return Json(new { success = false, message = $"Rol '{nuevoRol}' no encontrado." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

@@ -5,66 +5,99 @@
     var cancionesDisponibles = ViewBag.CancionesDisponibles as List<IglesiaGPS.modelo.Cancion> ?? new List<IglesiaGPS.modelo.Cancion>();
 }
 
-<div class="row justify-content-center mt-4">
+<div class="row justify-content-center mt-4 mb-5">
     <div class="col-lg-10">
-        <div class="card shadow-lg border-0 rounded-4 bg-white" style="background: rgba(255,255,255,0.8) !important; backdrop-filter: blur(10px);">
-            <div class="card-header bg-transparent border-0 pt-4 pb-0 text-center">
-                <h2 class="fw-bold mb-0">🎵 Armar Nuevo Repertorio</h2>
-                <p class="text-muted mt-2">Selecciona exactamente entre <strong>5 y 7 canciones</strong> para la semana.</p>
+        <div class="card neo-main-panel shadow-lg border-0" style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(0, 229, 255, 0.3) !important;">
+            <!-- Deco line top -->
+            <div style="position: absolute; left: 0; top: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff3d00, #00e5ff); box-shadow: 0 0 15px #00e5ff;"></div>
+            
+            <div class="card-header bg-transparent border-0 pt-5 pb-3 text-center position-relative">
+                <h2 class="fw-bold mb-0" style="color: #ffffff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); letter-spacing: -0.5px;">
+                    <i class="bi bi-music-note-list me-2" style="color: #00e5ff; text-shadow: 0 0 15px #00e5ff;"></i>Armar Nuevo Repertorio
+                </h2>
+                <p class="mt-2" style="color: #94a3b8;">Selecciona exactamente entre <strong style="color: #1de9b6;">5 y 7 canciones</strong> para la semana.</p>
             </div>
-            <div class="card-body p-4 p-md-5">
+            
+            <div class="card-body p-4 p-md-5 pt-0">
                 
                 @if (ViewBag.Error != null)
                 {
-                    <div class="alert alert-danger shadow-sm rounded-3">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                    <div class="alert neo-alert-warning rounded-3 mb-4">
+                        <i class="bi bi-exclamation-triangle-fill me-2" style="color: #ff3d00;"></i> @ViewBag.Error
                     </div>
                 }
 
                 <form asp-action="Create" method="post" id="formRepertorio">
                     @Html.AntiForgeryToken()
                     
-                    <div class="mb-4">
-                        <label asp-for="Titulo" class="form-label fw-bold">Título del Repertorio</label>
-                        <input asp-for="Titulo" class="form-control form-control-lg rounded-3 shadow-sm bg-light border-0" placeholder="Ej: Servicio Dominical 26-Oct" required />
-                        <span asp-validation-for="Titulo" class="text-danger"></span>
+                    <div class="mb-5">
+                        <label asp-for="Titulo" class="form-label fw-bold" style="color: #00e5ff; letter-spacing: 0.5px;">Título del Repertorio</label>
+                        <input asp-for="Titulo" class="form-control form-control-lg neo-input" placeholder="Ej: Servicio Dominical 26-Oct" required />
+                        <span asp-validation-for="Titulo" class="text-danger mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
                     </div>
 
-                    <div class="mb-4 d-flex justify-content-between align-items-center">
-                        <label class="form-label fw-bold mb-0">Canciones Disponibles</label>
-                        <span class="badge bg-primary rounded-pill px-3 py-2 fs-6" id="contadorSeleccion">0 / 7 Seleccionadas</span>
+                    <!-- Cyber Dashboard Circular Progress widget -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 p-3 neo-counter-box rounded">
+                        <div>
+                            <h5 class="fw-bold mb-1" style="color: #ffffff;">Canciones Disponibles</h5>
+                            <small style="color: #94a3b8;">Elige tu setlist interactuando con las tarjetas.</small>
+                        </div>
+                        
+                        <!-- Animated Ring -->
+                        <div class="cyber-ring-container ms-3">
+                            <svg width="100" height="100" viewBox="0 0 100 100" class="ring-svg">
+                                <!-- Background ring -->
+                                <circle cx="50" cy="50" r="40" class="ring-bg text-muted"></circle>
+                                <!-- Foreground animated ring -->
+                                <circle cx="50" cy="50" r="40" class="ring-progress" id="ringProgress"></circle>
+                                <!-- Ticks / grid effect around (optional static deco) -->
+                                <g class="ring-ticks">
+                                    @for (int i = 0; i < 36; i++)
+                                    {
+                                        var angle = i * 10;
+                                        <line x1="50" y1="5" x2="50" y2="10" transform="rotate(@angle 50 50)" stroke="rgba(255,255,255,0.1)" stroke-width="2" />
+                                    }
+                                </g>
+                            </svg>
+                            <div class="ring-text" id="ringText">
+                                <span id="ringCount" style="font-size: 28px;">0</span><br>
+                                <span style="font-size: 12px; color: #94a3b8; font-weight: normal; text-shadow: none;">/ 7 máx</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-4" id="gridCanciones">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5" id="gridCanciones">
                         @foreach (var cancion in cancionesDisponibles)
                         {
                             <div class="col">
-                                <label class="w-100 h-100">
+                                <label class="w-100 h-100 m-0">
                                     <input type="checkbox" name="cancionesSeleccionadas" value="@cancion.CancionId" class="d-none cancion-checkbox" />
-                                    <div class="card h-100 border-2 rounded-3 cursor-pointer cancion-selector transition-hover shadow-sm" style="transition: all 0.3s; cursor: pointer;">
-                                        <div class="card-body text-center p-3">
+                                    <div class="card h-100 neo-song-card transition-hover shadow-sm" style="cursor: pointer;">
+                                        <div class="card-body text-center p-4">
                                             @if (!string.IsNullOrEmpty(cancion.FotoUrl))
                                             {
-                                                <img src="@cancion.FotoUrl" class="rounded-circle mx-auto mb-2 object-fit-cover shadow-sm" style="width: 50px; height: 50px;" alt="Foto">
+                                                <img src="@cancion.FotoUrl" class="rounded-circle mx-auto mb-3 object-fit-cover shadow-sm neo-img-border" style="width: 60px; height: 60px;" alt="Foto">
                                             }
                                             else
                                             {
-                                                <div class="bg-light text-secondary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <div class="neo-icon-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
                                                     <i class="bi bi-music-note fs-3"></i>
                                                 </div>
                                             }
-                                            <h6 class="fw-bold text-truncate mb-1">@cancion.Titulo</h6>
-                                            <small class="text-muted d-block text-truncate">@cancion.Autor</small>
+                                            <h6 class="fw-bold text-truncate mb-1 text-white">@cancion.Titulo</h6>
+                                            <small class="d-block text-truncate" style="color: #1de9b6;">@cancion.Autor</small>
                                         </div>
+                                        <!-- Active border overlay animated via CSS -->
+                                        <div class="neo-active-border"></div>
                                     </div>
                                 </label>
                             </div>
                         }
                     </div>
 
-                    <div class="d-flex justify-content-between pt-3 border-top mt-5">
-                        <a asp-action="Index" class="btn btn-light rounded-pill px-4 fw-bold">Cancelar</a>
-                        <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold shadow-sm" id="btnGuardar">Guardar Repertorio</button>
+                    <div class="d-flex justify-content-between pt-4 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                        <a asp-action="Index" class="btn neo-btn-outline rounded-pill px-4 fw-bold">Cancelar</a>
+                        <button type="submit" class="btn neo-btn-cyan-solid rounded-pill px-5 fw-bold shadow-lg" id="btnGuardar">Guardar Repertorio</button>
                     </div>
                 </form>
             </div>
@@ -72,61 +105,258 @@
     </div>
 </div>
 
+@section Styles {
+    <style>
+        :root {
+            --cyber-bg: #0a0b10;
+            --cyber-panel: #12141d;
+            --cyber-box: #1a1e2b;
+            --cyber-cyan: #00e5ff;
+            --cyber-orange: #ff3d00;
+            --cyber-teal: #1de9b6;
+            --ring-circumference: 251.2; /* 2 * pi * 40 */
+        }
+        
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            font-family: 'Inter', sans-serif;
+        }
+
+        .neo-main-panel { background-color: var(--cyber-panel) !important; }
+        
+        .neo-alert-warning {
+            background: rgba(255, 61, 0, 0.1);
+            border: 1px solid rgba(255, 61, 0, 0.5);
+            border-left: 4px solid var(--cyber-orange);
+            color: #ffffff;
+        }
+
+        .neo-input {
+            background-color: var(--cyber-box) !important;
+            border: 1px solid rgba(0, 229, 255, 0.3) !important;
+            color: #ffffff !important;
+            transition: all 0.3s ease;
+        }
+        .neo-input:focus {
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3) !important;
+            border-color: var(--cyber-cyan) !important;
+        }
+
+        /* Cyber Ring Dashboard Component */
+        .neo-counter-box {
+            background: rgba(26, 30, 43, 0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-left: 3px solid var(--cyber-teal);
+        }
+        
+        .cyber-ring-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ring-svg {
+            transform: rotate(-90deg); /* Start at top */
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        .ring-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 6;
+        }
+
+        .ring-progress {
+            fill: none;
+            stroke: var(--cyber-orange); /* default color before reaching min */
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: var(--ring-circumference);
+            stroke-dashoffset: var(--ring-circumference);
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease;
+            filter: drop-shadow(0 0 5px var(--cyber-orange));
+        }
+
+        .ring-text {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: #ffffff;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 0 8px var(--cyber-orange);
+            transition: color 0.5s, text-shadow 0.5s;
+        }
+
+        /* Song Cards */
+        .neo-song-card {
+            background-color: var(--cyber-box) !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .neo-img-border {
+            border: 2px solid rgba(0, 229, 255, 0.2);
+        }
+
+        .neo-icon-circle {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(0, 229, 255, 0.1);
+            color: var(--cyber-cyan);
+            border: 2px solid rgba(0, 229, 255, 0.2);
+            box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
+        }
+
+        .neo-active-border {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px solid var(--cyber-cyan);
+            border-radius: 12px;
+            opacity: 0;
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.2), 0 0 15px rgba(0, 229, 255, 0.4);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+
+        /* Card active state */
+        .cancion-checkbox:checked + .neo-song-card {
+            background-color: rgba(0, 229, 255, 0.05) !important;
+            transform: translateY(-5px);
+        }
+        .cancion-checkbox:checked + .neo-song-card .neo-active-border {
+            opacity: 1;
+            transform: scale(1);
+            animation: pulse-glow 2s infinite alternate;
+        }
+        .cancion-checkbox:checked + .neo-song-card .neo-icon-circle,
+        .cancion-checkbox:checked + .neo-song-card .neo-img-border {
+            border-color: var(--cyber-cyan);
+            box-shadow: 0 0 15px var(--cyber-cyan);
+        }
+
+        @@keyframes pulse-glow {
+            0% { box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.2), 0 0 10px rgba(0, 229, 255, 0.3); }
+            100% { box-shadow: inset 0 0 25px rgba(0, 229, 255, 0.4), 0 0 20px rgba(0, 229, 255, 0.6); }
+        }
+
+        /* Buttons */
+        .neo-btn-outline {
+            color: #94a3b8 !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            background: transparent;
+            transition: all 0.3s;
+        }
+        .neo-btn-outline:hover {
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.1);
+            border-color: #ffffff !important;
+        }
+
+        .neo-btn-cyan-solid {
+            background-color: var(--cyber-cyan) !important;
+            color: #000 !important;
+            border: none !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        }
+        .neo-btn-cyan-solid:hover {
+            background-color: #18ffff !important;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.7);
+            transform: translateY(-2px);
+        }
+    </style>
+}
+
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('.cancion-checkbox');
-            const contador = document.getElementById('contadorSeleccion');
+            const ringProgress = document.getElementById('ringProgress');
+            const ringCount = document.getElementById('ringCount');
+            const ringText = document.getElementById('ringText');
             const btnGuardar = document.getElementById('btnGuardar');
             const form = document.getElementById('formRepertorio');
+            
+            const maxSongs = 7;
+            const minSongs = 5;
+            const circumference = 251.2; // 2 * pi * 40
 
-            function actualizarEstado() {
+            function actualizarDashboard() {
                 let seleccionadas = document.querySelectorAll('.cancion-checkbox:checked').length;
-                contador.textContent = seleccionadas + " / 7 Seleccionadas";
                 
-                if (seleccionadas >= 5 && seleccionadas <= 7) {
-                    contador.className = "badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm";
-                } else {
-                    contador.className = "badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm";
-                }
+                // Update text
+                ringCount.textContent = seleccionadas;
 
-                checkboxes.forEach(cb => {
-                    const card = cb.nextElementSibling;
-                    if (cb.checked) {
-                        card.style.borderColor = "var(--bs-primary)";
-                        card.style.backgroundColor = "rgba(var(--bs-primary-rgb), 0.05)";
-                        card.style.boxShadow = "0 8px 25px rgba(0,0,0,0.15)";
-                        card.style.transform = "scale(1.02)";
-                    } else {
-                        card.style.borderColor = "var(--bs-gray-200)";
-                        card.style.backgroundColor = "white";
-                        card.style.boxShadow = "0 .125rem .25rem rgba(0,0,0,.075)";
-                        card.style.transform = "scale(1)";
-                    }
-                });
+                // Animate ring dashoffset
+                let offset = circumference - (seleccionadas / maxSongs) * circumference;
+                ringProgress.style.strokeDashoffset = offset;
+
+                // Change colors based on status
+                if (seleccionadas >= minSongs && seleccionadas <= maxSongs) {
+                    // Success state (Cyan/Teal)
+                    ringProgress.style.stroke = "var(--cyber-cyan)";
+                    ringProgress.style.filter = "drop-shadow(0 0 8px var(--cyber-cyan))";
+                    ringText.style.color = "#ffffff";
+                    ringText.style.textShadow = "0 0 10px var(--cyber-cyan)";
+                } else if(seleccionadas > 0) {
+                    // Warning state (Orange)
+                    ringProgress.style.stroke = "var(--cyber-orange)";
+                    ringProgress.style.filter = "drop-shadow(0 0 8px var(--cyber-orange))";
+                    ringText.style.color = "#ffffff";
+                    ringText.style.textShadow = "0 0 10px var(--cyber-orange)";
+                } else {
+                    // Empty state (Dim)
+                    ringProgress.style.stroke = "rgba(255,255,255,0.2)";
+                    ringProgress.style.filter = "none";
+                    ringText.style.color = "#94a3b8";
+                    ringText.style.textShadow = "none";
+                }
             }
 
             checkboxes.forEach(cb => {
                 cb.addEventListener('change', function() {
                     let seleccionadas = document.querySelectorAll('.cancion-checkbox:checked').length;
-                    if (seleccionadas > 7) {
-                        this.checked = false; // Prevent more than 7
+                    if (seleccionadas > maxSongs) {
+                        this.checked = false; 
+                        // Trigger a quick pulse on the ring to indicate error
+                        ringProgress.style.transform = "scale(1.05)";
+                        ringProgress.style.transformOrigin = "50% 50%";
+                        setTimeout(() => ringProgress.style.transform = "scale(1)", 200);
                         return;
                     }
-                    actualizarEstado();
+                    actualizarDashboard();
                 });
             });
 
             form.addEventListener('submit', function(e) {
                 let seleccionadas = document.querySelectorAll('.cancion-checkbox:checked').length;
-                if (seleccionadas < 5 || seleccionadas > 7) {
+                if (seleccionadas < minSongs || seleccionadas > maxSongs) {
                     e.preventDefault();
-                    alert("Por favor, selecciona entre 5 y 7 canciones.");
+                    // Shake the ring on submit error
+                    const container = document.querySelector('.cyber-ring-container');
+                    container.animate([
+                        { transform: 'translateX(0)' },
+                        { transform: 'translateX(-5px)' },
+                        { transform: 'translateX(5px)' },
+                        { transform: 'translateX(-5px)' },
+                        { transform: 'translateX(5px)' },
+                        { transform: 'translateX(0)' }
+                    ], { duration: 400 });
                 }
             });
 
-            // Init
-            actualizarEstado();
+            // Init initial state with small delay for intro animation
+            setTimeout(actualizarDashboard, 100);
         });
     </script>
 }

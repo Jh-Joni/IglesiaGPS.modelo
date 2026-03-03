@@ -4,159 +4,371 @@
     ViewData["Title"] = "Editar Canción";
 }
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
-                    <h2 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Editar Canción</h2>
-                    <p class="mb-0 text-white-50">Modifica los detalles de la alabanza y actualiza sus notas musicales</p>
-                </div>
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-lg-10">
+        <div class="card neo-main-panel shadow-lg border-0" style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(0, 229, 255, 0.3) !important;">
+            <!-- Deco line -->
+            <div style="position: absolute; left: 0; top: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #ff3d00, #00e5ff); box-shadow: 0 0 15px #00e5ff;"></div>
+            
+            <div class="card-header bg-transparent border-0 pt-5 pb-3 text-center position-relative">
+                <h2 class="fw-bold mb-0" style="color: #ffffff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); letter-spacing: -0.5px;">
+                    <i class="bi bi-pencil-square me-2" style="color: #00e5ff; text-shadow: 0 0 15px #00e5ff;"></i>Editar Canción
+                </h2>
+                <p class="mt-2" style="color: #94a3b8;">Modifica los detalles de la alabanza y actualiza la pista de secuencias y notas.</p>
+            </div>
                 
-                <div class="card-body p-5">
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i>@ViewBag.Error</div>
-                    }
+            <div class="card-body p-4 p-md-5 pt-0">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert neo-alert-danger rounded-3 mb-4 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2" style="color: #ff3d00;"></i>@ViewBag.Error
+                    </div>
+                }
 
-                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        <input type="hidden" asp-for="CancionId" />
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="text-shadow: 0 0 5px #ff0000;"></div>
+                    <input type="hidden" asp-for="CancionId" />
 
-                        <h5 class="text-primary border-bottom pb-2 mb-4"><i class="bi bi-info-circle me-2"></i>Información Principal</h5>
-                        
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Titulo" class="form-control" placeholder="Título de la canción" required />
-                                    <label asp-for="Titulo">Título <span class="text-danger">*</span></label>
-                                    <span asp-validation-for="Titulo" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Autor" class="form-control" placeholder="Autor o Interprete" required />
-                                    <label asp-for="Autor">Autor / Artista <span class="text-danger">*</span></label>
-                                    <span asp-validation-for="Autor" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="Tono" class="form-control" placeholder="Ej: Do Mayor, G, Am..." />
-                                    <label asp-for="Tono">Tono</label>
-                                    <span asp-validation-for="Tono" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="UrlAudio" class="form-control" type="text" placeholder="Enlace a YouTube o Audio" />
-                                    <label asp-for="UrlAudio">Enlace a YouTube/Audio</label>
-                                    <span asp-validation-for="UrlAudio" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input asp-for="FechaCreacion" class="form-control" type="datetime-local" />
-                                    <label asp-for="FechaCreacion">Fecha de Creación</label>
-                                    <span asp-validation-for="FechaCreacion" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select asp-for="CreadoPorUsuarioId" class="form-select" required>
-                                        <option value="">-- Seleccione un Usuario --</option>
-                                        @if(ViewBag.Usuarios != null)
-                                        {
-                                            foreach (var usuario in ViewBag.Usuarios)
-                                            {
-                                                <option value="@usuario.UsuarioId">@usuario.Nombre @usuario.Apellido</option>
-                                            }
-                                        }
-                                    </select>
-                                    <label asp-for="CreadoPorUsuarioId">Usuario Creador <span class="text-danger">*</span></label>
-                                    <span asp-validation-for="CreadoPorUsuarioId" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <textarea asp-for="Letra" class="form-control" placeholder="Letra de la canción" style="height: 120px"></textarea>
-                                    <label asp-for="Letra">Letra (Exclusivo texto. ¡NO poner acordes aquí!)</label>
-                                    <span asp-validation-for="Letra" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-group mb-2">
-                                    <label for="FotoFile" class="form-label fw-bold"><i class="bi bi-image me-2"></i>Actualizar Foto del Artista (Opcional)</label>
-                                    @if (!string.IsNullOrEmpty(Model.FotoUrl))
-                                    {
-                                        <div class="mb-3">
-                                            <img src="@Model.FotoUrl" alt="Foto actual" class="img-thumbnail rounded shadow-sm" style="max-height: 120px;" />
-                                        </div>
-                                    }
-                                    <input type="file" name="FotoFile" class="form-control form-control-lg bg-light" accept="image/*" />
-                                    <small class="text-muted">Si subes una nueva imagen, reemplazará a la mostrada actualmente.</small>
-                                </div>
-                            </div>
+                    <h5 class="neo-section-title pb-2 mb-4"><i class="bi bi-info-circle me-2"></i>Información Principal</h5>
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Titulo" class="neo-label">Título <span class="text-danger">*</span></label>
+                            <input asp-for="Titulo" class="form-control form-control-lg neo-input" placeholder="Título de la canción" required />
+                            <span asp-validation-for="Titulo" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
                         </div>
-
-                        <h5 class="text-primary border-bottom pb-2 mb-4 mt-5"><i class="bi bi-music-note-list me-2"></i>Notas Musicales Existentes</h5>
-                        
-                        @if (Model.NotasMusicales != null && Model.NotasMusicales.Any())
-                        {
-                            <div class="row g-4 mb-4">
-                                @foreach (var nota in Model.NotasMusicales)
+                        <div class="col-md-6">
+                            <label asp-for="Autor" class="neo-label">Autor / Artista <span class="text-danger">*</span></label>
+                            <input asp-for="Autor" class="form-control form-control-lg neo-input" placeholder="Autor o Interprete" required />
+                            <span asp-validation-for="Autor" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Tono" class="neo-label">Tono</label>
+                            <div class="input-group">
+                                <span class="input-group-text neo-input-group-text"><i class="bi bi-music-note"></i></span>
+                                <input asp-for="Tono" class="form-control form-control-lg neo-input" placeholder="Ej: Do Mayor, G, Am..." />
+                            </div>
+                            <span asp-validation-for="Tono" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="UrlAudio" class="neo-label">Enlace a YouTube/Audio</label>
+                            <div class="input-group">
+                                <span class="input-group-text neo-input-group-text"><i class="bi bi-link-45deg"></i></span>
+                                <input asp-for="UrlAudio" class="form-control form-control-lg neo-input" type="text" placeholder="https://" />
+                            </div>
+                            <span asp-validation-for="UrlAudio" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="FechaCreacion" class="neo-label">Fecha de Creación</label>
+                            <input asp-for="FechaCreacion" class="form-control form-control-lg neo-input" type="datetime-local" />
+                            <span asp-validation-for="FechaCreacion" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CreadoPorUsuarioId" class="neo-label">Usuario Creador <span class="text-danger">*</span></label>
+                            <select asp-for="CreadoPorUsuarioId" class="form-select form-select-lg neo-input" required>
+                                <option value="">-- Seleccione un Usuario --</option>
+                                @if(ViewBag.Usuarios != null)
                                 {
-                                    <div class="col-12">
-                                        <div class="p-3 bg-light rounded shadow-sm border">
-                                            <input type="hidden" name="NotaIds" value="@nota.NotaMusicalId" />
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <span class="badge bg-secondary">Instrumento: @nota.Instrumento</span>
-                                                <small class="text-muted">Última edición: @nota.UltimaEdicion.ToShortDateString()</small>
-                                            </div>
-                                            <textarea name="NotaContenidos" class="form-control font-monospace" style="height: 350px">@nota.Contenido</textarea>
+                                    foreach (var usuario in ViewBag.Usuarios)
+                                    {
+                                        <option value="@usuario.UsuarioId">@usuario.Nombre @usuario.Apellido</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="CreadoPorUsuarioId" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Letra" class="neo-label">Letra Base (Sin acordes)</label>
+                            <textarea asp-for="Letra" class="form-control neo-input neo-textarea" placeholder="Escribe aquí la letra pura..." style="height: 120px"></textarea>
+                            <span asp-validation-for="Letra" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <div class="neo-upload-box p-4 rounded-3 text-center transition-all" style="border: 2px dashed rgba(255,255,255,0.1);">
+                                <label for="FotoFile" class="form-label fw-bold d-block w-100" style="color: var(--cyber-cyan); cursor: pointer;">
+                                    <i class="bi bi-cloud-arrow-up fs-2 d-block mb-2"></i> Actualizar Foto del Artista (Opcional)
+                                </label>
+                                @if (!string.IsNullOrEmpty(Model.FotoUrl))
+                                {
+                                    <div class="mb-3 mt-3 position-relative d-inline-block">
+                                        <img src="@Model.FotoUrl" alt="Foto actual" class="img-thumbnail rounded-circle shadow-lg" style="max-height: 120px; border: 3px solid var(--cyber-cyan); box-shadow: 0 0 15px rgba(0,229,255,0.4) !important;" />
+                                        <div class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style="border: 1px solid var(--cyber-cyan); transform: translate(25%, 25%);">
+                                            <i class="bi bi-camera-fill text-info small"></i>
                                         </div>
                                     </div>
                                 }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="alert alert-info shadow-sm">
-                                <i class="bi bi-info-circle-fill me-2"></i>Esta canción aún no tiene notas registradas. Puedes agregar una a continuación.
-                            </div>
-                        }
-
-                        <h5 class="text-success border-bottom pb-2 mb-4 mt-4"><i class="bi bi-plus-circle me-2"></i>Agregar Nueva Nota (Opcional)</h5>
-                        <div class="row g-4 mb-5 bg-light p-4 rounded-3 shadow-sm border border-success-subtle">
-                            <div class="col-md-4">
-                                <div class="form-floating">
-                                    <input type="text" name="NewInstrumento" class="form-control" placeholder="Ej: Batería, Voz..." />
-                                    <label for="NewInstrumento">Instrumento</label>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="form-floating">
-                                    <textarea name="NewNotaContenido" class="form-control font-monospace" placeholder="Escribe aquí los acordes o tablatura..." style="height: 100px"></textarea>
-                                    <label for="NewNotaContenido">Acordes / Tablatura nueva (¡Copia LAS NOTAS AQUÍ!)</label>
-                                </div>
+                                <input type="file" id="FotoFile" name="FotoFile" class="form-control neo-input d-none" accept="image/*" />
+                                <div class="mt-2 text-muted small" id="file-name-display">Ningún archivo nuevo seleccionado</div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 rounded-pill shadow-sm">
-                                <i class="bi bi-arrow-left me-2"></i>Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-sm fw-bold">
-                                <i class="bi bi-save me-2"></i>Actualizar Cambios
-                            </button>
+                    <h5 class="neo-section-title pb-2 mb-4 mt-5"><i class="bi bi-music-note-list me-2"></i>Notas Musicales Existentes</h5>
+                    
+                    @if (Model.NotasMusicales != null && Model.NotasMusicales.Any())
+                    {
+                        <div class="row g-4 mb-4">
+                            @foreach (var nota in Model.NotasMusicales)
+                            {
+                                <div class="col-12">
+                                    <div class="neo-code-block rounded-3 overflow-hidden position-relative">
+                                        <input type="hidden" name="NotaIds" value="@nota.NotaMusicalId" />
+                                        
+                                        <!-- Header de la Consola -->
+                                        <div class="d-flex justify-content-between align-items-center p-2 neo-code-header">
+                                            <div class="d-flex align-items-center">
+                                                <div class="mac-btns me-3">
+                                                    <span class="mac-btn close-btn"></span>
+                                                    <span class="mac-btn min-btn"></span>
+                                                    <span class="mac-btn max-btn"></span>
+                                                </div>
+                                                <span class="badge" style="background: var(--cyber-cyan); color: #000; font-weight: bold; letter-spacing: 1px;">
+                                                    <i class="bi bi-speaker me-1"></i> @nota.Instrumento
+                                                </span>
+                                            </div>
+                                            <small style="color: #64748b; font-family: monospace;">mod_time: @nota.UltimaEdicion.ToShortDateString()</small>
+                                        </div>
+                                        
+                                        <!-- Contenedor del Textarea con efecto Matrix -->
+                                        <div class="position-relative">
+                                            <textarea name="NotaContenidos" class="form-control font-monospace neo-textarea-code" spellcheck="false" style="height: 350px">@nota.Contenido</textarea>
+                                            <div class="coding-caret"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
-                    </form>
-                </div>
+                    }
+                    else
+                    {
+                        <div class="alert neo-alert-blue shadow-sm d-flex align-items-center rounded-3">
+                            <i class="bi bi-info-circle-fill fs-4 me-3" style="color: #00e5ff; text-shadow: 0 0 10px #00e5ff;"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-white">No hay datos musicales</h6>
+                                <p class="mb-0 text-muted small">Esta canción aún no tiene notas registradas en la base de datos.</p>
+                            </div>
+                        </div>
+                    }
+
+                    <h5 class="pb-2 mb-4 mt-5" style="color: var(--cyber-teal); border-bottom: 1px solid rgba(29, 233, 182, 0.3); text-shadow: 0 0 8px rgba(29, 233, 182, 0.4);">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Nueva Secuencia (Opcional)
+                    </h5>
+                    
+                    <div class="row g-4 mb-5 p-4 rounded-4 shadow-sm neo-glow-box">
+                        <div class="col-md-4">
+                            <label for="NewInstrumento" class="neo-label" style="color: var(--cyber-teal);">Instrumento Nuevo</label>
+                            <input type="text" name="NewInstrumento" id="NewInstrumento" class="form-control form-control-lg neo-input" placeholder="Ej: Sintetizador, Bajo..." />
+                        </div>
+                        <div class="col-md-8">
+                            <label for="NewNotaContenido" class="neo-label" style="color: var(--cyber-teal);">Tablatura / Cifrado</label>
+                            <textarea name="NewNotaContenido" id="NewNotaContenido" class="form-control font-monospace neo-input neo-textarea-code" spellcheck="false" placeholder="<Ingresar_Secuencia_Aquí>" style="height: 120px"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                        <a asp-action="Index" class="btn neo-btn-outline rounded-pill px-4 fw-bold">
+                            <i class="bi bi-arrow-return-left me-2"></i>Abortar
+                        </a>
+                        <button type="submit" class="btn neo-btn-cyan-solid rounded-pill px-5 py-2 shadow-lg fw-bold" style="letter-spacing: 1px;">
+                            <i class="bi bi-database-up me-2"></i>Sincronizar Cambios
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
+@section Styles {
+    <style>
+        :root {
+            --cyber-bg: #0a0b10;
+            --cyber-panel: #12141d;
+            --cyber-box: #1a1e2b;
+            --cyber-cyan: #00e5ff;
+            --cyber-orange: #ff3d00;
+            --cyber-teal: #1de9b6;
+        }
+        
+        body { 
+            background-color: var(--cyber-bg) !important; 
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        .neo-main-panel { background-color: var(--cyber-panel) !important; }
+        
+        /* Titles & Alerts */
+        .neo-section-title {
+            color: var(--cyber-cyan);
+            border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+            text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+        }
+
+        .neo-alert-danger {
+            background: rgba(255, 61, 0, 0.1);
+            border: 1px solid rgba(255, 61, 0, 0.5);
+            border-left: 4px solid var(--cyber-orange);
+            color: #ffffff;
+        }
+
+        .neo-alert-blue {
+            background: rgba(0, 229, 255, 0.05);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-left: 4px solid var(--cyber-cyan);
+        }
+
+        /* Inputs and Textareas */
+        .neo-label {
+            color: #a9b7c6;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .neo-input {
+            background-color: var(--cyber-box) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+            transition: all 0.3s ease;
+        }
+        
+        .neo-input-group-text {
+            background-color: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--cyber-cyan);
+            border-right: none;
+        }
+        
+        .input-group > .neo-input { border-left: none !important; }
+
+        .neo-input:focus, .input-group:focus-within .neo-input-group-text {
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2) !important;
+            border-color: var(--cyber-cyan) !important;
+            color: var(--cyber-cyan) !important;
+        }
+
+        /* Upload area */
+        .neo-upload-box {
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+        .neo-upload-box:hover {
+            background: rgba(0, 229, 255, 0.05);
+            border-color: var(--cyber-cyan) !important;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+        }
+        
+        .neo-glow-box {
+            background: rgba(26, 30, 43, 0.6);
+            border: 1px solid rgba(29, 233, 182, 0.3);
+            box-shadow: inset 0 0 20px rgba(29, 233, 182, 0.05);
+        }
+
+        /* Coding Area (Notas Musicales) */
+        .neo-code-block {
+            background-color: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .neo-code-block:focus-within {
+            border-color: var(--cyber-cyan);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+
+        .neo-code-header {
+            background: #161b22;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .mac-btns { display: flex; gap: 6px; }
+        .mac-btn { width: 12px; height: 12px; border-radius: 50%; opacity: 0.8; }
+        .close-btn { background: #ff5f56; }
+        .min-btn { background: #ffbd2e; }
+        .max-btn { background: #27c93f; }
+
+        .neo-textarea-code {
+            background-color: transparent !important;
+            border: none !important;
+            color: #e5e5e5 !important;
+            padding: 1.5rem;
+            resize: vertical;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .neo-textarea-code:focus {
+            box-shadow: none !important;
+            color: var(--cyber-teal) !important;
+            outline: none;
+        }
+
+        /* Caret blink effect added dynamically by JS */
+
+        /* Buttons */
+        .neo-btn-outline {
+            color: #94a3b8 !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            background: transparent;
+            transition: all 0.3s;
+        }
+        .neo-btn-outline:hover {
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.1);
+            border-color: #ffffff !important;
+        }
+
+        .neo-btn-cyan-solid {
+            background-color: var(--cyber-cyan) !important;
+            color: #000 !important;
+            border: none !important;
+            transition: all 0.3s ease;
+        }
+        .neo-btn-cyan-solid:hover {
+            background-color: #18ffff !important;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.7);
+            transform: translateY(-2px);
+        }
+    </style>
+}
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Manejar display del archivo seleccionado
+            const fileInput = document.getElementById('FotoFile');
+            const fileDisplay = document.getElementById('file-name-display');
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files[0]) {
+                        fileDisplay.textContent = e.target.files[0].name;
+                        fileDisplay.style.color = 'var(--cyber-cyan)';
+                    } else {
+                        fileDisplay.textContent = 'Ningún archivo nuevo seleccionado';
+                        fileDisplay.style.color = '';
+                    }
+                });
+            }
+
+            // Animaciones Matrix / Codificación para las áreas de texto de notas
+            const textareas = document.querySelectorAll('.neo-textarea-code');
+            
+            textareas.forEach(ta => {
+                // Flash effect al enfocar
+                ta.addEventListener('focus', function() {
+                    const block = this.closest('.neo-code-block') || this.closest('.neo-glow-box');
+                    if(block) {
+                        block.animate([
+                            { boxShadow: '0 0 0 rgba(0, 229, 255, 0)' },
+                            { boxShadow: '0 0 30px rgba(0, 229, 255, 0.4)' },
+                            { boxShadow: '0 0 15px rgba(0, 229, 255, 0.2)' }
+                        ], { duration: 600, easing: 'ease-out' });
+                    }
+                });
+            });
+        });
+    </script>
 }
