@@ -3,6 +3,12 @@ using IglesiaGPS.modelo;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Aumentar límite de tamaño del cuerpo de la solicitud (50 MB) para subida de imágenes
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
+});
+
 Crud<Rol>.EndPoint = "https://localhost:7220/api/Roles";
 Crud<Usuario>.EndPoint = "https://localhost:7220/api/Usuarios";
 Crud<Cancion>.EndPoint = "https://localhost:7220/api/Canciones";

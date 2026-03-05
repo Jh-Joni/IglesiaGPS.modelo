@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IglesiaGPS.Api.Migrations
 {
     [DbContext(typeof(IglesiaGPSApiContext))]
-    [Migration("20260228232429_AddFotoUrlCancion")]
-    partial class AddFotoUrlCancion
+    [Migration("20260305144111_iglesia01")]
+    partial class iglesia01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,9 +43,6 @@ namespace IglesiaGPS.Api.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FotoUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Letra")
                         .HasColumnType("text");
 
                     b.Property<string>("Titulo")

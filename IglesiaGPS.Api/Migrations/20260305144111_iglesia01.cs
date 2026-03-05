@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IglesiaGPS.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class v2 : Migration
+    public partial class iglesia01 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,7 +38,7 @@ namespace IglesiaGPS.Api.Migrations
                     Correo = table.Column<string>(type: "text", nullable: false),
                     Contrasena = table.Column<string>(type: "text", nullable: false),
                     RolId = table.Column<int>(type: "integer", nullable: false),
-                    FechaRegistro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaRegistro = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Activo = table.Column<bool>(type: "boolean", nullable: false),
                     PuedeEditarNotas = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -63,8 +63,8 @@ namespace IglesiaGPS.Api.Migrations
                     Autor = table.Column<string>(type: "text", nullable: false),
                     Tono = table.Column<string>(type: "text", nullable: true),
                     UrlAudio = table.Column<string>(type: "text", nullable: true),
-                    Letra = table.Column<string>(type: "text", nullable: true),
-                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FotoUrl = table.Column<string>(type: "text", nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     CreadoPorUsuarioId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -85,8 +85,8 @@ namespace IglesiaGPS.Api.Migrations
                     ListaCancionesId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Titulo = table.Column<string>(type: "text", nullable: false),
-                    FechaPublicacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaPublicacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Publicada = table.Column<bool>(type: "boolean", nullable: false),
                     DirectorId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -110,7 +110,7 @@ namespace IglesiaGPS.Api.Migrations
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
                     TipoAccion = table.Column<string>(type: "text", nullable: false),
                     Descripcion = table.Column<string>(type: "text", nullable: false),
-                    FechaAccion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaAccion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     EntidadAfectada = table.Column<string>(type: "text", nullable: true),
                     EntidadId = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -134,8 +134,8 @@ namespace IglesiaGPS.Api.Migrations
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
                     CodigoIngresado = table.Column<string>(type: "text", nullable: false),
                     Estado = table.Column<string>(type: "text", nullable: false),
-                    FechaSolicitud = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    FechaRespuesta = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    FechaSolicitud = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    FechaRespuesta = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     RespuestaPorUsuarioId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -163,7 +163,7 @@ namespace IglesiaGPS.Api.Migrations
                     CancionId = table.Column<int>(type: "integer", nullable: false),
                     Contenido = table.Column<string>(type: "text", nullable: false),
                     Instrumento = table.Column<string>(type: "text", nullable: true),
-                    UltimaEdicion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UltimaEdicion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     EditadoPorUsuarioId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -192,7 +192,7 @@ namespace IglesiaGPS.Api.Migrations
                     UsuarioId = table.Column<int>(type: "integer", nullable: false),
                     CancionId = table.Column<int>(type: "integer", nullable: false),
                     Mensaje = table.Column<string>(type: "text", nullable: true),
-                    FechaRecomendacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaRecomendacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Leida = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>

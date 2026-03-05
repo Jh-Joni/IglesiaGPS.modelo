@@ -144,89 +144,114 @@ namespace Iglesia.MVC.Controllers
         [HttpGet]
         public IActionResult DescargarPdfListaActiva(int id)
         {
-            var lista = Crud<ListaCanciones>.GetById(id);
-            if (lista == null) return NotFound();
-
-            var detalles = lista.Detalles?.OrderBy(d => d.Orden).ToList() ?? new List<ListaCancionDetalle>();
-            var todasLasNotas = Crud<NotaMusical>.GetAll() ?? new List<NotaMusical>();
-
-            QuestPDF.Settings.License = LicenseType.Community;
-
-            var document = Document.Create(container =>
+            try
             {
-                container.Page(page =>
+                var lista = Crud<ListaCanciones>.GetById(id);
+                if (lista == null) return NotFound();
+
+                var detalles = lista.Detalles?.OrderBy(d => d.Orden).ToList() ?? new List<ListaCancionDetalle>();
+
+                // Obtener notas de forma segura
+                List<NotaMusical> todasLasNotas;
+                try
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(2, Unit.Centimetre);
-                    page.PageColor(Colors.White);
-                    page.DefaultTextStyle(x => x.FontSize(12));
+                    todasLasNotas = Crud<NotaMusical>.GetAll() ?? new List<NotaMusical>();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "No se pudieron cargar las notas musicales para el PDF.");
+                    todasLasNotas = new List<NotaMusical>();
+                }
 
-                    page.Header().Element(ComposeHeader);
-                    page.Content().Element(ComposeContent);
-                    page.Footer().AlignCenter().Text(x =>
-                    {
-                        x.CurrentPageNumber();
-                        x.Span(" / ");
-                        x.TotalPages();
-                    });
+                QuestPDF.Settings.License = LicenseType.Community;
 
-                    void ComposeHeader(IContainer container)
+                // Sanitizar título para nombre de archivo seguro
+                var tituloSeguro = string.Join("_", (lista.Titulo ?? "Repertorio").Split(Path.GetInvalidFileNameChars()));
+
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
                     {
-                        container.Row(row =>
+                        page.Size(PageSizes.A4);
+                        page.Margin(2, Unit.Centimetre);
+                        page.PageColor(Colors.White);
+                        page.DefaultTextStyle(x => x.FontSize(12));
+
+                        page.Content().Column(c =>
                         {
-                            row.RelativeItem().Column(column =>
-                            {
-                                column.Item().Text($"Repertorio: {lista.Titulo}").FontSize(20).SemiBold().FontColor(Colors.Blue.Darken2);
-                                column.Item().Text($"Fecha: {lista.FechaCreacion:dd/MM/yyyy}").FontSize(14);
-                            });
+                            c.Item().PaddingBottom(1, Unit.Centimetre).Element(ComposeHeader);
+                            c.Item().Element(ComposeContent);
                         });
-                    }
 
-                    void ComposeContent(IContainer container)
-                    {
-                        container.PaddingVertical(1, Unit.Centimetre).Column(column =>
+                        page.Footer().AlignCenter().Text(x =>
                         {
-                            foreach (var det in detalles)
-                            {
-                                var cancion = det.Cancion;
-                                if (cancion == null) continue;
+                            x.CurrentPageNumber();
+                            x.Span(" / ");
+                            x.TotalPages();
+                        });
 
-                                var notas = todasLasNotas.FirstOrDefault(n => n.CancionId == cancion.CancionId);
-                                
-                                column.Item().PaddingBottom(10).Text(text =>
+                        void ComposeHeader(IContainer headerContainer)
+                        {
+                            headerContainer.Row(row =>
+                            {
+                                row.RelativeItem().Column(column =>
                                 {
-                                    text.Span($"{cancion.Titulo}").FontSize(16).Bold();
-                                    if (!string.IsNullOrEmpty(cancion.Tono))
-                                    {
-                                        text.Span($" (Tono: {cancion.Tono})").FontSize(14).Italic().FontColor(Colors.Grey.Darken2);
-                                    }
+                                    column.Item().Text($"Repertorio: {lista.Titulo ?? "Sin título"}").FontSize(20).SemiBold().FontColor(Colors.Blue.Darken2);
+                                    column.Item().Text($"Fecha: {lista.FechaCreacion:dd/MM/yyyy}").FontSize(14);
                                 });
+                            });
+                        }
 
-                                if (notas != null && !string.IsNullOrWhiteSpace(notas.Contenido))
+                        void ComposeContent(IContainer contentContainer)
+                        {
+                            contentContainer.PaddingVertical(1, Unit.Centimetre).Column(column =>
+                            {
+                                if (detalles.Count == 0)
                                 {
-                                    column.Item().PaddingBottom(20).Text(notas.Contenido).FontSize(12);
+                                    column.Item().PaddingBottom(20).Text("Este repertorio no tiene canciones vinculadas.").FontSize(14).Italic().FontColor(Colors.Grey.Medium);
+                                    return;
                                 }
-                                else
+
+                                foreach (var det in detalles)
                                 {
-                                    column.Item().PaddingBottom(20).Text("Sin notas registradas.").FontSize(12).Italic().FontColor(Colors.Grey.Medium);
+                                    var cancion = det.Cancion;
+                                    if (cancion == null) continue;
+
+                                    var notas = todasLasNotas.FirstOrDefault(n => n.CancionId == cancion.CancionId);
+
+                                    column.Item().PaddingBottom(10).Text(text =>
+                                    {
+                                        text.Span(cancion.Titulo ?? "Sin título").FontSize(16).Bold();
+                                        if (!string.IsNullOrEmpty(cancion.Tono))
+                                        {
+                                            text.Span($" (Tono: {cancion.Tono})").FontSize(14).Italic().FontColor(Colors.Grey.Darken2);
+                                        }
+                                    });
+
+                                    if (notas != null && !string.IsNullOrWhiteSpace(notas.Contenido))
+                                    {
+                                        column.Item().PaddingBottom(20).Text(notas.Contenido).FontSize(12);
+                                    }
+                                    else
+                                    {
+                                        column.Item().PaddingBottom(20).Text("Sin notas registradas.").FontSize(12).Italic().FontColor(Colors.Grey.Medium);
+                                    }
+
+                                    column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                                    column.Item().PaddingBottom(15);
                                 }
-                                
-                                column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-                                column.Item().PaddingBottom(15);
-                            }
-                        });
-                    }
+                            });
+                        }
+                    });
                 });
-            });
 
-            try 
-            {
                 var pdfBytes = document.GeneratePdf();
-                return File(pdfBytes, "application/pdf", $"Repertorio_{lista.Titulo.Replace(" ", "_")}.pdf");
+                return File(pdfBytes, "application/pdf", $"Repertorio_{tituloSeguro}.pdf");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al generar el PDF del repertorio.");
+                _logger.LogError(ex, "Error al generar el PDF del repertorio {Id}.", id);
+                TempData["Error"] = "No se pudo generar el PDF. Intente nuevamente.";
                 return RedirectToAction("Index");
             }
         }

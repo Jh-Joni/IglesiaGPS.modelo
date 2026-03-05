@@ -42,9 +42,6 @@ namespace IglesiaGPS.Api.Migrations
                     b.Property<string>("FotoUrl")
                         .HasColumnType("text");
 
-                    b.Property<string>("Letra")
-                        .HasColumnType("text");
-
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasColumnType("text");
