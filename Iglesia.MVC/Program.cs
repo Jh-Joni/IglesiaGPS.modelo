@@ -11,15 +11,15 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var apiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? "https://iglesiagps-modelo-1.onrender.com";
 
-Crud<Rol>.EndPoint = "$apiBaseUrl/api/Roles";
-Crud<Usuario>.EndPoint = "$apiBaseUrl/api/Usuarios";
-Crud<Cancion>.EndPoint = "$apiBaseUrl/api/Canciones";
-Crud<CancionDTO>.EndPoint = "$apiBaseUrl/api/Canciones";
-Crud<NotaMusical>.EndPoint = "$apiBaseUrl/api/NotasMusicales";
-Crud<ListaCanciones>.EndPoint = "$apiBaseUrl/api/ListaCanciones";
-Crud<ListaCancionDetalle>.EndPoint = "$apiBaseUrl/api/ListaCancionDetalles";
-Crud<Recomendacion>.EndPoint = "$apiBaseUrl/api/Recomendaciones";
-Crud<SolicitudDirector>.EndPoint = "$apiBaseUrl/api/SolicitudesDirector";
+Crud<Rol>.EndPoint = $"{apiBaseUrl}/api/Roles";
+Crud<Usuario>.EndPoint = $"{apiBaseUrl}/api/Usuarios";
+Crud<Cancion>.EndPoint = $"{apiBaseUrl}/api/Canciones";
+Crud<CancionDTO>.EndPoint = $"{apiBaseUrl}/api/Canciones";
+Crud<NotaMusical>.EndPoint = $"{apiBaseUrl}/api/NotasMusicales";
+Crud<ListaCanciones>.EndPoint = $"{apiBaseUrl}/api/ListaCanciones";
+Crud<ListaCancionDetalle>.EndPoint = $"{apiBaseUrl}/api/ListaCancionDetalles";
+Crud<Recomendacion>.EndPoint = $"{apiBaseUrl}/api/Recomendaciones";
+Crud<SolicitudDirector>.EndPoint = $"{apiBaseUrl}/api/SolicitudesDirector";
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
