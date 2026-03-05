@@ -18,6 +18,14 @@ namespace Iglesia.MVC.Controllers
         public ActionResult Index()
         {
             var lista = Crud<Cancion>.GetAll();
+            
+            // Lógica de Recomendaciones
+            string? userIdStr = HttpContext.Session.GetString("UsuarioId");
+            int usuarioId = string.IsNullOrEmpty(userIdStr) ? 0 : int.Parse(userIdStr);
+            
+            var todasRecomendaciones = Crud<Recomendacion>.GetAll() ?? new List<Recomendacion>();
+            ViewBag.Recomendadas = todasRecomendaciones.Where(r => r.UsuarioId == usuarioId).Select(r => r.CancionId).ToList();
+            
             return View(lista);
         }
                 
@@ -53,25 +61,51 @@ namespace Iglesia.MVC.Controllers
         // POST: CancionesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Cancion cancion, IFormFile? FotoFile, string? NotaContenido = null, string? Instrumento = null)
+        public ActionResult Create(CancionDTO cancionDto, IFormFile? FotoFile, string? NotaContenido = null, string? Instrumento = null)
         {
-            if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
+            var userIdStr = HttpContext.Session.GetString("UsuarioId");
+            if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Auth");
+            
             try
             {
-                if (cancion.FechaCreacion == default)
+                if (cancionDto.FechaCreacion == default)
                 {
-                    cancion.FechaCreacion = DateTime.UtcNow;
+                    cancionDto.FechaCreacion = DateTime.UtcNow;
                 }
-                else if (cancion.FechaCreacion.Kind == DateTimeKind.Unspecified)
+                else if (cancionDto.FechaCreacion.Kind == DateTimeKind.Unspecified)
                 {
-                    cancion.FechaCreacion = DateTime.SpecifyKind(cancion.FechaCreacion, DateTimeKind.Local).ToUniversalTime();
+                    cancionDto.FechaCreacion = DateTime.SpecifyKind(cancionDto.FechaCreacion, DateTimeKind.Local).ToUniversalTime();
                 }
                 else
                 {
-                    cancion.FechaCreacion = cancion.FechaCreacion.ToUniversalTime();
+                    cancionDto.FechaCreacion = cancionDto.FechaCreacion.ToUniversalTime();
                 }
 
-                var createdCancion = Crud<Cancion>.Create(cancion);
+                // Auto-asignar creador desde sesión
+                cancionDto.CreadoPorUsuarioId = int.Parse(userIdStr);
+                
+                // Mapear la letra a null para evitar problemas (ya no se usa en UI)
+                cancionDto.Letra = null;
+
+                // Mapear imagen - Guardar en disco en lugar de B64 para evitar bloqueos
+                if (FotoFile != null && FotoFile.Length > 0)
+                {
+                    var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "canciones");
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(FotoFile.FileName);
+                    var filePath = Path.Combine(folderPath, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        FotoFile.CopyTo(stream);
+                    }
+                    // Usa FotoBase64 temporalmente para transportar la URL a la API si la API la guarda directo
+                    cancionDto.FotoBase64 = "/images/canciones/" + fileName;
+                }
+
+                var createdCancion = Crud<CancionDTO>.Create(cancionDto);
 
                 if (createdCancion != null && createdCancion.CancionId > 0 && !string.IsNullOrWhiteSpace(NotaContenido))
                 {
@@ -81,7 +115,7 @@ namespace Iglesia.MVC.Controllers
                         Contenido = NotaContenido,
                         Instrumento = string.IsNullOrWhiteSpace(Instrumento) ? "General" : Instrumento,
                         UltimaEdicion = DateTime.UtcNow,
-                        EditadoPorUsuarioId = cancion.CreadoPorUsuarioId
+                        EditadoPorUsuarioId = cancionDto.CreadoPorUsuarioId
                     };
                     Crud<NotaMusical>.Create(nota);
                 }
@@ -91,8 +125,13 @@ namespace Iglesia.MVC.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error = ex.Message;
-                ViewBag.Usuarios = Crud<Usuario>.GetAll();
-                return View(cancion);
+                return View(new Cancion 
+                { 
+                    Titulo = cancionDto.Titulo, 
+                    Autor = cancionDto.Autor, 
+                    Tono = cancionDto.Tono, 
+                    UrlAudio = cancionDto.UrlAudio 
+                });
             }
         }
 
@@ -134,18 +173,25 @@ namespace Iglesia.MVC.Controllers
                     Autor = cancion.Autor,
                     Tono = cancion.Tono,
                     UrlAudio = cancion.UrlAudio,
-                    Letra = cancion.Letra,
+                    Letra = null,
                     FechaCreacion = cancion.FechaCreacion,
                     CreadoPorUsuarioId = cancion.CreadoPorUsuarioId
                 };
 
                 if (FotoFile != null && FotoFile.Length > 0)
                 {
-                    using (var ms = new MemoryStream())
+                    var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "canciones");
+                    if (!Directory.Exists(folderPath))
                     {
-                        FotoFile.CopyTo(ms);
-                        dto.FotoBase64 = "data:" + FotoFile.ContentType + ";base64," + Convert.ToBase64String(ms.ToArray());
+                        Directory.CreateDirectory(folderPath);
                     }
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(FotoFile.FileName);
+                    var filePath = Path.Combine(folderPath, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        FotoFile.CopyTo(stream);
+                    }
+                    dto.FotoBase64 = "/images/canciones/" + fileName;
                 }
 
                 // Actualizar Canción usando el DTO

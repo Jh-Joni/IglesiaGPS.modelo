@@ -59,16 +59,28 @@ namespace Iglesia.MVC.Controllers
             // Traer el Historial de Repertorios (Máximo 5)
             try
             {
-                var endpoint = $"{Crud<ListaCanciones>.EndPoint}/publicadas";
-                var listas = Crud<ListaCanciones>.GetCustom(endpoint);
+                var todasLasListas = Crud<ListaCanciones>.GetAll() ?? new List<ListaCanciones>();
 
-                if (listas == null || listas.Count == 0)
-                {
-                    listas = Crud<ListaCanciones>.GetAll()
-                        .OrderByDescending(l => l.FechaCreacion)
-                        .Take(5)
-                        .ToList();
-                }
+                // Filtrar las 5 listas PADRE (Domingo) más recientes que estén publicadas
+                var listasPadre = todasLasListas
+                    .Where(l => l.Publicada && !l.Titulo.StartsWith("Miércoles_"))
+                    .OrderByDescending(l => l.FechaCreacion)
+                    .Take(5)
+                    .ToList();
+
+                // Extraer los IDs de esas 5 listas padre
+                var idsPadre = listasPadre.Select(l => l.ListaCancionesId).ToList();
+
+                // Buscar las listas de Miércoles asociadas a esos 5 padres (pueden ser privadas)
+                var listasMiercoles = todasLasListas
+                    .Where(l => l.Titulo.StartsWith("Miércoles_") && 
+                                idsPadre.Contains(int.Parse(l.Titulo.Split('_')[1])))
+                    .ToList();
+
+                // Combinar padres e hijas para la vista
+                var listas = new List<ListaCanciones>();
+                listas.AddRange(listasPadre);
+                listas.AddRange(listasMiercoles);
 
                 ViewBag.ListasMusicales = listas;
             }
@@ -76,6 +88,17 @@ namespace Iglesia.MVC.Controllers
             {
                 ViewBag.ListasMusicales = new List<ListaCanciones>();
                 _logger.LogError(ex, "Error al cargar las listas de canciones.");
+            }
+
+            // Notificación de Recomendaciones para Directores/Desarrolladores
+            try
+            {
+                var recomendaciones = Crud<Recomendacion>.GetAll();
+                ViewBag.TotalRecomendacionesPendientes = recomendaciones != null ? recomendaciones.Count : 0;
+            }
+            catch (Exception)
+            {
+                ViewBag.TotalRecomendacionesPendientes = 0;
             }
 
             return View();

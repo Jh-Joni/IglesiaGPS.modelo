@@ -111,25 +111,31 @@
         </div>
     }
 
+    <!-- ALERTA DE RECOMENDACIONES (Cyberpunk Orange) -->
+    @if ((Context.Session.GetString("UsuarioRol") == "Director" || Context.Session.GetString("UsuarioRol") == "Desarrollador") && ViewBag.TotalRecomendacionesPendientes > 0)
+    {
+        <div class="container my-4" style="max-width: 900px;">
+            <div class="alert shadow-lg d-flex align-items-center justify-content-between p-3" style="background: rgba(255, 170, 0, 0.1); border: 1px solid rgba(255, 170, 0, 0.5); border-left: 4px solid #ffaa00; border-radius: 12px; backdrop-filter: blur(5px);">
+                <div>
+                    <i class="bi bi-broadcast fs-4 me-3" style="color: #ffaa00; text-shadow: 0 0 10px #ffaa00;"></i>
+                    <span style="color: #e2e8f0; font-size: 1.05rem;">
+                        <strong>¡Señal Recibida!</strong> Hay <span style="color: #ffaa00; font-weight: bold; font-family: monospace; font-size: 1.1rem;">@ViewBag.TotalRecomendacionesPendientes</span> canciones recomendadas esperando revisión.
+                    </span>
+                </div>
+                <a asp-controller="Recomendaciones" asp-action="Index" class="btn btn-sm btn-outline-warning fw-bold rounded-pill shadow-sm" style="transition: all 0.3s; white-space: nowrap;">
+                    IR A PANEL <i class="bi bi-arrow-right-short"></i>
+                </a>
+            </div>
+        </div>
+    }
+
     <!-- HISTORIAL DE ALABANZAS POR SEMANA -->
     <section class="historial-section">
         @{
-            var listasMusicales = ViewBag.ListasMusicales as List<IglesiaGPS.modelo.ListaCanciones> ?? new();
-            var existePublicada = listasMusicales.Any(l => l.Publicada);
-        }
+            var listasMusicalesRaw = ViewBag.ListasMusicales as List<IglesiaGPS.modelo.ListaCanciones> ?? new List<IglesiaGPS.modelo.ListaCanciones>();
+            var listasPadre = listasMusicalesRaw.Where(l => !l.Titulo.StartsWith("Miércoles_")).ToList();
+            bool existePublicada = listasPadre.Any(l => l.Publicada);
 
-        <h2>📋 Alabanzas de la Semana</h2>
-        <p class="historial-subtitulo">Repertorio principal elegido por nuestros Directores</p>
-
-        @if (listasMusicales.Count == 0)
-        {
-            <div class="historial-vacio">
-                🎵 No hay repertorios creados todavía.<br>
-                <span class="text-muted" style="font-size:13px;">Los directores pueden crear el repertorio semanal desde el panel y aparecerá aquí automáticamente.</span>
-            </div>
-        }
-        else
-        {
             // Lógica robusta para determinar el límite de la semana activa (Domingo 19:00)
             var ahora = DateTime.Now;
             
@@ -146,10 +152,23 @@
             }
             
             var inicioSemana = corteSemana.AddDays(-7); // El límite inferior es exactamente 7 días antes del corte
+        }
 
-            @for (int i = 0; i < listasMusicales.Count; i++)
+        <h2>📋 Alabanzas de la Semana</h2>
+        <p class="historial-subtitulo">Repertorio principal elegido por nuestros Directores</p>
+
+        @if (listasPadre.Count == 0)
+        {
+            <div class="historial-vacio">
+                🎵 No hay repertorios creados todavía.<br>
+                <span class="text-muted" style="font-size:13px;">Los directores pueden crear el repertorio semanal desde el panel y aparecerá aquí automáticamente.</span>
+            </div>
+        }
+        else
+        {
+            @for (int i = 0; i < listasPadre.Count; i++)
             {
-                var lista = listasMusicales[i];
+                var lista = listasPadre[i];
                 var esActiva = lista.Publicada || (!existePublicada && i == 0);
                 var colorClase = esActiva ? "lista-activa" : "lista-pasada";
                 
@@ -157,30 +176,46 @@
                 var detalles = lista.Detalles?.OrderBy(d => d.Orden).ToList() ?? new List<IglesiaGPS.modelo.ListaCancionDetalle>();
                 var creador = lista.Director != null ? lista.Director.Nombre : "Director";
 
+                // Encontrar la lista de Miércoles asociada
+                string tituloMiercoles = $"Miércoles_{lista.ListaCancionesId}";
+                var listaMiercoles = listasMusicalesRaw.FirstOrDefault(l => l.Titulo == tituloMiercoles);
+                var detallesMiercoles = listaMiercoles?.Detalles?.OrderBy(d => d.Orden).ToList() ?? new List<IglesiaGPS.modelo.ListaCancionDetalle>();
+
                 <div class="historial-lista @colorClase" data-index="@i">
                     <div class="historial-lista-header" onclick="toggleSemana(@i)">
                         <div class="historial-lista-info">
-                            @if (esActiva)
-                            { 
-                                <span class="estado-badge badge-activa">🟢 REPERTORIO ACTUAL</span> 
-                                <a asp-controller="Home" asp-action="DescargarPdfListaActiva" asp-route-id="@lista.ListaCancionesId" class="btn btn-sm text-white ms-3 rounded-pill fw-bold" style="background-color: #d4af37;" target="_blank">
-                                    <i class="bi bi-file-earmark-pdf"></i> Descargar PDF
-                                </a>
-                                @if (Context.Session.GetString("UsuarioRol") == "Director" || Context.Session.GetString("UsuarioRol") == "Desarrollador")
-                                {
-                                    <a asp-controller="ListaCanciones" asp-action="EditarSemana" asp-route-id="@lista.ListaCancionesId" class="btn btn-sm text-white ms-3 rounded-pill fw-bold" style="background-color: #0D6845;">
-                                        <i class="bi bi-pencil-square"></i> Editar Repertorio
-                                    </a>
+                            <div class="d-flex align-items-center mb-2 flex-wrap">
+                                @if (esActiva)
+                                { 
+                                    <span class="estado-badge badge-activa me-2">🟢 DOMINGO ACTUAL</span> 
                                 }
-                            }
-                            else
-                            { 
-                                <span class="estado-badge badge-pasada">🔴 ANTERIOR</span> 
-                            }
+                                else
+                                { 
+                                    <span class="estado-badge badge-pasada me-2">🔴 DOMINGO ANTERIOR</span> 
+                                }
+                            </div>
                             
-                            <h3>@lista.Titulo</h3>
-                            <div class="historial-meta">
-                                <span>🎵 @detalles.Count canciones</span>
+                            <div class="d-flex align-items-center flex-wrap gap-2 mt-2 mb-1" onclick="event.stopPropagation();">
+                                @if (esActiva)
+                                {
+                                    <a asp-controller="Home" asp-action="DescargarPdfListaActiva" asp-route-id="@lista.ListaCancionesId" class="btn btn-sm text-white rounded-pill fw-bold" style="background-color: #d4af37;" target="_blank">
+                                        <i class="bi bi-file-earmark-pdf"></i> PDF Domingo
+                                    </a>
+                                    @if (Context.Session.GetString("UsuarioRol") == "Director" || Context.Session.GetString("UsuarioRol") == "Desarrollador")
+                                    {
+                                        <a asp-controller="ListaCanciones" asp-action="EditarSemana" asp-route-id="@lista.ListaCancionesId" class="btn btn-sm text-white rounded-pill fw-bold" style="background-color: #0D6845;">
+                                            <i class="bi bi-pencil-square"></i> Editar Dom
+                                        </a>
+                                        <a asp-controller="ListaCanciones" asp-action="EditarMiercoles" asp-route-id="@lista.ListaCancionesId" class="btn btn-sm btn-outline-warning rounded-pill fw-bold" style="border-width: 2px;">
+                                            <i class="bi bi-gear-fill"></i> Armar Miércoles
+                                        </a>
+                                    }
+                                }
+                            </div>
+                            
+                            <h3 class="mt-2 text-white">@lista.Titulo</h3>
+                            <div class="historial-meta mt-1 mb-2">
+                                <span>🎵 @detalles.Count canciones dom.</span>
                                 <span>📅 @lista.FechaCreacion.ToString("dd/MM/yyyy")</span>
                                 <span class="fw-bold text-dark"><i class="bi bi-person-badge"></i> Por: @creador</span>
                             </div>
@@ -189,8 +224,20 @@
                     </div>
 
                     <div class="canciones-wrapper @(esActiva ? "expandido" : "colapsado")" id="canciones-@i">
-                        <div class="canciones-container">
-                            
+                        
+                        <!-- CONTENEDOR DE DOMINGO -->
+                        <div class="canciones-container mt-2" id="grid-domingo-@i">
+                            <div class="d-flex justify-content-between align-items-center mb-3 mt-1 pb-2 border-bottom border-secondary flex-wrap gap-2">
+                                <h5 class="fw-bold m-0 text-white">
+                                    <i class="bi bi-calendar-check text-success"></i> Lista del Domingo
+                                </h5>
+                                @if (detallesMiercoles.Count > 0)
+                                {
+                                    <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-sm" onclick="switchTab(@i, 'miercoles')">
+                                        Ver Miércoles <i class="bi bi-arrow-right-circle"></i>
+                                    </button>
+                                }
+                            </div>
                             @if (detalles.Count == 0)
                             {
                                 <div class="text-muted small mt-2">Esta lista se guardó sin canciones vinculadas.</div>
@@ -204,7 +251,7 @@
 
                                     <div class="cancion-card @(esActiva ? "" : "card-pasada")" style="animation-delay: @(detalles.IndexOf(det) * 0.1)s">
                                         <div>
-                                            <h3>@cancion.Titulo</h3>
+                                            <h3 class="text-truncate" title="@cancion.Titulo">@cancion.Titulo</h3>
                                             <p>Autor: @(string.IsNullOrEmpty(cancion.Autor) ? "Desconocido" : cancion.Autor)</p>
                                             @if (!string.IsNullOrEmpty(cancion.Tono))
                                             {
@@ -222,6 +269,57 @@
                                 }
                             }
                         </div>
+                        
+                        <!-- INCIO SUB-PANEL DE MIERCOLES (OCULTO POR DEFECTO) -->
+                        @if (detallesMiercoles.Count > 0)
+                        {
+                            <div class="canciones-container mt-2 d-none" id="grid-miercoles-@i">
+                                <div class="d-flex justify-content-between align-items-center mb-3 mt-1 pb-2 border-bottom flex-wrap gap-2" style="border-color: rgba(234, 179, 8, 0.4) !important;">
+                                    <h5 class="fw-bold m-0" style="color: #fde047;">
+                                        <i class="bi bi-calendar3-week text-warning"></i> Lista del Miércoles
+                                    </h5>
+                                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                                        <a asp-controller="Home" asp-action="DescargarPdfListaActiva" asp-route-id="@listaMiercoles.ListaCancionesId" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-sm" target="_blank">
+                                            <i class="bi bi-file-earmark-pdf"></i> PDF Mié.
+                                        </a>
+                                        @if (Context.Session.GetString("UsuarioRol") == "Director" || Context.Session.GetString("UsuarioRol") == "Desarrollador")
+                                        {
+                                            <a asp-controller="ListaCanciones" asp-action="EditarMiercoles" asp-route-id="@lista.ListaCancionesId" class="btn btn-sm btn-outline-warning fw-bold rounded-pill">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </a>
+                                        }
+                                        <button class="btn btn-sm btn-info text-dark fw-bold rounded-pill mx-1" onclick="switchTab(@i, 'domingo')" style="background-color:#38bdf8; border:none;">
+                                            <i class="bi bi-arrow-left-circle"></i> Ver Domingo
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                @foreach (var detMiercoles in detallesMiercoles)
+                                {
+                                    var cancionMi = detMiercoles.Cancion;
+                                    if (cancionMi == null) continue;
+
+                                    <div class="cancion-card cancion-miercoles card-pasada" style="background: rgba(234, 179, 8, 0.05); border-color: rgba(234, 179, 8, 0.2); animation-delay: 0s">
+                                        <div>
+                                            <h3 style="color: #fde047;" class="text-truncate" title="@cancionMi.Titulo">@cancionMi.Titulo</h3>
+                                            <p style="color: #cbd5e1;">Autor: @(string.IsNullOrEmpty(cancionMi.Autor) ? "Desconocido" : cancionMi.Autor)</p>
+                                            @if (!string.IsNullOrEmpty(cancionMi.Tono))
+                                            {
+                                                <p class="tono-info" style="color: #eab308;">🎼 Tono: @cancionMi.Tono</p>
+                                            }
+                                        </div>
+                                        <div class="botones mt-3">
+                                            <a asp-controller="NotasMusicales" asp-action="VerNotas" asp-route-id="@cancionMi.CancionId" class="btn btn-sm text-dark fw-bold shadow-sm" style="background: #eab308;">Ver notas</a>
+                                            @if (!string.IsNullOrEmpty(cancionMi.UrlAudio))
+                                            {
+                                                <button class="secundario shadow-sm border-warning text-warning" onclick="window.open('@cancionMi.UrlAudio', '_blank')">Escuchar</button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <!-- FIN SUB-PANEL MIERCOLES -->
                     </div>
                 </div>
             }
@@ -241,6 +339,9 @@
             main { 
                 background-color: transparent !important; 
             }
+            
+            /* ====== ESTILOS MODIFICADOS HOME ====== */
+
             /* Estilizar el footer para integrarlo con el neón */
             .footer {
                 background-color: #0b1120 !important;
@@ -256,6 +357,12 @@
             .footer a:hover {
                 text-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
                 color: #ffffff !important;
+            }
+            /* Clase especial para la card the miercoles */
+            .cancion-miercoles:hover {
+                transform: translateY(-5px);
+                border-color: #eab308 !important;
+                box-shadow: 0 10px 20px rgba(234, 179, 8, 0.15) !important;
             }
         </style>
     }

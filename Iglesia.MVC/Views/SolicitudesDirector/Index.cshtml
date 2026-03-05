@@ -18,13 +18,13 @@
         
         <div class="p-5 text-center" style="background-color: var(--cyber-panel);">
             
-            @if (usuarioRol == "Director")
+            @if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
             {
                 <div class="alert neo-alert-success d-flex align-items-center mb-0 text-start" role="alert">
                     <i class="bi bi-check-circle-fill fs-3 me-3" style="color: #1de9b6; text-shadow: 0 0 8px #1de9b6;"></i>
                     <div>
-                        <h5 class="alert-heading mb-1 fw-bold" style="color: #ffffff;">¡Felicidades! Ya eres Director</h5>
-                        <p class="mb-0" style="color: #94a3b8;">Ahora tienes acceso para crear listas de canciones de la semana y editar el repertorio con herramientas exclusivas.</p>
+                        <h5 class="alert-heading mb-1 fw-bold" style="color: #ffffff;">Acceso Concedido: @usuarioRol</h5>
+                        <p class="mb-0" style="color: #94a3b8;">Tienes acceso para crear listas de canciones de la semana, editar el repertorio con herramientas exclusivas y ver recomendaciones.</p>
                     </div>
                 </div>
             }

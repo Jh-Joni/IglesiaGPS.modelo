@@ -1,0 +1,106 @@
+@model IglesiaGPS.modelo.ListaCanciones
+
+@{
+    ViewData["Title"] = "Editar Repertorio de Miércoles";
+    var userRol = Context.Session.GetString("UsuarioRol");
+    var seleccionadas = ViewBag.Seleccionadas as List<int> ?? new List<int>();
+    var disponibles = ViewBag.CancionesDisponibles as List<IglesiaGPS.modelo.Cancion> ?? new List<IglesiaGPS.modelo.Cancion>();
+    int idMiercolesExistente = ViewBag.IdMiercoles ?? 0;
+}
+
+<div class="container mt-4 mb-5">
+    <div class="header-editar mb-4 p-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #111827, #1f2937); border-radius: 12px; border-left: 5px solid #eab308; border-right: 1px solid rgba(234, 179, 8, 0.3); border-top: 1px solid rgba(234, 179, 8, 0.3); border-bottom: 1px solid rgba(234, 179, 8, 0.3);">
+        <div class="d-flex justify-content-between align-items-center position-relative" style="z-index: 2;">
+            <div>
+                <h1 class="text-white fw-bold mb-1" style="text-shadow: 0px 4px 10px rgba(0,0,0,0.5);">Repertorio del Miércoles</h1>
+                <p class="text-white-50 mb-0 d-flex align-items-center">
+                    <i class="bi bi-music-note-list me-2 fs-5 text-warning"></i> Derivado de: @Model.Titulo 
+                </p>
+            </div>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-warning rounded-pill px-4 fw-bold shadow-sm">Volver al Inicio</a>
+        </div>
+    </div>
+
+    <!-- Buscador Oculto: Al ser solo 5-7 tarjetas, no es tan necesario, pero mantenemos compatibilidad con el JS si hiciera falta -->
+    <div class="row mb-5 justify-content-center d-none">
+        <div class="col-md-6 text-center">
+             <input type="text" id="searchInput" class="d-none">
+        </div>
+    </div>
+
+    @* Token Antiforgery Oculto *@
+    <form id="antiForgeryForm" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+    
+    <!-- INYECCIÓN AL JS -->
+    <input type="hidden" id="idListaPadre" value="@Model.ListaCancionesId" />
+    <input type="hidden" id="idListaMiercoles" value="@idMiercolesExistente" />
+
+    <!-- Grid Musical (Solo las seleccionables) -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="cancionesContainer">
+        @foreach (var item in disponibles)
+        {
+            var isSelected = seleccionadas.Contains(item.CancionId);
+            var cardClass = isSelected ? "cancion-card selected border-warning shadow-lg" : "cancion-card";
+            var bgStyle = isSelected ? "background: rgba(234, 179, 8, 0.1);" : "background: rgba(30, 41, 59, 0.6);";
+            var borderStyle = isSelected ? "border: 2px solid #eab308 !important;" : "border: 1px solid rgba(255, 255, 255, 0.05) !important;";
+
+            <div class="col cancion-card-wrapper" data-autor="@item.Autor?.ToLower()" data-titulo="@item.Titulo?.ToLower()">
+                <div class="card h-100 song-panel transition-hover @cardClass" data-id="@item.CancionId" style="@bgStyle backdrop-filter: blur(10px); @borderStyle transition: all 0.3s ease;">
+                    <div class="card-body d-flex flex-column text-center p-3">
+                        <div class="cancion-selector mx-auto mb-3 cancion-img-container position-relative" style="cursor: pointer;" onclick="toggleSeleccion(this)">
+                            @if (!string.IsNullOrEmpty(item.FotoUrl))
+                            {
+                                <img src="@item.FotoUrl" class="rounded-circle object-fit-cover shadow-sm cancion-foto" style="width: 70px; height: 70px; border: 2px solid rgba(234, 179, 8, 0.5);" alt="Foto de @item.Autor">
+                            }
+                            else
+                            {
+                                <div class="song-icon rounded-circle d-flex align-items-center justify-content-center shadow-sm mx-auto" style="width: 70px; height: 70px; background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); color: #eab308;">
+                                    <i class="bi bi-music-note-beamed fs-3 icon-music"></i>
+                                </div>
+                            }
+                            <!-- Borde de selección verde -->
+                            <div class="seleccion-badge position-absolute top-50 start-50 translate-middle text-white rounded-circle fw-bold fs-4 align-items-center justify-content-center shadow @(isSelected ? "d-flex" : "d-none")" style="width: 70px; height: 70px; z-index: 10; background-color: rgba(234, 179, 8, 0.85); border: 2px solid #fff;">
+                                <i class="bi bi-check-lg text-dark"></i>
+                            </div>
+                        </div>
+
+                        <h5 class="card-title fw-bold text-truncate mb-1" title="@item.Titulo" style="font-size: 1.1rem; color: #ffffff;">@item.Titulo</h5>
+                        <p class="card-text mb-3" style="font-size: 0.9rem; color: #94a3b8;">
+                            <i class="bi bi-person-fill"></i> @(string.IsNullOrEmpty(item.Autor) ? "Desconocido" : item.Autor)
+                        </p>
+
+                        <div class="mt-auto pointer-events-none">
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem; background: rgba(0, 242, 254, 0.1); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.3);">
+                                Tono: @(string.IsNullOrEmpty(item.Tono) ? "-" : item.Tono)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Panel Flotante Fijo Inferior -->
+    <div class="fixed-bottom p-3" style="z-index: 1000; pointer-events: none;">
+        <div class="container d-flex justify-content-center">
+            <div class="panel-flotante shadow-lg rounded-pill p-2 d-flex align-items-center" style="background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(234, 179, 8, 0.5); pointer-events: auto; padding-right: 20px !important;">
+                <div class="contador-badge d-flex align-items-center justify-content-center rounded-circle fw-bold shadow-sm ms-2" id="contadorSeleccion" style="width: 45px; height: 45px; background: #eab308; color: #000; font-size: 1.2rem; border: 2px solid #000;">
+                    @seleccionadas.Count
+                </div>
+                <div class="ms-3 me-4 text-white">
+                    <div class="fw-bold" style="line-height: 1;">Canciones (Miércoles)</div>
+                    <small style="color: #94a3b8; font-size: 0.75rem;">(Min 2, Máx 5)</small>
+                </div>
+                <button id="btnGuardarRepertorio" class="btn fw-bold rounded-pill shadow px-4" style="background: linear-gradient(135deg, #eab308, #ca8a04); color: white; border: none; height: 45px;" disabled>
+                    <i class="bi bi-arrow-repeat me-1" id="spinnerGuardar" style="display:none;"></i> Actualizar Miércoles
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/miercoles-index.js" asp-append-version="true"></script>
+}

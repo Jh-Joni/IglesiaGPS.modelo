@@ -53,7 +53,7 @@ namespace IglesiaGPS.Api.Controllers
         {
             var listas = await _context.ListaCanciones
                 .AsNoTracking()
-                .Where(l => l.Publicada)
+                .Where(l => l.Publicada && !l.Titulo.StartsWith("Miércoles_"))
                 .Include(l => l.Director)
                 .Include(l => l.Detalles)!
                     .ThenInclude(d => d.Cancion)
@@ -145,17 +145,29 @@ namespace IglesiaGPS.Api.Controllers
             lista.ListaCancionesId = 0;
             lista.Director = null;
             lista.Detalles = null;
-            lista.Publicada = true;
-            lista.FechaPublicacion = DateTime.UtcNow;
+            
+            // Omitir regla de Publicación Unica si es Miércoles
+            bool esMiercoles = lista.Titulo != null && lista.Titulo.StartsWith("Miércoles_");
 
-            var publicadas = await _context.ListaCanciones
-                .Where(l => l.Publicada)
-                .ToListAsync();
-
-            foreach (var publicada in publicadas)
+            if (!esMiercoles)
             {
-                publicada.Publicada = false;
-                publicada.FechaPublicacion = null;
+                lista.Publicada = true;
+                lista.FechaPublicacion = DateTime.UtcNow;
+
+                var publicadas = await _context.ListaCanciones
+                    .Where(l => l.Publicada)
+                    .ToListAsync();
+
+                foreach (var publicada in publicadas)
+                {
+                    publicada.Publicada = false;
+                    publicada.FechaPublicacion = null;
+                }
+            }
+            else
+            {
+                lista.Publicada = false;
+                lista.FechaPublicacion = DateTime.UtcNow;
             }
 
             _context.ListaCanciones.Add(lista);

@@ -211,6 +211,124 @@ namespace Iglesia.MVC.Controllers
             }
         }
 
+        // ==============================================================
+        // LÓGICA DE REPERTORIO SECTORIZADO (MIÉRCOLES) A PARTIR DE DOMINGO
+        // ==============================================================
+
+        // GET: ListaCancionesController/EditarMiercoles/5
+        public IActionResult EditarMiercoles(int id)
+        {
+            var userId = GetUsuarioIdFromSession();
+            var userRol = HttpContext.Session.GetString("UsuarioRol");
+
+            if (userId == null) return RedirectToAction("Login", "Auth");
+            if (userRol != "Director" && userRol != "Desarrollador") return Forbid();
+
+            // 'id' es la lista PADRE (Domingo)
+            var listaPadre = Crud<ListaCanciones>.GetById(id);
+            if (listaPadre == null) return NotFound();
+
+            // Rescatar las canciones del PADRE (son las únicas permitidas)
+            var detallesPadre = listaPadre.Detalles?.OrderBy(d => d.Orden).ToList() ?? new List<ListaCancionDetalle>();
+            var idsDisponiblesParaMiercoles = detallesPadre.Select(d => d.CancionId).ToList();
+
+            var cancionesTodas = Crud<Cancion>.GetAll();
+            var cancionesPermitidas = cancionesTodas.Where(c => idsDisponiblesParaMiercoles.Contains(c.CancionId)).ToList();
+            
+            ViewBag.CancionesDisponibles = cancionesPermitidas;
+            ViewBag.ListaPadre = listaPadre;
+
+            // Verificar si ya existe una lista hija de miércoles
+            string tituloMiercolesEsperado = $"Miércoles_{id}";
+            var todasLasListas = Crud<ListaCanciones>.GetAll();
+            var listaMiercoles = todasLasListas.FirstOrDefault(l => l.Titulo == tituloMiercolesEsperado);
+
+            if (listaMiercoles != null)
+            {
+                // Ya existe, precargar selecciones
+                var detallesMiercoles = Crud<ListaCancionDetalle>.GetAll()
+                                        .Where(d => d.ListaCancionesId == listaMiercoles.ListaCancionesId)
+                                        .OrderBy(d => d.Orden).ToList();
+                ViewBag.Seleccionadas = detallesMiercoles.Select(x => x.CancionId).ToList();
+                ViewBag.IdMiercoles = listaMiercoles.ListaCancionesId;
+            }
+            else
+            {
+                ViewBag.Seleccionadas = new List<int>();
+                ViewBag.IdMiercoles = 0; // Se creará una nueva
+            }
+
+            return View(listaPadre); // Le pasamos el modelo padre para el título
+        }
+
+        // POST: ListaCancionesController/ActualizarMiercoles (AJAX)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ActualizarMiercoles(int idPadre, int idMiercolesExistente, [FromBody] List<int> cancionesSeleccionadas)
+        {
+            var userId = GetUsuarioIdFromSession();
+            if (userId == null)
+                return Unauthorized(new { mensaje = "Sesión expirada. Inicie sesión nuevamente." });
+
+            if (cancionesSeleccionadas == null || cancionesSeleccionadas.Count < 2 || cancionesSeleccionadas.Count > 5)
+                return BadRequest(new { mensaje = "El repertorio de miércoles debe tener entre 2 y 5 canciones exactas." });
+
+            try
+            {
+                string tituloMiercoles = $"Miércoles_{idPadre}";
+                int listaIdReceptor;
+
+                if (idMiercolesExistente == 0)
+                {
+                    // Crear nueva lista hija
+                    var nuevaLista = new ListaCanciones
+                    {
+                        Titulo = tituloMiercoles,
+                        FechaCreacion = DateTime.Now,
+                        FechaPublicacion = DateTime.Now,
+                        Publicada = false, // Las de miércoles son adjuntas, no son la principal general publicable
+                        DirectorId = userId.Value
+                    };
+                    var listaGuardada = Crud<ListaCanciones>.Create(nuevaLista);
+                    if (listaGuardada == null || listaGuardada.ListaCancionesId == 0)
+                        return StatusCode(500, new { mensaje = "No se pudo guardar la lista de Miércoles." });
+                    
+                    listaIdReceptor = listaGuardada.ListaCancionesId;
+                }
+                else
+                {
+                    // Editar la existente
+                    listaIdReceptor = idMiercolesExistente;
+                    // Borrar detalles anteriores
+                    var detallesPrevios = Crud<ListaCancionDetalle>.GetAll().Where(d => d.ListaCancionesId == listaIdReceptor).ToList();
+                    foreach (var detalle in detallesPrevios)
+                    {
+                        Crud<ListaCancionDetalle>.Delete(detalle.ListaCancionDetalleId);
+                    }
+                }
+
+                // Insertar nuevas canciones
+                int orden = 1;
+                foreach (var cancionId in cancionesSeleccionadas)
+                {
+                    var nuevoDetalle = new ListaCancionDetalle
+                    {
+                        ListaCancionDetalleId = 0,
+                        ListaCancionesId = listaIdReceptor,
+                        CancionId = cancionId,
+                        Orden = orden++
+                    };
+                    Crud<ListaCancionDetalle>.Create(nuevoDetalle);
+                }
+
+                return Ok(new { mensaje = "Repertorio de Miércoles actualizado exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno: " + ex.Message });
+            }
+        }
+
         // GET: ListaCancionesController/Edit/5
         public ActionResult Edit(int id)
         {

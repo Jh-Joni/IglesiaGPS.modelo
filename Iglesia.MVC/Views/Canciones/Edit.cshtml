@@ -58,26 +58,17 @@
                             </div>
                             <span asp-validation-for="UrlAudio" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 d-none">
                             <label asp-for="FechaCreacion" class="neo-label">Fecha de Creación</label>
                             <input asp-for="FechaCreacion" class="form-control form-control-lg neo-input" type="datetime-local" />
                             <span asp-validation-for="FechaCreacion" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 d-none">
                             <label asp-for="CreadoPorUsuarioId" class="neo-label">Usuario Creador <span class="text-danger">*</span></label>
-                            <select asp-for="CreadoPorUsuarioId" class="form-select form-select-lg neo-input" required>
-                                <option value="">-- Seleccione un Usuario --</option>
-                                @if(ViewBag.Usuarios != null)
-                                {
-                                    foreach (var usuario in ViewBag.Usuarios)
-                                    {
-                                        <option value="@usuario.UsuarioId">@usuario.Nombre @usuario.Apellido</option>
-                                    }
-                                }
-                            </select>
+                            <input asp-for="CreadoPorUsuarioId" type="hidden" />
                             <span asp-validation-for="CreadoPorUsuarioId" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
                         </div>
-                        <div class="col-12">
+                        <div class="col-12 d-none">
                             <label asp-for="Letra" class="neo-label">Letra Base (Sin acordes)</label>
                             <textarea asp-for="Letra" class="form-control neo-input neo-textarea" placeholder="Escribe aquí la letra pura..." style="height: 120px"></textarea>
                             <span asp-validation-for="Letra" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
