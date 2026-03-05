@@ -1,0 +1,41 @@
+# ==============================================================
+# Dockerfile específico - Iglesia.MVC
+# Corre únicamente la aplicación web cliente
+# ==============================================================
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+# ---- BUILD ----
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copiar proyectos necesarios (falla si falta alguno)
+COPY ["IglesiaGPS.modelo/IglesiaGPS.modelo.csproj", "IglesiaGPS.modelo/"]
+COPY ["Iglesia.Api.consumer/Iglesia.Api.consumer.csproj", "Iglesia.Api.consumer/"]
+COPY ["Iglesia.MVC/Iglesia.MVC.csproj", "Iglesia.MVC/"]
+
+# Restaurar dependencias del proyecto principal
+RUN dotnet restore "Iglesia.MVC/Iglesia.MVC.csproj"
+
+# Copiar todo el código fuente
+COPY . .
+
+# Compilar proyecto MVC
+WORKDIR "/src/Iglesia.MVC"
+RUN dotnet build "Iglesia.MVC.csproj" -c Release -o /app/build
+
+# ---- PUBLISH ----
+FROM build AS publish
+RUN dotnet publish "Iglesia.MVC.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# ---- FINAL ----
+FROM base AS final
+WORKDIR /app
+
+# Copiar publicación local
+COPY --from=publish /app/publish .
+
+# Comando de inicio asegurando que corra en el puerto definido
+ENTRYPOINT ["dotnet", "Iglesia.MVC.dll", "--urls", "http://0.0.0.0:8080"]
