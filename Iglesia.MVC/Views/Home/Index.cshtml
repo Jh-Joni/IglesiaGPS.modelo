@@ -227,13 +227,13 @@
                         
                         <!-- CONTENEDOR DE DOMINGO -->
                         <div class="canciones-container mt-2" id="grid-domingo-@i">
-                            <div class="d-flex justify-content-between align-items-center mb-3 mt-1 pb-2 border-bottom border-secondary flex-wrap gap-2">
-                                <h5 class="fw-bold m-0 text-white">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 mt-1 pb-2 border-bottom border-secondary gap-3">
+                                <h5 class="fw-bold m-0 text-white text-center text-sm-start">
                                     <i class="bi bi-calendar-check text-success"></i> Lista del Domingo
                                 </h5>
                                 @if (detallesMiercoles.Count > 0)
                                 {
-                                    <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-sm" onclick="switchTab(@i, 'miercoles')">
+                                    <button class="btn btn-warning text-dark fw-bold rounded-pill shadow-sm w-100 w-sm-auto px-4" onclick="switchTab(@i, 'miercoles')" style="z-index: 10;">
                                         Ver Miércoles <i class="bi bi-arrow-right-circle"></i>
                                     </button>
                                 }
@@ -274,21 +274,21 @@
                         @if (detallesMiercoles.Count > 0)
                         {
                             <div class="canciones-container mt-2 d-none" id="grid-miercoles-@i">
-                                <div class="d-flex justify-content-between align-items-center mb-3 mt-1 pb-2 border-bottom flex-wrap gap-2" style="border-color: rgba(234, 179, 8, 0.4) !important;">
-                                    <h5 class="fw-bold m-0" style="color: #fde047;">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-strecth align-items-md-center mb-3 mt-1 pb-3 border-bottom gap-3" style="border-color: rgba(234, 179, 8, 0.4) !important;">
+                                    <h5 class="fw-bold m-0 text-center text-md-start" style="color: #fde047;">
                                         <i class="bi bi-calendar3-week text-warning"></i> Lista del Miércoles
                                     </h5>
-                                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                                        <a asp-controller="Home" asp-action="DescargarPdfListaActiva" asp-route-id="@listaMiercoles.ListaCancionesId" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill shadow-sm" target="_blank">
+                                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center" style="z-index: 10;">
+                                        <a asp-controller="Home" asp-action="DescargarPdfListaActiva" asp-route-id="@listaMiercoles.ListaCancionesId" class="btn btn-warning text-dark fw-bold rounded-pill shadow-sm w-100 w-sm-auto" target="_blank">
                                             <i class="bi bi-file-earmark-pdf"></i> PDF Mié.
                                         </a>
                                         @if (Context.Session.GetString("UsuarioRol") == "Director" || Context.Session.GetString("UsuarioRol") == "Desarrollador")
                                         {
-                                            <a asp-controller="ListaCanciones" asp-action="EditarMiercoles" asp-route-id="@lista.ListaCancionesId" class="btn btn-sm btn-outline-warning fw-bold rounded-pill">
+                                            <a asp-controller="ListaCanciones" asp-action="EditarMiercoles" asp-route-id="@lista.ListaCancionesId" class="btn btn-outline-warning fw-bold rounded-pill w-100 w-sm-auto">
                                                 <i class="bi bi-pencil"></i> Editar
                                             </a>
                                         }
-                                        <button class="btn btn-sm btn-info text-dark fw-bold rounded-pill mx-1" onclick="switchTab(@i, 'domingo')" style="background-color:#38bdf8; border:none;">
+                                        <button class="btn btn-info text-dark fw-bold rounded-pill w-100 w-sm-auto shadow-sm" onclick="switchTab(@i, 'domingo')" style="background-color:#38bdf8; border:none;">
                                             <i class="bi bi-arrow-left-circle"></i> Ver Domingo
                                         </button>
                                     </div>

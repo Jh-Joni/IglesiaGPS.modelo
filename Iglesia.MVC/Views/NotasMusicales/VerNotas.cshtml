@@ -2,238 +2,141 @@
 @{
     ViewData["Title"] = "Notas: " + ViewBag.CancionTitulo;
     var usuarioLogueado = Context.Session.GetString("UsuarioNombre");
+    var usuarioRol = Context.Session.GetString("UsuarioRol");
 }
 
-<div class="row justify-content-center mt-5 mb-5">
-    <div class="col-lg-10">
-        
-        <div class="neo-main-panel shadow-lg border-0 rounded-4 overflow-hidden position-relative" style="border: 1px solid rgba(29, 233, 182, 0.4) !important;">
-            
-            <!-- Deco headers -->
-            <div class="neo-header-bar p-3 d-flex justify-content-between align-items-center" style="background: rgba(10, 11, 16, 0.9); border-bottom: 2px solid var(--cyber-teal);">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="spinner-grow spinner-grow-sm text-info" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <span class="fw-bold" style="color: var(--cyber-teal); font-family: monospace; letter-spacing: 2px; font-size: 1.1rem;">
-                        LEYENDO_ARCHIVO: <span style="color: #ffffff;">[@ViewBag.CancionTitulo]</span>
-                    </span>
-                </div>
-                <div class="mac-btns">
-                    <span class="badge" style="background: rgba(0, 229, 255, 0.1); color: var(--cyber-cyan); border: 1px solid var(--cyber-cyan);">
-                        HUD_ACTIVE
-                    </span>
-                </div>
-            </div>
-
-            <div class="card-body p-4 p-md-5 neo-hud-body position-relative" style="background: var(--cyber-panel);">
+<div class="container mt-4 mb-5 px-3 px-md-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <!-- Panel Principal Simplificado -->
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden" style="background-color: #0d1b2a;">
                 
-                @if (string.IsNullOrEmpty(Model?.Contenido))
-                {
-                    <div class="alert neo-alert-warning d-flex align-items-center rounded-3 p-4">
-                        <i class="bi bi-exclamation-triangle-fill fs-2 me-4" style="color: var(--cyber-orange);"></i>
-                        <div>
-                            <h5 class="fw-bold text-white mb-1">ARCHIVO VACÍO / CORRUPTO</h5>
-                            <p class="mb-0 text-muted">Aún no hay notas registradas para este archivo de canción. <br/>Requiere inserción manual de datos.</p>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="neo-display-screen p-4 rounded-3 position-relative overflow-hidden shadow-lg">
-                        <!-- Hologram overlay effect -->
-                        <div class="hologram-overlay"></div>
-                        <!-- Scanline animado -->
-                        <div class="hud-scanline"></div>
-                        
-                        <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2" style="border-color: rgba(29, 233, 182, 0.2) !important;">
-                            <span class="badge" style="background: rgba(29, 233, 182, 0.15); color: var(--cyber-teal); border: 1px solid var(--cyber-teal); font-family: monospace;">
-                                <i class="bi bi-music-note-beamed me-1"></i> Secuencia: @Model.Instrumento
+                <!-- Encabezado -->
+                <div class="card-header border-bottom-0 py-3" style="background-color: #1b263b;">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                        <h4 class="mb-0 fw-bold d-flex align-items-center text-center text-sm-start" style="color: #7df9ff; letter-spacing: 0.5px;">
+                            <i class="bi bi-music-note-list me-2"></i> @ViewBag.CancionTitulo
+                        </h4>
+                        @if (!string.IsNullOrEmpty(Model?.Instrumento))
+                        {
+                            <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #415a77; color: #e0e1dd; font-size: 0.85rem;">
+                                Parámetro: @Model.Instrumento
                             </span>
-                            <span style="color: #64748b; font-family: monospace; font-size: 0.85rem;">
-                                SYS_TIME: @DateTime.Now.ToString("HH:mm:ss")
-                            </span>
-                        </div>
-
-                        <!-- El contenido a decodificar -->
-                        <div class="neo-lyrics-container position-relative z-1" style="min-height: 200px;">
-                            <pre id="hud-content-target" class="text-transparent" style="font-family: 'Space Mono', 'Courier New', monospace; font-size: 1.1rem; color: #1de9b6; text-shadow: 0 0 5px rgba(29, 233, 182, 0.5); white-space: pre-wrap; line-height: 1.6; display: none;">@Model.Contenido</pre>
-                            
-                            <!-- El visor visible durante la animacion -->
-                            <pre id="hud-decrypt-view" class="fw-bold" style="font-family: 'Space Mono', 'Courier New', monospace; font-size: 1.1rem; color: #1de9b6; text-shadow: 0 0 8px rgba(29, 233, 182, 0.6); white-space: pre-wrap; line-height: 1.6;">
-[ INICIANDO DECODIFICACIÓN... ]
-                            </pre>
-                        </div>
+                        }
                     </div>
-                }
+                </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
-                    <a href="javascript:history.back()" class="btn neo-btn-outline rounded-pill px-4 fw-bold">
-                        <i class="bi bi-arrow-return-left me-2"></i>Desconectar
-                    </a>
-
-                    @if (usuarioLogueado != null)
+                <!-- Cuerpo de Letras -->
+                <div class="card-body p-3 p-md-5">
+                    
+                    @if (string.IsNullOrEmpty(Model?.Contenido))
                     {
-                        <a asp-action="EditarNota" asp-route-id="@Model?.CancionId" class="btn neo-btn-orange-solid rounded-pill px-5 py-2 fw-bold shadow-lg" style="letter-spacing: 1px;">
-                            <i class="bi bi-pencil-square me-2"></i>Sobrescribir Datos
-                        </a>
+                        <div class="alert alert-warning d-flex align-items-center rounded-3 p-4 border-0" style="background-color: #fff3cd; color: #856404;">
+                            <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">Sin Letra o Notas</h6>
+                                <p class="mb-0 small">Esta canción aún no tiene contenido de letras/notas configurado.</p>
+                            </div>
+                        </div>
                     }
+                    else
+                    {
+                        <!-- Visor Elegante y Simple -->
+                        <div class="viewer-container p-3 p-md-4 rounded-3 shadow-inner" style="background-color: #081119; border: 1px solid #162a3f;">
+                            <pre class="mb-0" style="font-family: 'Inter', 'Segoe UI', sans-serif; font-size: 1.15rem; color: #7df9ff; white-space: pre-wrap; line-height: 1.7; word-wrap: break-word;">@Model.Contenido</pre>
+                        </div>
+                    }
+
+                    <!-- Botones de Acción -->
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch mt-5 pt-4 gap-3 border-top" style="border-color: #1b263b !important;">
+                        <a href="javascript:history.back()" class="btn btn-outline-light rounded-pill px-4 py-2 fw-semibold order-last order-sm-first">
+                            <i class="bi bi-arrow-left me-2"></i>Regresar
+                        </a>
+
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            @if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
+                            {
+                                <!-- Botón Eliminar (Visible solo para Director/Desarrollador) -->
+                                <button type="button" class="btn rounded-pill px-4 py-2 fw-semibold text-white shadow-sm" style="background-color: #e63946; border: none;" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                                    <i class="bi bi-trash3 me-2"></i>Eliminar
+                                </button>
+                            }
+
+                            @if (usuarioLogueado != null)
+                            {
+                                <a asp-action="EditarNota" asp-route-id="@Model?.CancionId" class="btn rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm" style="background-color: #7df9ff; border: none;">
+                                    <i class="bi bi-pencil-square me-2"></i>Editar Letra/Notas
+                                </a>
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal Confirmación Eliminación -->
+@if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
+{
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4" style="background-color: #1b263b; color: #e0e1dd;">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold text-white" id="confirmDeleteLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="mb-0 fs-5">
+                        <i class="bi bi-exclamation-circle text-warning fs-4 me-2"></i>
+                        ¿Estás seguro de que deseas eliminar permanentemente la canción <strong>"@ViewBag.CancionTitulo"</strong> y todas sus notas?
+                    </p>
+                    <p class="text-danger small mt-2 fw-bold">Esta acción no se puede deshacer y eliminará la canción de todas las listas.</p>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <!-- Formulario de eliminación real hacia CancionesController -->
+                    <form asp-controller="Canciones" asp-action="DeleteConfirmed" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model?.CancionId" />
+                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Sí, Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @section Styles {
     <style>
-        :root {
-            --cyber-bg: #0a0b10;
-            --cyber-panel: #12141d;
-            --cyber-box: #1a1e2b;
-            --cyber-cyan: #00e5ff;
-            --cyber-orange: #ff3d00;
-            --cyber-teal: #1de9b6;
+        body {
+            background-color: #0b111a !important;
+            font-family: 'Inter', sans-serif;
+        }
+        main {
+            background-color: transparent !important;
+        }
+
+        /* Responsive Text Viewer */
+        .viewer-container pre {
+            max-width: 100%;
+            overflow-x: auto; /* Evita que el texto salga de la pantalla en teléfonos pequeños */
         }
         
-        body { 
-            background-color: var(--cyber-bg) !important; 
-            font-family: 'Inter', sans-serif;
-            color: #ffffff;
+        .shadow-inner {
+            box-shadow: inset 0px 4px 10px rgba(0,0,0,0.5);
         }
 
-        /* Screen & HUD Elements */
-        .neo-display-screen {
-            background-color: #051614; /* Oscuro verdoso */
-            border: 1px solid rgba(29, 233, 182, 0.3);
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(29, 233, 182, 0.1);
-        }
-
-        .hologram-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(rgba(29, 233, 182, 0.05) 1px, transparent 1px);
-            background-size: 100% 4px; /* Rayas horizontales TV */
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.6;
-        }
-
-        .hud-scanline {
-            position: absolute;
-            top: -10px;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background-color: var(--cyber-teal);
-            box-shadow: 0 0 15px var(--cyber-teal), 0 0 30px var(--cyber-cyan);
-            opacity: 0.8;
-            z-index: 2;
-            animation: laserScan 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            border-radius: 50%;
-        }
-
-        @@keyframes laserScan {
-            0% { top: -10px; opacity: 0; }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* Alerts and Buttons */
-        .neo-alert-warning {
-            background: rgba(255, 61, 0, 0.05);
-            border: 1px solid rgba(255, 61, 0, 0.4);
-            border-left: 4px solid var(--cyber-orange);
-            box-shadow: 0 0 15px rgba(255, 61, 0, 0.1);
-        }
-
-        .neo-btn-outline {
-            color: #94a3b8 !important;
-            border: 1px solid rgba(255,255,255,0.2) !important;
-            background: transparent;
-            transition: all 0.3s;
-        }
-        .neo-btn-outline:hover {
-            color: #ffffff !important;
-            background: rgba(255,255,255,0.1);
-            border-color: #ffffff !important;
-            box-shadow: 0 0 10px rgba(255,255,255,0.2);
-        }
-
-        .neo-btn-orange-solid {
-            background-color: transparent !important;
-            color: var(--cyber-orange) !important;
-            border: 2px solid var(--cyber-orange) !important;
-            transition: all 0.3s ease;
-        }
-        .neo-btn-orange-solid:hover {
-            background-color: var(--cyber-orange) !important;
-            color: #000 !important;
-            box-shadow: 0 0 25px rgba(255, 61, 0, 0.6);
-            transform: translateY(-2px);
+        /* Hover de botones */
+        .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #fff;
         }
     </style>
 }
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const hiddenTarget = document.getElementById('hud-content-target');
-            const viewTarget = document.getElementById('hud-decrypt-view');
-            
-            if (!hiddenTarget || !viewTarget) return;
-
-            const finalString = hiddenTarget.innerText;
-            const validChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@@#$%-+<>[]{}';
-            
-            // Si el texto es muy largo, ajustamos la velocidad
-            const isLong = finalString.length > 500;
-            const steps = isLong ? 15 : 25; // Número de pasadas de desencriptado
-            let currentStep = 0;
-
-            function scramble() {
-                let displayString = '';
-                
-                // Si hemos terminado
-                if (currentStep >= steps) {
-                    viewTarget.innerText = finalString;
-                    viewTarget.style.textShadow = '0 0 15px rgba(29, 233, 182, 0.8)';
-                    viewTarget.animate([
-                        { opacity: 0.5 }, { opacity: 1 }
-                    ], { duration: 300 });
-                    return;
-                }
-
-                // Generamos texto mitad real, mitad basura
-                for (let i = 0; i < finalString.length; i++) {
-                    const char = finalString[i];
-                    
-                    // Respetamos los saltos de linea y espacios para mantener el formato
-                    if (char === '\n' || char === ' ') {
-                        displayString += char;
-                        continue;
-                    }
-
-                    // A medida que currentStep se acerca a steps, más letras reales se muestran
-                    const threshold = (currentStep / steps);
-                    if (Math.random() < threshold) {
-                        displayString += char; // Letra real
-                    } else {
-                        // Letra aleatoria
-                        const randomChar = validChars.charAt(Math.floor(Math.random() * validChars.length));
-                        displayString += randomChar;
-                    }
-                }
-
-                viewTarget.innerText = displayString;
-                currentStep++;
-                
-                // Efecto de sonido (opcional silenciado por default para web)
-                setTimeout(scramble, 60); // 60ms por iteración
-            }
-
-            // Iniciar animación después un ligero delay para impacto
-            setTimeout(scramble, 500);
-        });
+        // No se requiere script para animaciones, vista limpia de solo lectura
     </script>
 }
