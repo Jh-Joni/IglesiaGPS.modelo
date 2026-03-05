@@ -9,7 +9,15 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
 });
 
-var apiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") ?? "https://iglesiagps-modelo-1.onrender.com";
+// URL base de la API: busca API_URL (Render) o API_BASE_URL, si no hay usa el valor por defecto
+var apiBaseUrl = Environment.GetEnvironmentVariable("API_URL")
+              ?? Environment.GetEnvironmentVariable("API_BASE_URL")
+              ?? "https://iglesiagps-modelo-1.onrender.com";
+
+// Quitar barra final si existe para evitar doble barra en endpoints
+apiBaseUrl = apiBaseUrl.TrimEnd('/');
+
+Console.WriteLine($"[STARTUP] Conectando MVC a la API en: {apiBaseUrl}");
 
 Crud<Rol>.EndPoint = $"{apiBaseUrl}/api/Roles";
 Crud<Usuario>.EndPoint = $"{apiBaseUrl}/api/Usuarios";
@@ -39,8 +47,12 @@ var app = builder.Build();
 app.UseExceptionHandler("/Home/Error");
 app.UseHsts();
 
+// Solo redirigir HTTPS en desarrollo local (Render maneja SSL con su proxy)
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
