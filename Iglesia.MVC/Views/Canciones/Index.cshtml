@@ -108,12 +108,9 @@
                                             <a asp-action="Edit" asp-route-id="@item.CancionId" class="btn btn-sm py-2 px-3 text-white" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);">
                                                 <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
                                             </a>
-                                            @if (usuarioRol == "Desarrollador")
-                                            {
-                                                <a asp-action="Delete" asp-route-id="@item.CancionId" class="btn btn-sm py-2 px-3 text-danger" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
-                                                    <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
-                                                </a>
-                                            }
+                                            <a asp-action="Delete" asp-route-id="@item.CancionId" class="btn btn-sm py-2 px-3 text-danger" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
+                                                <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
+                                            </a>
                                         }
                                     }
                                 </div>
