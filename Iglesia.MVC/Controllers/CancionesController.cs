@@ -61,6 +61,7 @@ namespace Iglesia.MVC.Controllers
         // POST: CancionesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequestSizeLimit(50 * 1024 * 1024)] // 50 MB máximo
         public ActionResult Create(CancionDTO cancionDto, IFormFile? FotoFile, string? NotaContenido = null, string? Instrumento = null)
         {
             var userIdStr = HttpContext.Session.GetString("UsuarioId");
@@ -84,12 +85,24 @@ namespace Iglesia.MVC.Controllers
                 // Auto-asignar creador desde sesión
                 cancionDto.CreadoPorUsuarioId = int.Parse(userIdStr);
                 
-                // Mapear la letra a null para evitar problemas (ya no se usa en UI)
-                cancionDto.Letra = null;
+                // Letra eliminado del modelo
 
                 // Mapear imagen - Guardar en disco en lugar de B64 para evitar bloqueos
                 if (FotoFile != null && FotoFile.Length > 0)
                 {
+                    // Validar tamaño máximo (10 MB)
+                    if (FotoFile.Length > 10 * 1024 * 1024)
+                    {
+                        ViewBag.Error = "La imagen es demasiado grande. El tamaño máximo permitido es 10 MB.";
+                        return View(new Cancion
+                        {
+                            Titulo = cancionDto.Titulo,
+                            Autor = cancionDto.Autor,
+                            Tono = cancionDto.Tono,
+                            UrlAudio = cancionDto.UrlAudio
+                        });
+                    }
+
                     var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "canciones");
                     if (!Directory.Exists(folderPath))
                     {
@@ -156,6 +169,7 @@ namespace Iglesia.MVC.Controllers
         // POST: CancionesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequestSizeLimit(50 * 1024 * 1024)] // 50 MB máximo
         public ActionResult Edit(int id, Cancion cancion, IFormCollection collection, IFormFile? FotoFile)
         {
             if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
@@ -173,13 +187,21 @@ namespace Iglesia.MVC.Controllers
                     Autor = cancion.Autor,
                     Tono = cancion.Tono,
                     UrlAudio = cancion.UrlAudio,
-                    Letra = null,
+
                     FechaCreacion = cancion.FechaCreacion,
                     CreadoPorUsuarioId = cancion.CreadoPorUsuarioId
                 };
 
                 if (FotoFile != null && FotoFile.Length > 0)
                 {
+                    // Validar tamaño máximo (10 MB)
+                    if (FotoFile.Length > 10 * 1024 * 1024)
+                    {
+                        ViewBag.Error = "La imagen es demasiado grande. El tamaño máximo permitido es 10 MB.";
+                        ViewBag.Usuarios = Crud<Usuario>.GetAll();
+                        return View(cancion);
+                    }
+
                     var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "canciones");
                     if (!Directory.Exists(folderPath))
                     {

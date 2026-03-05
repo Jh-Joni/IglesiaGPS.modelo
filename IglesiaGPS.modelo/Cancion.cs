@@ -10,7 +10,6 @@ namespace IglesiaGPS.modelo
         public string Autor { get; set; }
         public string? Tono { get; set; }
         public string? UrlAudio { get; set; }
-        public string? Letra { get; set; }
         public string? FotoUrl { get; set; }
         public DateTime FechaCreacion { get; set; }
         public int CreadoPorUsuarioId { get; set; }

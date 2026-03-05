@@ -68,11 +68,7 @@
                             <input asp-for="CreadoPorUsuarioId" type="hidden" />
                             <span asp-validation-for="CreadoPorUsuarioId" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
                         </div>
-                        <div class="col-12 d-none">
-                            <label asp-for="Letra" class="neo-label">Letra Base (Sin acordes)</label>
-                            <textarea asp-for="Letra" class="form-control neo-input neo-textarea" placeholder="Escribe aquí la letra pura..." style="height: 120px"></textarea>
-                            <span asp-validation-for="Letra" class="text-danger small mt-1 d-block" style="text-shadow: 0 0 5px #ff0000;"></span>
-                        </div>
+                       
                         <div class="col-12 mt-4">
                             <div class="neo-upload-box p-4 rounded-3 text-center transition-all" style="border: 2px dashed rgba(255,255,255,0.1);">
                                 <label for="FotoFile" class="form-label fw-bold d-block w-100" style="color: var(--cyber-cyan); cursor: pointer;">
@@ -88,6 +84,20 @@
                                     </div>
                                 }
                                 <input type="file" id="FotoFile" name="FotoFile" class="form-control neo-input d-none" accept="image/*" />
+                <div class="mt-2 text-muted small" id="file-name-display">Ningún archivo nuevo seleccionado (máx. 10 MB)</div>
+                <script>
+                    document.getElementById('FotoFile').addEventListener('change', function(event) {
+                        const file = event.target.files[0];
+                        if (file && file.size > 10 * 1024 * 1024) { // 10 MB
+                            alert('El tamaño del archivo no debe exceder los 10 MB.');
+                            this.value = ''; // Clear the input
+                            document.getElementById('file-name-display').textContent = 'Ningún archivo nuevo seleccionado';
+                        }
+                    });
+                    document.querySelector('label[for="FotoFile"]').addEventListener('click', function() {
+                        document.getElementById('FotoFile').click();
+                    });
+                </script>
                                 <div class="mt-2 text-muted small" id="file-name-display">Ningún archivo nuevo seleccionado</div>
                             </div>
                         </div>
@@ -328,17 +338,35 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Manejar display del archivo seleccionado
             const fileInput = document.getElementById('FotoFile');
             const fileDisplay = document.getElementById('file-name-display');
+            const uploadBox = document.querySelector('.neo-upload-box');
+
+            // Hacer que toda la zona de upload abra el selector de archivo
+            if (uploadBox && fileInput) {
+                uploadBox.addEventListener('click', function(e) {
+                    if (e.target !== fileInput) {
+                        fileInput.click();
+                    }
+                });
+            }
             
             if (fileInput) {
                 fileInput.addEventListener('change', function(e) {
                     if (e.target.files && e.target.files[0]) {
-                        fileDisplay.textContent = e.target.files[0].name;
-                        fileDisplay.style.color = 'var(--cyber-cyan)';
+                        var file = e.target.files[0];
+                        var maxSize = 10 * 1024 * 1024; // 10 MB
+                        if (file.size > maxSize) {
+                            alert('La imagen es demasiado grande. El tamaño máximo permitido es 10 MB.');
+                            fileInput.value = '';
+                            fileDisplay.textContent = 'Ningún archivo nuevo seleccionado (máx. 10 MB)';
+                            fileDisplay.style.color = '#ff3d00';
+                            return;
+                        }
+                        fileDisplay.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+                        fileDisplay.style.color = '#1de9b6';
                     } else {
-                        fileDisplay.textContent = 'Ningún archivo nuevo seleccionado';
+                        fileDisplay.textContent = 'Ningún archivo nuevo seleccionado (máx. 10 MB)';
                         fileDisplay.style.color = '';
                     }
                 });

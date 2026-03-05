@@ -6,6 +6,12 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Aumentar límite de tamaño del cuerpo de la solicitud para la API
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
+});
+
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddDbContext<IglesiaGPSApiContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("IglesiaGPSApiContext") ?? throw new InvalidOperationException("Connection string 'IglesiaGPSApiContext' not found.")));

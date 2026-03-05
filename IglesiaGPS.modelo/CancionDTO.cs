@@ -15,7 +15,7 @@ namespace IglesiaGPS.modelo
         
         public string? Tono { get; set; }
         public string? UrlAudio { get; set; }
-        public string? Letra { get; set; }
+
         
         // El DTO lleva la imagen encapsulada en texto Base64
         public string? FotoBase64 { get; set; } 

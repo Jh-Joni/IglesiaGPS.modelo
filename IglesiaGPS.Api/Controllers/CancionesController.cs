@@ -61,7 +61,7 @@ namespace IglesiaGPS.Api.Controllers
             cancion.Autor = cancionDto.Autor;
             cancion.Tono = cancionDto.Tono;
             cancion.UrlAudio = cancionDto.UrlAudio;
-            cancion.Letra = cancionDto.Letra;
+           
             cancion.FechaCreacion = cancionDto.FechaCreacion;
             cancion.CreadoPorUsuarioId = cancionDto.CreadoPorUsuarioId;
 
@@ -102,7 +102,7 @@ namespace IglesiaGPS.Api.Controllers
                 Autor = cancionDto.Autor,
                 Tono = cancionDto.Tono,
                 UrlAudio = cancionDto.UrlAudio,
-                Letra = cancionDto.Letra,
+               
                 FechaCreacion = cancionDto.FechaCreacion,
                 CreadoPorUsuarioId = cancionDto.CreadoPorUsuarioId,
                 FotoUrl = cancionDto.FotoBase64
@@ -111,7 +111,8 @@ namespace IglesiaGPS.Api.Controllers
             _context.Canciones.Add(cancion);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCancion", new { id = cancion.CancionId }, cancion);
+            cancionDto.CancionId = cancion.CancionId;
+            return Ok(cancionDto);
         }
 
         // DELETE: api/Canciones/5
