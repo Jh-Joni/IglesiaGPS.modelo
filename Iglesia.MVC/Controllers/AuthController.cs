@@ -7,7 +7,9 @@ namespace Iglesia.MVC.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly string _apiBaseUrl = "https://localhost:7220/api/Auth";
+        private readonly string _apiBaseUrl = Environment.GetEnvironmentVariable("API_BASE_URL") != null 
+            ? $"{Environment.GetEnvironmentVariable("API_BASE_URL")}/api/Auth"
+            : "https://iglesiagps-modelo-1.onrender.com/api/Auth";
 
         private HttpClient CrearHttpClient()
         {
