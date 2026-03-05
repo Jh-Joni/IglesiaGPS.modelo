@@ -98,6 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const response = await fetch(`/ListaCanciones/ActualizarMiercoles?${urlParams.toString()}`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'RequestVerificationToken': token

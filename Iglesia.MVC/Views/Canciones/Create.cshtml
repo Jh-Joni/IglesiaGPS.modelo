@@ -22,99 +22,74 @@
                     <form asp-action="Create" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <h5 class="neo-section-title pb-2 mb-4"><i class="bi bi-info-circle me-2 neo-icon"></i>Información Principal</h5>
-                        
                         <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <div class="form-floating neo-floating">
+                            <!-- Columna Izquierda: Información Principal -->
+                            <div class="col-md-6 border-end border-secondary border-opacity-25 pe-4">
+                                <h5 class="neo-section-title pb-2 mb-4"><i class="bi bi-info-circle me-2 neo-icon"></i>Información Principal</h5>
+
+                                <!-- Inputs ocultos para validación de modelo si son requeridos internamente o mapeados -->
+                                <input type="hidden" asp-for="FechaCreacion" />
+                                <input type="hidden" asp-for="CreadoPorUsuarioId" value="0" />
+
+                                <div class="form-floating neo-floating mb-3">
                                     <input asp-for="Titulo" class="form-control neo-input" placeholder="Título de la canción" required />
                                     <label asp-for="Titulo" class="neo-label">Título <span class="text-danger">*</span></label>
                                     <span asp-validation-for="Titulo" class="text-danger small"></span>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating neo-floating">
+
+                                <div class="form-floating neo-floating mb-3">
                                     <input asp-for="Autor" class="form-control neo-input" placeholder="Autor o Interprete" required />
                                     <label asp-for="Autor" class="neo-label">Autor / Artista <span class="text-danger">*</span></label>
                                     <span asp-validation-for="Autor" class="text-danger small"></span>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating neo-floating">
-                                    <input asp-for="Tono" class="form-control neo-input" placeholder="Ej: Do Mayor, G, Am..." />
-                                    <label asp-for="Tono" class="neo-label">Tono</label>
-                                    <span asp-validation-for="Tono" class="text-danger small"></span>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-5">
+                                        <div class="form-floating neo-floating">
+                                            <input asp-for="Tono" class="form-control neo-input" placeholder="Ej: Do Mayor, G, Am..." />
+                                            <label asp-for="Tono" class="neo-label">Tono</label>
+                                            <span asp-validation-for="Tono" class="text-danger small"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="form-floating neo-floating">
+                                            <input asp-for="UrlAudio" class="form-control neo-input" type="text" placeholder="Enlace a YouTube o Audio" />
+                                            <label asp-for="UrlAudio" class="neo-label">Enlace a YouTube</label>
+                                            <span asp-validation-for="UrlAudio" class="text-danger small"></span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating neo-floating">
-                                    <input asp-for="UrlAudio" class="form-control neo-input" type="text" placeholder="Enlace a YouTube o Audio" />
-                                    <label asp-for="UrlAudio" class="neo-label">Enlace a YouTube/Audio</label>
-                                    <span asp-validation-for="UrlAudio" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating neo-floating">
-                                    <input asp-for="FechaCreacion" class="form-control neo-input" type="datetime-local" />
-                                    <label asp-for="FechaCreacion" class="neo-label">Fecha de Creación</label>
-                                    <span asp-validation-for="FechaCreacion" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating neo-floating">
-                                    <select asp-for="CreadoPorUsuarioId" class="form-select neo-input" required>
-                                        <option value="">-- Seleccione un Usuario --</option>
-                                        @if(ViewBag.Usuarios != null)
-                                        {
-                                            foreach (var usuario in ViewBag.Usuarios)
-                                            {
-                                                <option value="@usuario.UsuarioId">@usuario.Nombre @usuario.Apellido</option>
-                                            }
-                                        }
-                                    </select>
-                                    <label asp-for="CreadoPorUsuarioId" class="neo-label">Usuario Creador <span class="text-danger">*</span></label>
-                                    <span asp-validation-for="CreadoPorUsuarioId" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-floating neo-floating">
-                                    <textarea asp-for="Letra" class="form-control neo-input" placeholder="Letra de la canción" style="height: 120px"></textarea>
-                                    <label asp-for="Letra" class="neo-label">Letra (Exclusivo texto. ¡NO poner acordes aquí!)</label>
-                                    <span asp-validation-for="Letra" class="text-danger small"></span>
-                                </div>
-                            </div>
-                            <div class="col-12">
+
                                 <div class="form-group mb-2">
-                                    <label for="FotoFile" class="form-label fw-bold neo-label-file"><i class="bi bi-image me-2 neo-icon"></i>Foto del Artista / Banda (Opcional)</label>
-                                    <input type="file" name="FotoFile" class="form-control form-control-lg neo-input-file" accept="image/*" />
-                                    <small class="neo-helper">Sube una imagen para identificar visualmente al autor de la alabanza.</small>
+                                    <label for="FotoFile" class="form-label fw-bold neo-label-file"><i class="bi bi-image me-2 neo-icon"></i>Foto (Opcional)</label>
+                                    <input type="file" name="FotoFile" class="form-control form-control-sm neo-input-file" accept="image/*" />
+                                </div>
+                            </div>
+
+                            <!-- Columna Derecha: Notas Musicales -->
+                            <div class="col-md-6 ps-4">
+                                <h5 class="neo-section-title pb-2 mb-4"><i class="bi bi-music-note me-2 neo-icon"></i>Notas Musicales</h5>
+                                <p class="neo-subtitle small mb-3">Agrega acordes o tablaturas para esta canción.</p>
+
+                                <div class="neo-inner-panel p-3 rounded-3 shadow-sm border-0 h-100 d-flex flex-column" style="min-height: 250px;">
+                                    <div class="form-floating neo-floating mb-3">
+                                        <input type="text" name="Instrumento" class="form-control neo-input" placeholder="Ej: Guitarra, Piano, Bajo..." />
+                                        <label for="Instrumento" class="neo-label">Instrumento</label>
+                                    </div>
+
+                                    <div class="form-floating neo-floating flex-grow-1">
+                                        <textarea name="NotaContenido" class="form-control neo-input font-monospace h-100" placeholder="Escribe aquí los acordes..." style="min-height: 15rem;"></textarea>
+                                        <label for="NotaContenido" class="neo-label">Acordes / Tablatura</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <h5 class="neo-section-title pb-2 mb-4 mt-5"><i class="bi bi-music-note me-2 neo-icon"></i>Notas Musicales (Opcional)</h5>
-                        <p class="neo-subtitle small">Agrega directamente la tablatura o acordes para esta canción.</p>
-
-                        <div class="row g-4 mb-5 neo-inner-panel p-4 rounded-3 shadow-sm border-0">
-                            <div class="col-md-4">
-                                <div class="form-floating neo-floating">
-                                    <input type="text" name="Instrumento" class="form-control neo-input" placeholder="Ej: Guitarra, Piano, Bajo..." />
-                                    <label for="Instrumento" class="neo-label">Instrumento</label>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="form-floating neo-floating">
-                                    <textarea name="NotaContenido" class="form-control neo-input font-monospace" placeholder="Escribe aquí los acordes..." style="height: 150px"></textarea>
-                                    <label for="NotaContenido" class="neo-label">Acordes / Tablatura (¡Copia LAS NOTAS AQUÍ!)</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a asp-action="Index" class="btn neo-btn-outline btn-lg px-4 rounded-pill shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top border-secondary border-opacity-25">
+                            <a asp-action="Index" class="btn neo-btn-outline px-4 rounded-pill shadow-sm">
                                 <i class="bi bi-arrow-left me-2"></i>Volver
                             </a>
-                            <button type="submit" class="btn neo-btn-primary btn-lg px-5 rounded-pill shadow-sm fw-bold">
+                            <button type="submit" class="btn neo-btn-primary px-5 rounded-pill shadow-sm fw-bold">
                                 <i class="bi bi-save me-2"></i>Guardar Canción
                             </button>
                         </div>
