@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IglesiaGPS.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class iglesia01 : Migration
+    public partial class iglesia02 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

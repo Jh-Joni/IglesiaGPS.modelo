@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IglesiaGPS.Api.Migrations
 {
     [DbContext(typeof(IglesiaGPSApiContext))]
-    [Migration("20260305144111_iglesia01")]
-    partial class iglesia01
+    [Migration("20260306035326_iglesia02")]
+    partial class iglesia02
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
