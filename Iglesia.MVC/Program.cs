@@ -9,10 +9,10 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Limits.MaxRequestBodySize = 50 * 1024 * 1024; // 50 MB
 });
 
-// URL base de la API: busca API_URL (Render) o API_BASE_URL, si no hay usa el valor por defecto
+// URL base de la API: busca API_URL o API_BASE_URL (Azure/Entorno), si no hay usa el valor local por defecto
 var apiBaseUrl = Environment.GetEnvironmentVariable("API_URL")
               ?? Environment.GetEnvironmentVariable("API_BASE_URL")
-              ?? "https://iglesiagps-modelo-1.onrender.com";
+              ?? "https://localhost:7220";
 
 // Quitar barra final si existe para evitar doble barra en endpoints
 apiBaseUrl = apiBaseUrl.TrimEnd('/');
