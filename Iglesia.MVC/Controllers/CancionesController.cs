@@ -26,6 +26,28 @@ namespace Iglesia.MVC.Controllers
             var todasRecomendaciones = Crud<Recomendacion>.GetAll() ?? new List<Recomendacion>();
             ViewBag.Recomendadas = todasRecomendaciones.Where(r => r.UsuarioId == usuarioId).Select(r => r.CancionId).ToList();
             
+            // Lógica de Frecuencia de Uso (Últimos 3 meses)
+            var limiteFecha = DateTime.Now.AddMonths(-3);
+            var todasLasListas = Crud<ListaCanciones>.GetAll() ?? new List<ListaCanciones>();
+            var listasRecientes = todasLasListas.Where(l => l.FechaPublicacion >= limiteFecha).ToList();
+            var todosLosDetalles = Crud<ListaCancionDetalle>.GetAll() ?? new List<ListaCancionDetalle>();
+
+            var detallesRecientes = todosLosDetalles
+                .Where(d => listasRecientes.Any(l => l.ListaCancionesId == d.ListaCancionesId))
+                .ToList();
+
+            var frecuencias = new Dictionary<int, int>();
+            foreach (var det in detallesRecientes)
+            {
+                if (frecuencias.ContainsKey(det.CancionId))
+                    frecuencias[det.CancionId]++;
+                else
+                    frecuencias[det.CancionId] = 1;
+            }
+
+            ViewBag.Frecuencias = frecuencias;
+            ViewBag.MaxFrecuencia = frecuencias.Values.Any() ? frecuencias.Values.Max() : 1;
+            
             return View(lista);
         }
                 
@@ -51,18 +73,21 @@ namespace Iglesia.MVC.Controllers
         }
 
         // GET: CancionesController/Create
-        public ActionResult Create()
+        public ActionResult Create(string? titulo = null, string? autor = null)
         {
             if (HttpContext.Session.GetString("UsuarioNombre") == null) return RedirectToAction("Login", "Auth");
             ViewBag.Usuarios = Crud<Usuario>.GetAll();
-            return View();
+            var cancion = new Cancion();
+            if (!string.IsNullOrEmpty(titulo)) cancion.Titulo = titulo;
+            if (!string.IsNullOrEmpty(autor)) cancion.Autor = autor;
+            return View(cancion);
         }
 
         // POST: CancionesController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(50 * 1024 * 1024)] // 50 MB máximo
-        public ActionResult Create(CancionDTO cancionDto, IFormFile? FotoFile, string? NotaContenido = null, string? Instrumento = null)
+        public ActionResult Create(CancionDTO cancionDto, IFormFile? FotoFile, string? NotaContenido = null, string? Instrumento = null, string? submitAction = null)
         {
             var userIdStr = HttpContext.Session.GetString("UsuarioId");
             if (string.IsNullOrEmpty(userIdStr)) return RedirectToAction("Login", "Auth");
@@ -87,13 +112,12 @@ namespace Iglesia.MVC.Controllers
                 
                 // Letra eliminado del modelo
 
-                // Mapear imagen - Guardar en disco en lugar de B64 para evitar bloqueos
                 if (FotoFile != null && FotoFile.Length > 0)
                 {
-                    // Validar tamaño máximo (10 MB)
-                    if (FotoFile.Length > 10 * 1024 * 1024)
+                    // Validar tamaño máximo (2 MB) para Base64 es sensato
+                    if (FotoFile.Length > 2 * 1024 * 1024)
                     {
-                        ViewBag.Error = "La imagen es demasiado grande. El tamaño máximo permitido es 10 MB.";
+                        ViewBag.Error = "La imagen es demasiado grande. Máximo 2 MB para evitar llenar la base de datos.";
                         return View(new Cancion
                         {
                             Titulo = cancionDto.Titulo,
@@ -103,19 +127,13 @@ namespace Iglesia.MVC.Controllers
                         });
                     }
 
-                    var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "canciones");
-                    if (!Directory.Exists(folderPath))
+                    using (var ms = new MemoryStream())
                     {
-                        Directory.CreateDirectory(folderPath);
+                        FotoFile.CopyTo(ms);
+                        var fileBytes = ms.ToArray();
+                        string base64String = Convert.ToBase64String(fileBytes);
+                        cancionDto.FotoBase64 = $"data:{FotoFile.ContentType};base64,{base64String}";
                     }
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(FotoFile.FileName);
-                    var filePath = Path.Combine(folderPath, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        FotoFile.CopyTo(stream);
-                    }
-                    // Usa FotoBase64 temporalmente para transportar la URL a la API si la API la guarda directo
-                    cancionDto.FotoBase64 = "/images/canciones/" + fileName;
                 }
 
                 var createdCancion = Crud<CancionDTO>.Create(cancionDto);
@@ -133,6 +151,10 @@ namespace Iglesia.MVC.Controllers
                     Crud<NotaMusical>.Create(nota);
                 }
                     
+                if (submitAction == "otra_version")
+                {
+                    return RedirectToAction("Create", new { titulo = cancionDto.Titulo, autor = cancionDto.Autor });
+                }
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -194,26 +216,21 @@ namespace Iglesia.MVC.Controllers
 
                 if (FotoFile != null && FotoFile.Length > 0)
                 {
-                    // Validar tamaño máximo (10 MB)
-                    if (FotoFile.Length > 10 * 1024 * 1024)
+                    // Validar tamaño máximo (2 MB)
+                    if (FotoFile.Length > 2 * 1024 * 1024)
                     {
-                        ViewBag.Error = "La imagen es demasiado grande. El tamaño máximo permitido es 10 MB.";
+                        ViewBag.Error = "La imagen es demasiado grande. Máximo 2 MB para evitar datos muy grandes en la BD.";
                         ViewBag.Usuarios = Crud<Usuario>.GetAll();
                         return View(cancion);
                     }
 
-                    var folderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "canciones");
-                    if (!Directory.Exists(folderPath))
+                    using (var ms = new MemoryStream())
                     {
-                        Directory.CreateDirectory(folderPath);
+                        FotoFile.CopyTo(ms);
+                        var fileBytes = ms.ToArray();
+                        string base64String = Convert.ToBase64String(fileBytes);
+                        dto.FotoBase64 = $"data:{FotoFile.ContentType};base64,{base64String}";
                     }
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(FotoFile.FileName);
-                    var filePath = Path.Combine(folderPath, fileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        FotoFile.CopyTo(stream);
-                    }
-                    dto.FotoBase64 = "/images/canciones/" + fileName;
                 }
 
                 // Actualizar Canción usando el DTO
@@ -282,11 +299,13 @@ namespace Iglesia.MVC.Controllers
         }
 
         // POST: CancionesController/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador") return RedirectToAction("Index");
+            var userRol = HttpContext.Session.GetString("UsuarioRol");
+            if (userRol != "Desarrollador" && userRol != "Director") 
+                return RedirectToAction("Index");
             try
             {
                 Crud<Cancion>.Delete(id);

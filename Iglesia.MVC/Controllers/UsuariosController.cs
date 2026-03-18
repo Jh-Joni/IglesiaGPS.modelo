@@ -180,5 +180,26 @@ namespace Iglesia.MVC.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        // POST: /Usuarios/DeleteAjax
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteAjax(int id)
+        {
+            if (HttpContext.Session.GetString("UsuarioRol") != "Desarrollador")
+            {
+                return Json(new { success = false, message = "No autorizado." });
+            }
+
+            try
+            {
+                Crud<Usuario>.Delete(id);
+                return Json(new { success = true, message = "Usuario eliminado permanentemente." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error al eliminar: " + ex.Message });
+            }
+        }
     }
 }

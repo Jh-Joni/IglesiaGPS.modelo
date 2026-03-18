@@ -110,6 +110,20 @@ namespace Iglesia.Api.consumer
             }
         }
 
+        public static bool DeleteStr(string id)
+        {
+            var response = _client.DeleteAsync($"{EndPoint}/{id}").Result;
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                var errorResponse = response.Content.ReadAsStringAsync().Result;
+                throw new Exception($"Error {response.StatusCode}: {errorResponse}");
+            }
+        }
+
         public static T GetSingle(string customUrl)
         {
             var response = _client.GetAsync(customUrl).Result;

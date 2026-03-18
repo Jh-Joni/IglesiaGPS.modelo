@@ -5,6 +5,8 @@
     var usuarioLogueado = Context.Session.GetString("UsuarioNombre");
     var usuarioRol = Context.Session.GetString("UsuarioRol");
     var recomendadas = ViewBag.Recomendadas as List<int> ?? new List<int>();
+    var frecuencias = ViewBag.Frecuencias as Dictionary<int, int> ?? new Dictionary<int, int>();
+    int maxFrecuencia = ViewBag.MaxFrecuencia != null ? (int)ViewBag.MaxFrecuencia : 1;
 }
 
 <div class="container mt-5">
@@ -65,16 +67,44 @@
                         </div>
 
                         <h5 class="card-title fw-bold text-truncate mb-1" title="@item.Titulo" style="font-size: 1.1rem; color: #ffffff;">@item.Titulo</h5>
-                        <p class="card-text mb-3" style="font-size: 0.9rem; color: #94a3b8;">
+                        <p class="card-text mb-2" style="font-size: 0.9rem; color: #94a3b8;">
                             <i class="bi bi-person-fill"></i> @(string.IsNullOrEmpty(item.Autor) ? "Desconocido" : item.Autor)
                         </p>
                         
+                        @{
+                            int frec = frecuencias.ContainsKey(item.CancionId) ? frecuencias[item.CancionId] : 0;
+                            double porcentaje = maxFrecuencia > 0 ? ((double)frec / maxFrecuencia) * 100 : 0;
+                            string colorBarra = "#0ea5e9"; // Azul por defecto (poco uso)
+                            if (porcentaje > 75) colorBarra = "#ef4444"; // Rojo (muy usado)
+                            else if (porcentaje > 40) colorBarra = "#eab308"; // Amarillo (uso medio)
+                        }
+                        
+                        <!-- Barra de Frecuencia de Uso (Últimos 3 meses) -->
+                        <div class="mb-3 text-start w-100" title="Uso últimos 3 meses: @frec veces">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span style="font-size: 0.75rem; color: #64748b;"><i class="bi bi-bar-chart-fill"></i> Frecuencia (3 meses)</span>
+                                <span style="font-size: 0.75rem; color: #94a3b8; font-weight: bold;">@frec @(frec == 1 ? "vez" : "veces")</span>
+                            </div>
+                            <div class="progress" style="height: 6px; background-color: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                <div class="progress-bar" role="progressbar" style="width: @porcentaje%; background-color: @colorBarra; transition: width 1s ease-in-out;" aria-valuenow="@porcentaje" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        
                         <div class="mt-auto">
-                            <!-- Botón Tono -->
-                            <div class="mb-2 text-start">
+                            <!-- Botón Tono y Eliminar Pequeño -->
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
                                 <span class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem; background: rgba(0, 242, 254, 0.1); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.3);">
                                     Tono: @(string.IsNullOrEmpty(item.Tono) ? "-" : item.Tono)
                                 </span>
+                                @if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
+                                {
+                                    <form asp-action="DeleteConfirmed" method="post" class="d-inline mb-0" onsubmit="return confirm('¿Eliminar la canción \'@item.Titulo\' permanentemente?');">
+                                        <input type="hidden" name="id" value="@item.CancionId" />
+                                        <button type="submit" class="btn btn-sm text-danger p-0 m-0 border-0 bg-transparent" title="Eliminar Canción">
+                                            <i class="bi bi-trash fs-6" style="opacity: 0.7; transition: opacity 0.2s; filter: drop-shadow(0 0 2px rgba(2ef,68,68,0.5));" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'"></i>
+                                        </button>
+                                    </form>
+                                }
                             </div>
                             
                             <!-- Botones Principales -->
@@ -105,11 +135,8 @@
 
                                         @if (usuarioRol == "Director" || usuarioRol == "Desarrollador")
                                         {
-                                            <a asp-action="Edit" asp-route-id="@item.CancionId" class="btn btn-sm py-2 px-3 text-white" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);">
+                                            <a asp-action="Edit" asp-route-id="@item.CancionId" class="btn btn-sm py-2 px-3 text-white" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);" title="Editar Canción">
                                                 <i class="bi bi-pencil" style="font-size: 0.8rem;"></i>
-                                            </a>
-                                            <a asp-action="Delete" asp-route-id="@item.CancionId" class="btn btn-sm py-2 px-3 text-danger" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
-                                                <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
                                             </a>
                                         }
                                     }
@@ -123,24 +150,28 @@
     </div>
 </div>
 
-<!-- Modal para Notas Musicales -->
+<!-- Modal para Notas Musicales Cyberpunk -->
 <div class="modal fade" id="notasModal" tabindex="-1" aria-labelledby="notasModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold" id="notasModalLabel">Notas Musicales</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0 shadow-lg" style="background: #0f172a; border: 1px solid rgba(0, 242, 254, 0.4) !important; border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(90deg, #0f172a, #1e293b); border-bottom: 2px solid rgba(0, 242, 254, 0.3);">
+                <h5 class="modal-title fw-bold" id="notasModalLabel" style="color: #00f2fe; text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);">
+                    <i class="bi bi-music-note-list me-2"></i>Notas Musicales
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="opacity: 0.8; filter: drop-shadow(0 0 5px rgba(0,242,254,0.5));"></button>
             </div>
-            <div class="modal-body bg-light" id="notasModalBody">
+            <div class="modal-body" id="notasModalBody" style="background: #0f172a; color: #e2e8f0; padding: 2rem 1.5rem;">
                 <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
+                    <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;">
                         <span class="visually-hidden">Cargando...</span>
                     </div>
-                    <p class="mt-2 text-muted">Obteniendo notas...</p>
+                    <p class="mt-3" style="color: #00f2fe; letter-spacing: 1px;">Sincronizando notas desde el servidor principal...</p>
                 </div>
             </div>
-            <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <div class="modal-footer border-0" style="background: #0f172a; border-top: 1px solid rgba(0, 242, 254, 0.2) !important;">
+                <button type="button" class="btn text-white fw-bold px-4" data-bs-dismiss="modal" style="background: #334155; border: 1px solid #475569; transition: 0.3s;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#334155'">
+                    Cerrar Enlace
+                </button>
             </div>
         </div>
     </div>

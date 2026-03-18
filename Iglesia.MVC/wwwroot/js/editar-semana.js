@@ -109,7 +109,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Evento final de actualizar 
     btnActualizarLista.addEventListener('click', async function () {
         if (cancionesSeleccionadas.length < 5 || cancionesSeleccionadas.length > 7) return;
 
@@ -150,6 +149,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Escuchar el cambio de tono desde el select
+    document.addEventListener('tonoCambiado', function (e) {
+        const { oldId, newId } = e.detail;
+        const index = cancionesSeleccionadas.indexOf(oldId);
+        if (index !== -1) {
+            cancionesSeleccionadas[index] = newId;
+        }
+    });
+
     // Inicializar la interfaz visualmente una vez el DOM se haya cargado
     repintarSelecciones();
 });
+
+// Funcion global para el onchange del Select de Tonos
+window.cambiarTonoSelect = function (selectElement) {
+    const cardBody = selectElement.closest('.card-body');
+    const btnVerNotas = cardBody.querySelector('.btn-ver-notas');
+    if (btnVerNotas) {
+        const oldId = btnVerNotas.getAttribute('data-id');
+        const newId = selectElement.value;
+        btnVerNotas.setAttribute('data-id', newId);
+
+        // Evitar que el clic en el selector se confunda con el clic principal de la tarjeta
+        const event = new CustomEvent('tonoCambiado', { detail: { oldId, newId } });
+        document.dispatchEvent(event);
+    }
+};

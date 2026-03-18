@@ -54,10 +54,23 @@ using (var scope = app.Services.CreateScope())
         db.Database.ExecuteSqlRaw("SELECT setval(pg_get_serial_sequence('\"Roles\"', 'RolId'), coalesce(max(\"RolId\"), 1), max(\"RolId\") IS NOT null) FROM \"Roles\";");
         db.Database.ExecuteSqlRaw("SELECT setval(pg_get_serial_sequence('\"NotaMusicales\"', 'NotaMusicalId'), coalesce(max(\"NotaMusicalId\"), 1), max(\"NotaMusicalId\") IS NOT null) FROM \"NotaMusicales\";");
         db.Database.ExecuteSqlRaw("SELECT setval(pg_get_serial_sequence('\"ListaCancionDetalles\"', 'ListaCancionDetalleId'), coalesce(max(\"ListaCancionDetalleId\"), 1), max(\"ListaCancionDetalleId\") IS NOT null) FROM \"ListaCancionDetalles\";");
+        
+        // Auto-crear tabla Anuncios (PostgreSQL syntax) para forzar su existencia
+        string sqlAnuncios = @"
+            CREATE TABLE IF NOT EXISTS ""Anuncios"" (
+                ""Id"" text NOT NULL,
+                ""Autor"" character varying(100) NOT NULL,
+                ""Contenido"" text NOT NULL,
+                ""Tipo"" character varying(50) NOT NULL,
+                ""FechaCreacion"" timestamp with time zone NOT NULL,
+                CONSTRAINT ""PK_Anuncios"" PRIMARY KEY (""Id"")
+            );
+        ";
+        db.Database.ExecuteSqlRaw(sqlAnuncios);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error synchronizing sequences: {ex.Message}");
+        Console.WriteLine($"Error synchronizing sequences or tables: {ex.Message}");
     }
 }
 

@@ -69,15 +69,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         const instrumento = nota.instrumento || 'General';
                         notasHtml += `
                             <div class="col-12">
-                                <div class="card border-0 shadow-sm">
-                                    <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                                        <h6 class="text-primary fw-bold mb-0">
-                                            <i class="bi bi-music-note-list me-2"></i>${instrumento}
+                                <div class="card border-0 shadow-sm" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 242, 254, 0.2) !important;">
+                                    <div class="card-header border-bottom-0 pt-3 pb-0" style="background: transparent;">
+                                        <h6 class="fw-bold mb-0" style="color: #00f2fe;">
+                                            <i class="bi bi-music-note-list me-2"></i> ${instrumento}
                                         </h6>
                                     </div>
                                     <div class="card-body">
-                                        <pre class="bg-dark text-light p-3 rounded mb-0" style="white-space: pre-wrap; font-family: 'Courier New', Courier, monospace;">${nota.contenido}</pre>
-                                        <small class="text-muted mt-2 d-block text-end">Actualizado: ${new Date(nota.ultimaEdicion).toLocaleDateString()}</small>
+                                        <pre class="p-3 rounded mb-0" style="background: #090e17; color: #00f2fe; white-space: pre-wrap; font-family: 'Courier New', Courier, monospace; border: 1px solid rgba(0, 242, 254, 0.15); box-shadow: inset 0 0 20px rgba(0,0,0,0.8);">${nota.contenido}</pre>
+                                        <small class="mt-2 d-block text-end" style="color: rgba(255,255,255,0.4);">Actualizado: ${new Date(nota.ultimaEdicion).toLocaleDateString()}</small>
                                     </div>
                                 </div>
                             </div>

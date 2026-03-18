@@ -67,8 +67,10 @@
                     </div>
 
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5" id="gridCanciones">
-                        @foreach (var cancion in cancionesDisponibles)
+                        @{ var cancionesAgrupadas = cancionesDisponibles.GroupBy(c => c.Titulo).ToList(); }
+                        @foreach (var grupo in cancionesAgrupadas)
                         {
+                            var cancion = grupo.First();
                             <div class="col">
                                 <label class="w-100 h-100 m-0">
                                     <input type="checkbox" name="cancionesSeleccionadas" value="@cancion.CancionId" class="d-none cancion-checkbox" />
@@ -85,7 +87,28 @@
                                                 </div>
                                             }
                                             <h6 class="fw-bold text-truncate mb-1 text-white">@cancion.Titulo</h6>
-                                            <small class="d-block text-truncate" style="color: #1de9b6;">@cancion.Autor</small>
+                                            <small class="d-block text-truncate mb-2" style="color: #1de9b6;">@cancion.Autor</small>
+
+                                            <!-- Selector de Versión / Tono (Click propagation stopped) -->
+                                            <div class="mt-2" onclick="event.preventDefault(); event.stopPropagation();">
+                                                @if (grupo.Count() > 1)
+                                                {
+                                                    <select class="form-select form-select-sm select-tono neo-input mx-auto text-center" style="width: 80%; border-radius: 20px;" onchange="var cb = this.closest('label').querySelector('.cancion-checkbox'); cb.value = this.value; if(cb.checked){ actualizarDashboard(); }">
+                                                        @foreach(var version in grupo)
+                                                        {
+                                                            <option value="@version.CancionId">
+                                                                Tono: @(string.IsNullOrEmpty(version.Tono) ? "General" : version.Tono)
+                                                            </option>
+                                                        }
+                                                    </select>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge rounded-pill px-3 py-1 fw-semibold shadow-sm" style="font-size: 0.75rem; background: rgba(0, 229, 255, 0.1); color: #00e5ff; border: 1px solid rgba(0, 229, 255, 0.3);">
+                                                        Tono: @(string.IsNullOrEmpty(cancion.Tono) ? "-" : cancion.Tono)
+                                                    </span>
+                                                }
+                                            </div>
                                         </div>
                                         <!-- Active border overlay animated via CSS -->
                                         <div class="neo-active-border"></div>
