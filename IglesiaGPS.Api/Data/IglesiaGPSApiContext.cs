@@ -20,4 +20,5 @@ using IglesiaGPS.modelo;
         public DbSet<ListaCancionDetalle> ListaCancionDetalles { get; set; } = default!;
         public DbSet<Recomendacion> Recomendaciones { get; set; } = default!;
         public DbSet<SolicitudDirector> SolicitudDirectores { get; set; } = default!;
+        public DbSet<Anuncio> Anuncios { get; set; } = default!;
     }

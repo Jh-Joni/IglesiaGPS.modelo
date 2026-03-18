@@ -7,11 +7,27 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IglesiaGPS.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class iglesia02 : Migration
+    public partial class v2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Anuncios",
+                columns: table => new
+                {
+                    AnuncioID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Autor = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Contenido = table.Column<string>(type: "text", nullable: false),
+                    Tipo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    FechaCreacion = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Anuncios", x => x.AnuncioID);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
@@ -303,6 +319,9 @@ namespace IglesiaGPS.Api.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Anuncios");
+
             migrationBuilder.DropTable(
                 name: "ListaCancionDetalles");
 

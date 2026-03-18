@@ -76,6 +76,14 @@
                                     <i class="bi bi-arrow-up-circle"></i> Subir a Director
                                 </button>
                             </form>
+                            <!-- BOTÓN DE ELIMINAR USUARIO -->
+                            <form method="post" asp-action="DeleteConfirmed" asp-controller="Usuarios" class="mt-2" onsubmit="return confirm('¿Estás seguro de que deseas eliminar a este Usuario permanentemente?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.UsuarioId" />
+                                <button type="submit" class="btn btn-accion" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444;">
+                                    <i class="bi bi-trash"></i> Eliminar Usuario
+                                </button>
+                            </form>
                         </div>
                     }
                 </div>
@@ -125,6 +133,14 @@
                                 <input type="hidden" name="nuevoRol" value="Desarrollador" />
                                 <button type="submit" class="btn btn-accion btn-dorado">
                                     <i class="bi bi-star"></i> Promover a Desarrollador
+                                </button>
+                            </form>
+                            <!-- BOTÓN DE ELIMINAR USUARIO -->
+                            <form method="post" asp-action="DeleteConfirmed" asp-controller="Usuarios" class="mt-2" onsubmit="return confirm('¿Estás seguro de que deseas eliminar a este Director permanentemente?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.UsuarioId" />
+                                <button type="submit" class="btn btn-accion" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444;">
+                                    <i class="bi bi-trash"></i> Eliminar Usuario
                                 </button>
                             </form>
                         </div>
@@ -189,6 +205,14 @@
                                         <input type="hidden" name="nuevoRol" value="Usuario" />
                                         <button type="submit" class="btn btn-accion btn-degradar">
                                             <i class="bi bi-arrow-down-double"></i> Usuario
+                                        </button>
+                                    </form>
+                                    <!-- BOTÓN DE ELIMINAR USUARIO -->
+                                    <form method="post" asp-action="DeleteConfirmed" asp-controller="Usuarios" class="flex-grow-1" onsubmit="return confirm('¿Estás seguro de que deseas eliminar permanentemente a este Desarrollador?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@u.UsuarioId" />
+                                        <button type="submit" class="btn btn-accion" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #ef4444;">
+                                            <i class="bi bi-trash" style="font-size: 0.8rem;"></i>
                                         </button>
                                     </form>
                                 </div>
@@ -384,6 +408,54 @@
             
             container.addEventListener('submit', function (e) {
                 const form = e.target.closest('form');
+                
+                // Si es acción de ELIMINAR en Gestion de Usuarios (Usaremos AJAX también para evitar recargas completas)
+                if (form && form.hasAttribute('action') && form.getAttribute('action').includes('DeleteConfirmed')) {
+                    e.preventDefault();
+                    if (!confirm("¿Segurísimo de querer eliminar al usuario de forma definitiva? Esta acción no se puede deshacer.")) return;
+
+                    const actionUrl = form.getAttribute('action').replace('DeleteConfirmed', 'DeleteAjax');
+                    const formData = new FormData(form);
+                    const button = form.querySelector('button[type="submit"]');
+                    const originalContent = button.innerHTML;
+                    
+                    button.disabled = true;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+                    fetch(actionUrl, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const card = form.closest('.user-card');
+                            // Animar salida
+                            card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                            card.style.opacity = '0';
+                            card.style.transform = 'scale(0.8)';
+                            setTimeout(() => {
+                                card.remove();
+                                actualizarContadoresAnimados();
+                            }, 400);
+                            mostrarAlerta('success', data.message);
+                        } else {
+                            mostrarAlerta('danger', data.message || 'Error al eliminar usuario.');
+                            button.disabled = false;
+                            button.innerHTML = originalContent;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        mostrarAlerta('danger', 'Error de conexión con el servidor.');
+                        button.disabled = false;
+                        button.innerHTML = originalContent;
+                    });
+                    return;
+                }
+                
+                // Si es accion de CAMBIAR ROL
                 if (!form || !form.hasAttribute('action') || !form.getAttribute('action').includes('CambiarRol')) return;
 
                 e.preventDefault();

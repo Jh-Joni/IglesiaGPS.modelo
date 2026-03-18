@@ -90,9 +90,14 @@
                             <a asp-action="Index" class="btn neo-btn-outline px-4 rounded-pill shadow-sm">
                                 <i class="bi bi-arrow-left me-2"></i>Volver
                             </a>
-                            <button type="submit" class="btn neo-btn-primary px-5 rounded-pill shadow-sm fw-bold">
-                                <i class="bi bi-save me-2"></i>Guardar Canción
-                            </button>
+                            <div>
+                                <button type="submit" name="submitAction" value="otra_version" class="btn neo-btn-outline px-4 rounded-pill shadow-sm me-2 fw-bold" title="Guarda esta canción y recarga para agregar otro tono rápidamente.">
+                                    <i class="bi bi-music-note-list me-2"></i>Guardar y Añadir Otro Tono
+                                </button>
+                                <button type="submit" name="submitAction" value="guardar_salir" class="btn neo-btn-primary px-5 rounded-pill shadow-sm fw-bold">
+                                    <i class="bi bi-save me-2"></i>Guardar Canción
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>

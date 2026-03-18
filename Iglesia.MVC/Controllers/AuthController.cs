@@ -66,7 +66,7 @@ namespace Iglesia.MVC.Controllers
                     return View();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ViewBag.Error = "No se pudo conectar con el servidor. Verifica que la API esté ejecutándose.";
                 return View();
@@ -122,7 +122,7 @@ namespace Iglesia.MVC.Controllers
                     return View();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ViewBag.Error = "No se pudo conectar con el servidor. Verifica que la API esté ejecutándose.";
                 return View();
@@ -179,7 +179,7 @@ namespace Iglesia.MVC.Controllers
                     return View();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ViewBag.Error = "No se pudo conectar con el servidor. Verifica que la API esté ejecutándose.";
                 ViewBag.Correo = correo;
@@ -233,7 +233,7 @@ namespace Iglesia.MVC.Controllers
                     return View();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ViewBag.Error = "Error de conexión con el servidor.";
                 return View();

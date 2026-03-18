@@ -15,18 +15,6 @@ namespace Iglesia.MVC.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        // Anuncios temporales en memoria (expiran después de 7 días)
-        private static readonly ConcurrentDictionary<string, AnuncioTemporal> _anuncios = new();
-
-        public class AnuncioTemporal
-        {
-            public string Id { get; set; } = "";
-            public string Autor { get; set; } = "";
-            public string Contenido { get; set; } = "";
-            public string Tipo { get; set; } = "Anuncio"; // Anuncio, Versículo, Mensaje
-            public DateTime FechaCreacion { get; set; } = DateTime.Now;
-        }
-
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
@@ -47,14 +35,19 @@ namespace Iglesia.MVC.Controllers
             var semana = dia <= 7 ? "Primera" : dia <= 14 ? "Segunda" : dia <= 21 ? "Tercera" : dia <= 28 ? "Cuarta" : "Última";
             ViewBag.SemanaActual = semana;
 
-            // Limpiar anuncios expirados (más de 7 días)
-            var ahora = DateTime.Now;
-            var expirados = _anuncios.Where(a => (ahora - a.Value.FechaCreacion).TotalDays > 7).Select(a => a.Key).ToList();
-            foreach (var key in expirados)
-                _anuncios.TryRemove(key, out _);
-
-            // Pasar anuncios vigentes
-            ViewBag.Anuncios = _anuncios.Values.OrderByDescending(a => a.FechaCreacion).ToList();
+            try
+            {
+                // Traer los anuncios desde la API
+                var todosLosAnuncios = Crud<Anuncio>.GetAll() ?? new List<Anuncio>();
+                
+                // Mostrar solo los más recientes, por ejemplo, los últimos 10
+                ViewBag.Anuncios = todosLosAnuncios.OrderByDescending(a => a.FechaCreacion).Take(10).ToList();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Anuncios = new List<Anuncio>();
+                _logger.LogError(ex, "Error al cargar los anuncios.");
+            }
 
             // Traer el Historial de Repertorios (Máximo 5)
             try
@@ -117,15 +110,21 @@ namespace Iglesia.MVC.Controllers
 
             if (!string.IsNullOrWhiteSpace(contenido))
             {
-                var id = Guid.NewGuid().ToString("N")[..8];
-                _anuncios[id] = new AnuncioTemporal
+                try
                 {
-                    Id = id,
-                    Autor = nombreUsuario,
-                    Contenido = contenido,
-                    Tipo = string.IsNullOrEmpty(tipo) ? "Anuncio" : tipo,
-                    FechaCreacion = DateTime.Now
-                };
+                    var anuncio = new Anuncio
+                    {
+                        Autor = nombreUsuario,
+                        Contenido = contenido,
+                        Tipo = string.IsNullOrEmpty(tipo) ? "Anuncio" : tipo,
+                        FechaCreacion = DateTime.UtcNow
+                    };
+                    Crud<Anuncio>.Create(anuncio);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error al crear anuncio");
+                }
             }
 
             return RedirectToAction("Index");
@@ -134,9 +133,16 @@ namespace Iglesia.MVC.Controllers
         // POST: /Home/EliminarAnuncio
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult EliminarAnuncio(string id)
+        public IActionResult EliminarAnuncio(int id)
         {
-            _anuncios.TryRemove(id, out _);
+            try
+            {
+                Crud<Anuncio>.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error eliminando anuncio.");
+            }
             return RedirectToAction("Index");
         }
 
@@ -165,22 +171,72 @@ namespace Iglesia.MVC.Controllers
 
                 QuestPDF.Settings.License = LicenseType.Community;
 
-                // Sanitizar título para nombre de archivo seguro
+                // Preparar entradas (solo título y notas)
+                var entradas = detalles
+                    .Where(d => d.Cancion != null)
+                    .Select(d => new
+                    {
+                        Title = d.Cancion!.Titulo ?? "Sin título",
+                        Notes = (todasLasNotas.FirstOrDefault(n => n.CancionId == d.Cancion!.CancionId)?.Contenido) ?? string.Empty
+                    })
+                    .ToList();
+
+                // Nombre de archivo seguro
                 var tituloSeguro = string.Join("_", (lista.Titulo ?? "Repertorio").Split(Path.GetInvalidFileNameChars()));
+
+                // Dividir en dos columnas balanceadas
+                int half = (entradas.Count + 1) / 2;
+                var left = entradas.Take(half).ToList();
+                var right = entradas.Skip(half).ToList();
 
                 var document = Document.Create(container =>
                 {
                     container.Page(page =>
                     {
                         page.Size(PageSizes.A4);
-                        page.Margin(2, Unit.Centimetre);
+                        page.Margin(1, Unit.Centimetre);
                         page.PageColor(Colors.White);
-                        page.DefaultTextStyle(x => x.FontSize(12));
+                        page.DefaultTextStyle(x => x.FontSize(10));
 
-                        page.Content().Column(c =>
+                        // No mostrar cabecera con "Lista de Canciones" ni fechas, solo contenido
+
+                        page.Content().PaddingVertical(5, Unit.Millimetre).Row(row =>
                         {
-                            c.Item().PaddingBottom(1, Unit.Centimetre).Element(ComposeHeader);
-                            c.Item().Element(ComposeContent);
+                            row.RelativeItem().Column(col =>
+                            {
+                                foreach (var e in left)
+                                {
+                                    col.Item().PaddingBottom(6).Column(c =>
+                                    {
+                                        c.Item().Text(e.Title).FontSize(12).Bold();
+                                        if (!string.IsNullOrWhiteSpace(e.Notes))
+                                            c.Item().Text(e.Notes).FontSize(9).LineHeight(1.1f);
+                                        else
+                                            c.Item().Text(string.Empty).FontSize(9);
+
+                                        c.Item().PaddingTop(4).LineHorizontal(0.3f).LineColor(Colors.Grey.Lighten3);
+                                    });
+                                }
+                            });
+
+                            row.Spacing(12);
+
+                            row.RelativeItem().Column(col =>
+                            {
+                                foreach (var e in right)
+                                {
+                                    col.Item().PaddingBottom(6).Column(c =>
+                                    {
+                                        c.Item().Text(e.Title).FontSize(12).Bold();
+                                        if (!string.IsNullOrWhiteSpace(e.Notes))
+                                            c.Item().Text(e.Notes).FontSize(9).LineHeight(1.1f);
+                                        else
+                                            c.Item().Text(string.Empty).FontSize(9);
+
+                                        c.Item().PaddingTop(4).LineHorizontal(0.3f).LineColor(Colors.Grey.Lighten3);
+                                    });
+                                }
+                            });
                         });
 
                         page.Footer().AlignCenter().Text(x =>
@@ -189,59 +245,6 @@ namespace Iglesia.MVC.Controllers
                             x.Span(" / ");
                             x.TotalPages();
                         });
-
-                        void ComposeHeader(IContainer headerContainer)
-                        {
-                            headerContainer.Row(row =>
-                            {
-                                row.RelativeItem().Column(column =>
-                                {
-                                    column.Item().Text($"Repertorio: {lista.Titulo ?? "Sin título"}").FontSize(20).SemiBold().FontColor(Colors.Blue.Darken2);
-                                    column.Item().Text($"Fecha: {lista.FechaCreacion:dd/MM/yyyy}").FontSize(14);
-                                });
-                            });
-                        }
-
-                        void ComposeContent(IContainer contentContainer)
-                        {
-                            contentContainer.PaddingVertical(1, Unit.Centimetre).Column(column =>
-                            {
-                                if (detalles.Count == 0)
-                                {
-                                    column.Item().PaddingBottom(20).Text("Este repertorio no tiene canciones vinculadas.").FontSize(14).Italic().FontColor(Colors.Grey.Medium);
-                                    return;
-                                }
-
-                                foreach (var det in detalles)
-                                {
-                                    var cancion = det.Cancion;
-                                    if (cancion == null) continue;
-
-                                    var notas = todasLasNotas.FirstOrDefault(n => n.CancionId == cancion.CancionId);
-
-                                    column.Item().PaddingBottom(10).Text(text =>
-                                    {
-                                        text.Span(cancion.Titulo ?? "Sin título").FontSize(16).Bold();
-                                        if (!string.IsNullOrEmpty(cancion.Tono))
-                                        {
-                                            text.Span($" (Tono: {cancion.Tono})").FontSize(14).Italic().FontColor(Colors.Grey.Darken2);
-                                        }
-                                    });
-
-                                    if (notas != null && !string.IsNullOrWhiteSpace(notas.Contenido))
-                                    {
-                                        column.Item().PaddingBottom(20).Text(notas.Contenido).FontSize(12);
-                                    }
-                                    else
-                                    {
-                                        column.Item().PaddingBottom(20).Text("Sin notas registradas.").FontSize(12).Italic().FontColor(Colors.Grey.Medium);
-                                    }
-
-                                    column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-                                    column.Item().PaddingBottom(15);
-                                }
-                            });
-                        }
                     });
                 });
 

@@ -43,8 +43,14 @@
 
     <!-- Cuadrícula de Canciones Disponibles -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="cancionesContainer">
-        @foreach (var item in cancionesDisponibles)
+        @{
+            var cancionesAgrupadas = cancionesDisponibles.GroupBy(c => c.Titulo).ToList();
+        }
+        @foreach (var grupo in cancionesAgrupadas)
         {
+            var preSelEnGrupo = grupo.FirstOrDefault(c => preSeleccionadas.Contains(c.CancionId));
+            var item = preSelEnGrupo ?? grupo.First();
+
             <div class="col cancion-card" data-autor="@item.Autor?.ToLower()" data-titulo="@item.Titulo?.ToLower()">
                 <div class="card h-100 border-0 shadow-sm song-panel transition-hover neo-song-panel">
                     <div class="card-body d-flex flex-column text-center p-3">
@@ -73,10 +79,24 @@
                         </p>
                         
                         <div class="mt-auto">
-                            <div class="mb-2 text-start">
-                                <span class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem; background: rgba(0, 229, 255, 0.15); color: #00e5ff; border: 1px solid rgba(0, 229, 255, 0.4);">
-                                    Tono: @(string.IsNullOrEmpty(item.Tono) ? "-" : item.Tono)
-                                </span>
+                            <div class="mb-2">
+                                @if (grupo.Count() > 1)
+                                {
+                                    <select class="form-select form-select-sm select-tono neo-input mx-auto mb-2 text-center" style="width: 80%; border-radius: 20px;" onchange="cambiarTonoSelect(this)">
+                                        @foreach(var version in grupo)
+                                        {
+                                            <option value="@version.CancionId" selected="@(version.CancionId == item.CancionId ? "selected" : null)">
+                                                Tono: @(string.IsNullOrEmpty(version.Tono) ? "General" : version.Tono)
+                                            </option>
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm mt-2 mb-2" style="font-size: 0.85rem; background: rgba(0, 229, 255, 0.15); color: #00e5ff; border: 1px solid rgba(0, 229, 255, 0.4);">
+                                        Tono: @(string.IsNullOrEmpty(item.Tono) ? "-" : item.Tono)
+                                    </span>
+                                }
                             </div>
                             <!-- Meta Boton (Su valor 'data-id' se usa en el javascript para la lógica del arreglo) -->
                             <div class="d-none">

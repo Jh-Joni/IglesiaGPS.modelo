@@ -28,6 +28,7 @@ namespace Iglesia.MVC.Controllers
             }
 
             ViewBag.CancionTitulo = cancion.Titulo;
+            ViewBag.UrlAudio = cancion.UrlAudio;
             return View(notas);
         }
 

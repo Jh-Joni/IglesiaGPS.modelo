@@ -125,7 +125,7 @@ namespace Iglesia.MVC.Controllers
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Manejar error si es necesario
             }

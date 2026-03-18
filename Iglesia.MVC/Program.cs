@@ -28,6 +28,7 @@ Crud<ListaCanciones>.EndPoint = $"{apiBaseUrl}/api/ListaCanciones";
 Crud<ListaCancionDetalle>.EndPoint = $"{apiBaseUrl}/api/ListaCancionDetalles";
 Crud<Recomendacion>.EndPoint = $"{apiBaseUrl}/api/Recomendaciones";
 Crud<SolicitudDirector>.EndPoint = $"{apiBaseUrl}/api/SolicitudesDirector";
+Crud<Anuncio>.EndPoint = $"{apiBaseUrl}/api/Anuncios";
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

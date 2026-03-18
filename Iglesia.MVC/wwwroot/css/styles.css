@@ -610,20 +610,33 @@ body {
     border-radius: 3px;
 }
 
+@keyframes slideDownIn {
+    0% {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 .mini-anuncio {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.2);
     border-radius: 12px;
     padding: 14px 16px;
     transition: all 0.3s;
     position: relative;
+    animation: slideDownIn 0.5s ease-out forwards;
 }
 
 .mini-anuncio:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(0, 242, 254, 0.4);
-    box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(0, 242, 254, 0.6);
+    transform: scale(1.02);
 }
 
 .mini-anuncio-top {
