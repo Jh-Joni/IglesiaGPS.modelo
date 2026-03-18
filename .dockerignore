@@ -1,0 +1,15 @@
+**/.DS_Store
+**/bin
+**/obj
+**/.vs
+**/.vscode
+**/.git
+**/.github
+**/.gitignore
+**/.dockerignore
+Dockerfile
+node_modules
+npm-debug.log
+README.md
+LICENSE
+.env
